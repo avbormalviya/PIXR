@@ -13,7 +13,7 @@ import { getBookmarks } from "../../utils/getBookmarks";
 import { createThumbnail } from "../../utils/createThumbnail";
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import { ImageCropper } from "../cropper/Cropper";
-import { FeedDetails } from "../../components/feedDetailes/feedDetails";
+import { FeedDetails } from "../../components/feedDetailes/FeedDetails";
 
 export const Settings = () => {
     const navigate = useNavigate();

@@ -20,7 +20,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 import style from "./feedDetails.module.scss";
 import { AnimatePresence } from "framer-motion";
-import { Comment } from "../../features/comment/Comment";
+import { Comment } from "../../features/comment/Comment.jsx";
 import { createThumbnail } from "../../utils/createThumbnail";
 
 export const FeedDetails = ({ feedId, feedType, setIsDetailsOpen }) => {
