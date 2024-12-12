@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 import { format } from 'date-fns';
 
-import { usePeerContext } from "../../context/peerContext";
+import { usePeerContext } from "../../context/PeerContext";
 
 import { useMediaQuery } from 'react-responsive';
 
