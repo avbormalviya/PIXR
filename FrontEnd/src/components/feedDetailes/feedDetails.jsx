@@ -1,4 +1,4 @@
-import { FloatingCon } from "../../components/floatingContainer/FloatingCon";
+import { FloatingCon } from "../floatingContainer/FloatingCon";
 import { getFeed } from "../../utils/getFeeds";
 import { DrawerUserCard } from "../userCard/UserCard";
 import { useEffect, useState } from "react";
@@ -20,7 +20,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 import style from "./feedDetails.module.scss";
 import { AnimatePresence } from "framer-motion";
-import { Comment } from "../../features/comment/comment";
+import { Comment } from "../../features/comment/Comment";
 import { createThumbnail } from "../../utils/createThumbnail";
 
 export const FeedDetails = ({ feedId, feedType, setIsDetailsOpen }) => {
