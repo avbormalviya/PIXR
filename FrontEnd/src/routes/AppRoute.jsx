@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import { Home } from "../pages/home/Home";
-import { Search } from "../components/search/search";
+import { Search } from "../components/search/Search";
 import { FeedLayout } from "../layouts/feed-layout/FeedLayout";
 import { Reel } from "../components/reel/Reel";
 import { Profile } from "../components/profile/Profile";
