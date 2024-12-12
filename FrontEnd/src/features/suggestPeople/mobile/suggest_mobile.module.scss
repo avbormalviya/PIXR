@@ -1,0 +1,64 @@
+.suggest {
+    width: 100%;
+
+    padding: 1em;
+
+    .suggest_heading {
+        margin: 0 0.5em 0.5em 0.5em;
+        font-size: 1.5em;
+        color: var(--text-primary-50);
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        i {
+            font-size: 1.3em;
+        }
+    }
+
+    .card_wrapper {
+        display: flex;
+
+        gap: 1em;
+
+        overflow-x: scroll;
+        scroll-snap-type: x mandatory;
+        
+        .usercard {
+            width: 130px;
+            height: 220px;
+
+            flex-shrink: 0;
+            
+            padding: 2em;
+
+            flex-direction: column;
+
+            scroll-snap-align: start;
+
+            img {
+                width: 80%;
+                height: unset;
+            }
+
+            figcaption {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+
+}
+
+@media (min-width: 768px) {
+    .suggest {
+        display: none;
+    }
+}

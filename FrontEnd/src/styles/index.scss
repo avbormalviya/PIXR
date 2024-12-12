@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Dosis:wght@200..800&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap');
+
+@font-face {
+    font-family: 'anurati';
+    src: url('../assets/fonts/Anurati-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'wakanda';
+    src: url('../../public/fonts/wakandaforever-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+input {
+    outline: none;
+    font-family: "Nunito", sans-serif;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+}
+
+button {
+    font-family: "Nunito", sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    font-size: 10px;
+    
+    --background-primary: #fff;
+    --background-secondary: #f0f0f0;
+    --background-ternary: #dedede;
+    --background-soft: rgba(255, 255, 255, 0.1);
+    --background-soft-2: rgb(242 242 242);
+
+    --text-primary: #000;
+    --text-primary-70: #000000b3;
+    --text-primary-50: #00000080;
+    --text-secondary: #000;
+    
+    --primary-color: #0095f6;
+    --secondary-color: #60efff;
+
+    --accent-border-color: #e0e0e0;
+}
+
+.dark-theme {
+    --background-primary: #000;
+    --background-secondary: #141414;
+    --background-ternary: #222222;
+    --background-soft: rgba(0, 0, 0, 0.3);
+    --background-soft-2: rgba(14, 14, 14);
+
+    --text-primary: #fff;
+    --text-primary-70: #ffffffb3;
+    --text-primary-50: #ffffff80;
+    --text-secondary: #fff;
+    
+    --primary-color: #0095f6;
+    --secondary-color: #60efff;
+
+    --accent-border-color: #353535;
+}
+
+body {
+    width: 100dvw;
+    height: 100dvh;
+    background-color: var(--background-primary);
+
+    font-family: "Nunito", sans-serif;
+    user-select: none;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}

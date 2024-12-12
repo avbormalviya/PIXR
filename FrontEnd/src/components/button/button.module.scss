@@ -1,0 +1,29 @@
+.__button {
+    padding: 0.6em 1em;
+    border-radius: 5px;
+
+    border: none;
+
+    font-size: 1.5em;
+    font-weight: 600;
+
+    color: var(--text-primary-50);
+    background-color: var(--background-ternary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+
+    cursor: pointer;
+    
+    &:first-child {
+        color: whitesmoke;
+        background-color: var(--primary-color);
+    }
+
+    i {
+        font-size: 1.5em;
+        color: var(--text-primary-70);
+    }
+}

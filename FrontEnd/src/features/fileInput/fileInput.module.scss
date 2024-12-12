@@ -1,0 +1,49 @@
+.file_input {
+    height: 200px;
+
+    margin-bottom: 1em;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    img {
+        height: 100%;
+        aspect-ratio: 1/1;
+
+        border-radius: 50%;
+        object-fit: cover;
+
+        box-shadow: -10px -10px 20px 0px rgb(255 255 255 / 10%), 10px 10px 20px 0px #000000;
+
+        background-color: transparent;
+        backdrop-filter: blur(1px);
+    }
+
+    i {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+
+        transform: translate(-50%, -50%);
+
+        font-size: 5em;
+
+        mix-blend-mode: soft-light;
+    }
+}
+
+
+@media (min-width: 1024px) {
+    .file_input {
+        height: clamp(200px, 20vw, 300px);
+    
+        position: fixed;
+        left: 75%;
+        top: 50%;
+    
+        transform: translate(-50%, -50%);
+    }
+}

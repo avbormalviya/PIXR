@@ -1,0 +1,129 @@
+.fer_a_fing_wrapper {
+    width: clamp(300px, 90%, 450px);
+    height: 96%;
+
+    padding: 1em;
+    border-radius: 20px;
+    // box-shadow: 6px 6px 20px 0px var(--accent-border-color);
+    background-color: var(--background-secondary);
+
+
+    display: grid;
+    grid-template-rows: 60px auto;
+    grid-auto-columns: auto;
+
+    .fer_a_fing_heading {
+        position: relative;
+
+        width: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+
+        h1 {
+            font-size: 1.5em;
+            color: var(--text-primary);
+
+            z-index: 2;
+        }
+
+        .indicator {
+            position: absolute;
+            left: 0;
+
+            width: 50%;
+            height: 100%;
+
+            border-radius: 15px 15px 0 0;
+            background-color: var(--background-soft-2);
+
+            z-index: 1;
+
+            .indicator_icons_wrapper {
+                position: absolute;
+                right: 8%;
+                top: 50%;
+                transform: translateY(-50%);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                gap: 0.5em;
+
+                i {
+                    font-size: 1.5em;
+                    font-weight: 600;
+                    color: var(--primary-color);
+
+                    cursor: pointer;
+                }
+            }
+
+
+            .indicator_before {
+                content: "";
+                position: absolute;
+                left: -20px;
+                bottom: 0;
+
+                width: 20px;
+                height: 20px;
+
+                border-radius: 0 0 50% 0;
+
+                box-shadow: 2px 2px 0 2px var(--background-soft-2);
+
+                z-index: 2;
+            }
+
+            .indicator_after {
+                content: "";
+                position: absolute;
+                right: -20px;
+                bottom: 0;
+
+                width: 20px;
+                height: 20px;
+
+                border-radius: 0 0 0 50%;
+
+                box-shadow: -2px 2px 0 2px var(--background-soft-2);
+
+                z-index: 2;
+            }
+        }
+    }
+
+    .wrapper {
+        width: 100%;
+        height: 100%;
+
+        padding: 1.5em 1em 1em 1em;
+        border-radius: 0 0 15px 15px;
+
+        background-color: var(--background-soft);
+
+        display: flex;
+        flex-direction: column;
+        gap: 1.5em;
+
+        overflow: hidden;
+
+        .fer_a_fing_input {
+            background-color: unset;
+            padding: 0;
+        }
+
+        .fer_a_fing_list {
+            border-radius: 10px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+
+            overflow-y: scroll;
+        }
+    }
+}

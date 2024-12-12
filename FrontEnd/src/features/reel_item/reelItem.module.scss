@@ -1,0 +1,209 @@
+.reel {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    background-color: #fff;
+
+    flex-shrink: 0;
+    scroll-snap-align: center;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    overflow: hidden;
+
+    z-index: 5;
+
+    .container {
+        width: 100%;
+        aspect-ratio: 9/16;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .reel_controllers {
+        position: absolute;
+
+        width: 100%;
+        height: 100%;
+
+        .controllers_wrapper {
+            width: 100%;
+            height: 100%;
+
+            color: white;
+
+            display: flex;
+            flex-direction: column;
+
+            .events_section {
+                width: 100%;
+                flex-grow: 1;
+            }
+
+            .reel_details {
+                width: 100%;
+
+                padding: 1em;
+                
+                background: linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255,0) 100%);
+
+                transition: all 0.5s;
+
+                .reel_creator_card {
+                    width: 85%;
+                    height: 40px;
+
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5em;
+                    
+                    img {
+                        height: 80%;
+                        aspect-ratio: 1/1;
+                        
+                        object-fit: cover;
+                        object-position: top;
+                        
+                        border-radius: 50%;
+                    }
+
+                    figcaption {
+
+                        h1 {
+                            font-size: 1.4em;
+                            font-weight: 500;
+                        }
+                    }
+
+                    button {
+                        padding: 0.5em;
+
+                        background-color: transparent;
+
+                        color: white;
+                        font-size: 1.2em;
+                        font-weight: 500;
+                        
+                        border: 1px solid white;
+                        border-radius: 5px;
+                        
+                    }
+                }
+                
+                .reel_description {
+                    width: 85%;
+                    
+                    margin: 0.5em;
+                    padding-right: 0.5em;
+                    font-size: 1.3em;
+                    
+
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    transition: max-height 0.5s ease-in-out;
+                }
+
+                .fold {
+                    max-height: 2.5em;
+                }
+                
+                .unfold {
+                    max-height: 20em;
+                }
+                
+            }
+
+            .reel_buttons {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+
+                margin: 0 0.5em 1em 0;
+
+                display: flex;
+                flex-direction: column;
+
+                gap: 2em;
+
+                .button_wrapper {
+                    width: 50px;
+
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+
+                    i {
+                        font-weight: 300;
+                        font-size: 2.5em;
+                    }
+
+                    h1 {
+                        font-size: 1.2em;
+                    }
+
+                    img {
+                        width: 90%;
+                        aspect-ratio: 1/1;
+                        border: 1px solid #eeeeee;
+                        border-radius: 5px;
+                        object-fit: cover;
+                    }
+                }
+            }
+            
+            .reel_progressBar {
+                position: absolute;
+                
+                left: 0;
+                bottom: 0;
+        
+                width: 100%;
+                height: 2px;
+
+                border-radius: 1em;
+        
+                overflow: hidden;
+        
+                .bar_1 {
+                    width: 0;
+                    height: 100%;
+        
+                    border-radius: 1em;
+        
+                    background-color: rgba(255, 255, 255, 0.8);
+                }
+            }
+        }
+    }
+    
+}
+
+@media (min-width: 485px) {
+    .reel {
+        width: 415px;
+        margin-top: 1em;
+
+        border-radius: 10px;
+
+        background: var(--background-secondary);
+
+        .reel_controllers {
+            .controllers_wrapper {
+                .reel_progressBar {
+                    padding: 0 1em;
+                }
+            }
+        }
+    }
+}

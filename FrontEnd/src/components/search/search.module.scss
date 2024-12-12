@@ -1,0 +1,81 @@
+.search_section {
+    width: 100%;
+    height: 100%;
+
+    overflow-y: scroll;
+
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    flex-direction: column;
+
+    .userCard_section {
+        position: fixed;
+        top: 6.5em;
+
+        width: 96%;
+        height: max-content;
+
+        padding: 1em;
+        border-radius: 15px;
+        background-color: var(--background-ternary);
+
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+
+        overflow: hidden;
+
+        z-index: 1;
+
+        .heading {
+            font-size: 2em;
+            font-weight: 600;
+            color: var(--text-primary-50);
+            margin-left: 0.2em;
+        }
+
+        .userCard_wrapper {
+            width: 100%;
+            flex-grow: 1;
+
+            border-radius: 10px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+
+            overflow-x: hidden;
+            overflow-y: scroll;
+
+            .no_result {
+                margin: auto;
+                color: var(--text-primary-50);
+            }
+        }
+    }
+}
+
+.input_style {
+    position: sticky;
+    top: 0;
+    transition: transform 0.3s ease-in-out;
+    z-index: 2;
+}
+
+@media (min-width: 485px) {
+    .userCard_section {
+        width: clamp(200px, 80%, 600px) !important;
+    }
+
+    .input_style {
+        width: clamp(200px, 80%, 600px);
+        border-radius: 0 0 15px 15px;
+    }
+}
+
+@media (min-width: 768px) {
+    .explore_section {
+        padding: 2em !important;
+    }
+}

@@ -1,0 +1,21 @@
+.error {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    
+    padding: 1em;
+    border-radius: 10px;
+    font-size: 1.5em;
+
+    border: 1px solid #ca0000;
+    color: red;
+    background-color: #320000;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.5em;
+
+    z-index: 50;
+}

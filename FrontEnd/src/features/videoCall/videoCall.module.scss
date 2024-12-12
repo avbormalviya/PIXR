@@ -1,0 +1,169 @@
+.video_call {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 1em;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1em;
+
+    background-color: var(--background-primary);
+
+    .local_video_wrapper {
+        position: absolute;
+        right: 10px;
+        bottom: 70px;
+
+        width: 150px;
+        aspect-ratio: 1/1;
+
+        border-radius: 10px;
+
+        overflow: hidden;
+
+        .local_video_holder {
+            position: relative;
+
+            width: 100%;
+            height: 100%;
+
+            background-color: var(--background-ternary);
+            
+            .local_video {
+                width: 100%;
+                height: 100%;
+    
+                object-fit: contain;
+            }
+    
+            .local_video_overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+    
+                width: 100%;
+                height: 100%;
+
+                background-color: var(--background-ternary);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                
+                img {
+                    width: 60%;
+                    height: 60%;
+                    
+                    object-fit: cover;
+                    object-position: center;
+        
+                    border-radius: 50%;
+                }
+            }
+        }
+        
+    }
+
+    .remote_video_wrapper {
+        position: relative;
+
+        width: 100%;
+        height: 100%;
+
+        border-radius: 10px;
+
+        background-color: var(--background-secondary);
+
+        overflow: hidden;
+
+        .remote_video {
+            width: 100%;
+            height: 100%;
+
+            object-fit: contain;
+    
+            border-radius: 10px;
+        }
+
+        .remote_video_overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background-color: var(--background-secondary);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 2em;
+            
+            img {
+                width: 30vmin;
+                aspect-ratio: 1/1;
+
+                border-radius: 50%;
+    
+                object-fit: cover;
+            }
+
+            h1 {
+                font-size: 2em;
+                color: var(--text-primary-70);
+            }
+        }
+    }
+
+    .controls_bar {
+
+        height: 50px;
+        width: auto;
+
+        padding: 0.5em;
+        border-radius: 10px;
+
+        background-color: var(--background-ternary);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1em;
+
+        i {
+            height: 100%;
+            aspect-ratio: 1/1;
+
+            font-size: 2.2em;
+            border-radius: 5px;
+            color: var(--text-primary-70);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+            transition: 0.3s;
+
+            &:hover {
+                color: whitesmoke;
+                background-color: var(--primary-color);
+            }
+        }
+
+        :last-child {
+            background-color: #ff4040;
+
+            &:hover {
+                background-color: red;
+            }
+        }
+    }
+}

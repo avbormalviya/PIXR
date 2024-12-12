@@ -1,0 +1,54 @@
+.input_section {
+    width: 100%;
+    height: 60px;
+
+    padding: 1em 1.5em 1em 2.5em;
+    border-radius: 20px;
+
+    background-color: #202020;
+
+    display: grid;
+    grid-template-columns: auto 40px;
+
+    .input_wrapper {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+
+        h2 {
+            font-weight: 400;
+            color: rgba(245, 245, 245, 0.3);
+        }
+
+        .__input_wrapper {
+            width: 100%;
+            overflow: hidden;
+
+            input {
+                width: 100%;
+                height: 20px;
+                
+                border: none;
+    
+                font-size: 1.8em;
+                font-weight: 700;
+    
+                color: whitesmoke;
+    
+                background-color: transparent !important;
+            }
+        }
+    }
+
+    i {
+        justify-self: center;
+        align-self: center;
+        font-size: 2.5em;
+        color: rgba(245, 245, 245, 0.5);
+    }
+}
+
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #202020 inset; /* Your desired background color */
+    -webkit-text-fill-color: whitesmoke; /* Your desired text color */
+}

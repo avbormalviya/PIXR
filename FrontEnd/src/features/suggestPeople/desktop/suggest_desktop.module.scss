@@ -1,0 +1,16 @@
+.suggest {
+    width: 100%;
+
+    margin-top: 1em;
+
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+    gap: 1em;
+
+    h1 {
+        font-size: 1.5em;
+        color: var(--text-primary-50);
+    }
+}

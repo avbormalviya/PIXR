@@ -1,0 +1,21 @@
+.imageHolder {
+    height: 100%;
+
+    position: relative;
+
+    img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        width: 80%;
+        aspect-ratio: 1/1;
+
+        box-shadow: 0px 0px 0px 0.3px var(--text-primary-70);
+        border-radius: 50%;
+
+        object-fit: cover;
+        object-position: center;
+    }
+}
