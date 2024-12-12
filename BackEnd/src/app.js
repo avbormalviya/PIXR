@@ -9,11 +9,9 @@ const app = express();
 initSocket(app);
 
 app.use(cors({
-    origin: "*",
+    origin: process.env.CORS_ORIGIN,
     credentials: true
 }))
-
-app.options('*', cors());  // Handle preflight requests
 
 app.use(express.json({
     limit: "10mb"
