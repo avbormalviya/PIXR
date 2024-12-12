@@ -1,5 +1,5 @@
 import { Navbar } from '../../components/navbar/Navbar'
-import { Header } from '../../components/header/header'
+import { Header } from '../../components/header/Header'
 import { Suggest_desktop } from '../../features/suggestPeople/desktop/Suggest_desktop'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Upload } from '../../components/upload/Upload'
