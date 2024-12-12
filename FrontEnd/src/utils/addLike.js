@@ -5,6 +5,6 @@ export const addLike = async (data) => {
         withCredentials: true,
     };
 
-    const response = await axios.post('http://localhost:8000/api/v1/users/addLike', data, config);
+    const response = await axios.post('https://pixr-backend.vercel.app/api/v1/users/addLike', data, config);
     return response;
 };

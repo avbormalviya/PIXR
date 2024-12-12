@@ -5,6 +5,6 @@ export const addReel = async (file) => {
         withCredentials: true,
     };
 
-    const response = await axios.post('http://localhost:8000/api/v1/users/uploadReel', file, config);
+    const response = await axios.post('https://pixr-backend.vercel.app/api/v1/users/uploadReel', file, config);
     return response;
 };

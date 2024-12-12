@@ -10,7 +10,7 @@ export const useGetUser = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get("http://localhost:8000/api/v1/users/getUser", { withCredentials: true });
+            const response = await axios.get("https://pixr-backend.vercel.app/api/v1/users/getUser", { withCredentials: true });
             setData(response.data);
         } catch (err) {
             setError(err.response?.data?.message || "An error occurred");
