@@ -13,7 +13,7 @@ import { ImageList, ImageListItem } from "@mui/material"
 import { createThumbnail } from "../../utils/createThumbnail"
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import { searchUser } from "../../utils/searchUser"
-import { FeedDetails } from "../feedDetailes/feedDetails"
+import { FeedDetails } from "../feedDetailes/FeedDetails"
 
 export const Search = () => {
     const navigate = useNavigate();
