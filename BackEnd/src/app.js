@@ -26,6 +26,8 @@ app.use(express.static("public"))
 
 app.use(cookieParser())
 
+app.options("*", cors());
+
 
 import userRoutes from "./routes/user.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
