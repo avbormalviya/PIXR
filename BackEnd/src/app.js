@@ -9,7 +9,7 @@ const app = express();
 initSocket(app);
 
 app.use(cors({
-    origin: "https://pixr-ten.vercel.app",
+    origin: "*",
     credentials: true
 }))
 
