@@ -4,7 +4,7 @@ import { setLoading } from "../features/statusSlice/loader/loaderSlice";
 
 const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
     const baseQuery = fetchBaseQuery({
-        baseUrl: "/api/v1/users/https://pixr-backend.vercel.app",
+        baseUrl: "https://pixr-backend.vercel.app",
         credentials: "include",
     });
 
