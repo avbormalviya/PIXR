@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom"
-import { Logo } from "../../components/logo/logo"
+import { Logo } from "../../components/logo/Logo"
 import style from "./auth.module.scss"
 
 export const Auth = () => {
