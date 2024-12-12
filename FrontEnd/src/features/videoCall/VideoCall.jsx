@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../../context/SocketContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import style from "./videoCall.module.scss";
-import { usePeerContext } from '../../context/peerContext';
+import { usePeerContext } from '../../context/PeerContext';
 import { Img } from "../../components/img/Img";
 import { useSelector } from "react-redux";
 
