@@ -24,7 +24,7 @@ import { useSelector } from "react-redux"
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import LayersRoundedIcon from '@mui/icons-material/LayersRounded';
-import { FeedDetails } from "../feedDetailes/feedDetails"
+import { FeedDetails } from "../feedDetailes/FeedDetails"
 
 export const Profile = () => {
 
