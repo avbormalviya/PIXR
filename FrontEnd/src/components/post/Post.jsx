@@ -18,7 +18,7 @@ import { BookmarkButton, CommentButton, LikeButton, ShareButton } from '../butto
 import { addBookmark } from '../../utils/addBookmark';
 import { formatDistanceToNowStrict } from 'date-fns';
 
-import { Comment } from '../../features/comment/comment';
+import { Comment } from '../../features/comment/Comment';
 import { AnimatePresence } from 'framer-motion';
 
 import { useSelector } from 'react-redux';
