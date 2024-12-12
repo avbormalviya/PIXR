@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import style from "./Input.module.scss"
+import style from "./input.module.scss"
 
 export const Input = ({ state, setState, placeholder, icon }) => {
     const inputRef = useRef(null);
