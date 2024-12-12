@@ -9,10 +9,11 @@ const app = express();
 initSocket(app);
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    origin: "*",
     credentials: true
 }))
+
+app.options('*', cors());  // Handle preflight requests
 
 app.use(express.json({
     limit: "10mb"
@@ -26,8 +27,6 @@ app.use(express.urlencoded({
 app.use(express.static("public"))
 
 app.use(cookieParser())
-
-// app.options("*", cors());
 
 
 import userRoutes from "./routes/user.routes.js";
