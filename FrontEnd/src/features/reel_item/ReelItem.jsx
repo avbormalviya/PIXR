@@ -6,7 +6,7 @@ import { BookmarkButton, CommentButton, LikeButton, ShareButton } from "../../co
 import { addLike } from "../../utils/addLike";
 import { addBookmark } from "../../utils/addBookmark";
 import { createThumbnail } from "../../utils/createThumbnail";
-import { Comment } from "../comment/comment";
+import { Comment } from "../comment/Comment";
 import { DrawerButton } from "../../components/drawer/Drawer";
 import { useSelector } from "react-redux";
 
