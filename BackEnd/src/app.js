@@ -13,6 +13,8 @@ app.use(cors({
     credentials: true
 }))
 
+app.options('*', cors());  // Handle preflight requests
+
 app.use(express.json({
     limit: "10mb"
 }))
