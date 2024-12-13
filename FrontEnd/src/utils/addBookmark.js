@@ -5,6 +5,6 @@ export const addBookmark = async (data) => {
         withCredentials: true,
     };
 
-    const response = await axios.post('https://pixr-backend.vercel.app/api/v1/users/addBookmark', data, config);
+    const response = await axios.post('https://pixr-backend.onrender.com/api/v1/users/addBookmark', data, config);
     return response;
 };

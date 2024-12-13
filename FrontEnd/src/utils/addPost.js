@@ -5,6 +5,6 @@ export const addPost = async (files) => {
         withCredentials: true,
     };
 
-    const response = await axios.post('https://pixr-backend.vercel.app/api/v1/users/uploadPost', files, config);
+    const response = await axios.post('https://pixr-backend.onrender.com/api/v1/users/uploadPost', files, config);
     return response;
 };

@@ -4,7 +4,7 @@ import { setLoading } from "../features/statusSlice/loader/loaderSlice";
 
 const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
     const baseQuery = fetchBaseQuery({
-        baseUrl: "https://pixr-backend.vercel.app/api/v1/chats/",
+        baseUrl: "https://pixr-backend.onrender.com/api/v1/chats/",
         credentials: "include",
     });
 

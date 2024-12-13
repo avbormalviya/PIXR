@@ -4,7 +4,7 @@ import { setLoading } from "../features/statusSlice/loader/loaderSlice";
 
 const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
     const baseQuery = fetchBaseQuery({
-        baseUrl: "https://pixr-backend.vercel.app",
+        baseUrl: "https://pixr-backend.onrender.com/api/v1/users/",
         credentials: "include",
     });
 
@@ -35,14 +35,14 @@ export const userApi = createApi({
 
         searchUser: builder.query({
             query: (searchTerm) => ({
-                url: `/api/v1/users/searchUser?query=${encodeURIComponent(searchTerm)}`,
+                url: `searchUser?query=${encodeURIComponent(searchTerm)}`,
                 method: "GET"
             })
         }),
 
         registerUser: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/register",
+                url: "register",
                 method: "POST",
                 body: data
             })
@@ -50,7 +50,7 @@ export const userApi = createApi({
 
         verifyEmail: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/verifyEmail",
+                url: "verifyEmail",
                 method: "POST",
                 body: data
             })
@@ -58,7 +58,7 @@ export const userApi = createApi({
 
         userProfile: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/userProfile",
+                url: "userProfile",
                 method: "POST",
                 body: data
             })
@@ -66,7 +66,7 @@ export const userApi = createApi({
 
         loginUser: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/login",
+                url: "login",
                 method: "POST",
                 body: data
             })
@@ -74,21 +74,21 @@ export const userApi = createApi({
 
         logoutUser: builder.mutation({
             query: () => ({
-                url: "/api/v1/users/logout",
+                url: "logout",
                 method: "POST"
             })
         }),
 
         refreshAccessToken: builder.mutation({
             query: () => ({
-                url: "/api/v1/users/refreshToken",
+                url: "refreshToken",
                 method: "POST"
             })
         }),
 
         changePassword: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/changePassword",
+                url: "changePassword",
                 method: "POST",
                 body: data
             })
@@ -96,21 +96,21 @@ export const userApi = createApi({
 
         getUserProfile: builder.query({
             query: (data) => ({
-                url: `/api/v1/users/getUserProfile/${encodeURIComponent(data)}`,
+                url: `getUserProfile/${encodeURIComponent(data)}`,
                 method: "GET"
             }),
         }),
 
         getUserFollowerAndFollowing: builder.query({
             query: (data) => ({
-                url: `/api/v1/users/getUserFollowerAndFollowing/${encodeURIComponent(data)}`,
+                url: `getUserFollowerAndFollowing/${encodeURIComponent(data)}`,
                 method: "GET"
             }),
         }),
 
         followUser: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/followUser",
+                url: "followUser",
                 method: "POST",
                 body: data
             })
@@ -118,63 +118,63 @@ export const userApi = createApi({
 
         getSuggestedUsers: builder.query({
             query: () => ({
-                url: "/api/v1/users/getSuggestedUsers",
+                url: "getSuggestedUsers",
                 method: "GET"
             })
         }),
 
         getStories: builder.query({
             query: (userName) => ({
-                url: `/api/v1/users/getStories/${encodeURIComponent(userName)}`,
+                url: `getStories/${encodeURIComponent(userName)}`,
                 method: "GET"
             }),
         }),
 
         getStoryViews: builder.query({
             query: (storyId) => ({
-                url: `/api/v1/users/getStoryViews/${encodeURIComponent(storyId)}`,
+                url: `getStoryViews/${encodeURIComponent(storyId)}`,
                 method: "GET"
             }),
         }),
 
         getStoryOnlyFollowers: builder.query({
             query: () => ({
-                url: "/api/v1/users/getStoryOnlyFollowers",
+                url: "getStoryOnlyFollowers",
                 method: "GET"
             }),
         }),
 
         getUserPosts: builder.query({
             query: (data) => ({
-                url: `/api/v1/users/getUserPosts/${encodeURIComponent(data)}`,
+                url: `getUserPosts/${encodeURIComponent(data)}`,
                 method: "GET"
             }),
         }),
 
         getPosts: builder.query({
             query: ({lastPostId, limit}) => ({
-                url: `/api/v1/users/getPosts?lastPostId=${lastPostId}&limit=${limit}`,
+                url: `getPosts?lastPostId=${lastPostId}&limit=${limit}`,
                 method: "GET"
             }),
         }),
 
         getUserReels: builder.query({
             query: (data) => ({
-                url: `/api/v1/users/getUserReels/${encodeURIComponent(data)}`,
+                url: `getUserReels/${encodeURIComponent(data)}`,
                 method: "GET"
             }),
         }),
 
         getReels: builder.query({
             query: ({lastReelId, limit}) => ({
-                url: `/api/v1/users/getReels?lastReelId=${lastReelId}&limit=${limit}`,
+                url: `getReels?lastReelId=${lastReelId}&limit=${limit}`,
                 method: "GET"
             }),
         }),
 
         deleteFeed: builder.query({
             query: (data) => ({
-                url: "/api/v1/users/deleteFeed",
+                url: "deleteFeed",
                 method: "DELETE",
                 body: data
             }),
@@ -182,21 +182,21 @@ export const userApi = createApi({
 
         getNotifications: builder.query({
             query: ({ lastNotificationId, limit }) => ({
-                url: `/api/v1/users/getNotifications?lastNotificationId=${lastNotificationId}&limit=${limit}`,
+                url: `getNotifications?lastNotificationId=${lastNotificationId}&limit=${limit}`,
                 method: "GET"
             }),
         }),
 
         markNotificationAsRead: builder.mutation({
             query: () => ({
-                url: "/api/v1/users/markNotificationAsRead",
+                url: "markNotificationAsRead",
                 method: "POST",
             })
         }),
 
         addRecentProfileOpened: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/addRecentProfileOpened",
+                url: "addRecentProfileOpened",
                 method: "POST",
                 body: data
             })
@@ -204,14 +204,14 @@ export const userApi = createApi({
 
         getRecentProfileOpened: builder.query({
             query: () => ({
-                url: "/api/v1/users/getRecentProfileOpened",
+                url: "getRecentProfileOpened",
                 method: "GET"
             })
         }),
 
         addBookmark: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/addBookmark",
+                url: "addBookmark",
                 method: "POST",
                 body: data
             })
@@ -219,14 +219,14 @@ export const userApi = createApi({
 
         getBookmarks: builder.query({
             query: () => ({
-                url: "/api/v1/users/getBookmarks",
+                url: "getBookmarks",
                 method: "GET"
             })
         }),
 
         addComment: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/addComment",
+                url: "addComment",
                 method: "POST",
                 body: data
             })
@@ -234,28 +234,28 @@ export const userApi = createApi({
 
         getComments: builder.query({
             query: (id) => ({
-                url: `/api/v1/users/getComments/${id}`,
+                url: `getComments/${id}`,
                 method: "GET"
             }),
         }),
 
         getExploreFeeds: builder.query({
             query: () => ({
-                url: "/api/v1/users/getExploreFeeds",
+                url: "getExploreFeeds",
                 method: "GET"
             }),
         }),
 
         getUserAccount: builder.query({
             query: () => ({
-                url: `/api/v1/users/getUserAccount`,
+                url: `getUserAccount`,
                 method: "GET"
             }),
         }),
 
         updateAccount: builder.mutation({
             query: (data) => ({
-                url: "/api/v1/users/updateAccount",
+                url: "updateAccount",
                 method: "POST",
                 body: data
             })
@@ -263,7 +263,7 @@ export const userApi = createApi({
 
         getFeed: builder.query({
             query: ({ feedId, feedType }) => ({
-                url: `/api/v1/users/getFeed/${encodeURIComponent(feedId)}/${encodeURIComponent(feedType)}`,
+                url: `getFeed/${encodeURIComponent(feedId)}/${encodeURIComponent(feedType)}`,
                 method: "GET",
             }),
         }),

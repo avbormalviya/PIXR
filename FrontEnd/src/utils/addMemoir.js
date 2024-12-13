@@ -5,6 +5,6 @@ export const addMemoir = async (files) => {
         withCredentials: true,
     };
 
-    const response = await axios.post('https://pixr-backend.vercel.app/api/v1/users/addStory', files, config);
+    const response = await axios.post('https://pixr-backend.onrender.com/api/v1/users/addStory', files, config);
     return response;
 };
