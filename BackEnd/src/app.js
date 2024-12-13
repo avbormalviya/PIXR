@@ -18,7 +18,8 @@ app.use(cors({
         console.log("Incoming request origin:", origin);
         const allowedOrigins = [
             "https://pixr-six.vercel.app",
-            "http://192.168.29.35:5173"
+            "http://192.168.29.35:5173",
+            "http://localhost:5173"
         ];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
