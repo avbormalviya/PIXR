@@ -8,17 +8,17 @@ const app = express();
 
 initSocket(app);
 
-app.use(cors({
-    origin: [process.env.CORS_ORIGIN, "http://localhost:5173"],
-    credentials: true
-}))
+// app.use(cors({
+//     origin: process.env.CORS_ORIGIN,
+//     credentials: true
+// }))
 
 app.use(cors({
     origin: (origin, callback) => {
         console.log("Incoming request origin:", origin);
         const allowedOrigins = [
-            "https://pixr-ten.vercel.app",
-            "http://localhost:5173",
+            "https://pixr-six.vercel.app",
+            "http://192.168.29.35:5173"
         ];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
@@ -29,9 +29,6 @@ app.use(cors({
     },
     credentials: true,
 }));
-
-
-app.options('*', cors());
 
 app.use(express.json({
     limit: "10mb"
