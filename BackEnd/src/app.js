@@ -13,7 +13,25 @@ app.use(cors({
     credentials: true
 }))
 
-app.options('*', cors());  // Handle preflight requests
+app.use(cors({
+    origin: (origin, callback) => {
+        console.log("Incoming request origin:", origin);
+        const allowedOrigins = [
+            "https://pixr-ten.vercel.app",
+            "http://localhost:5173",
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.error("Blocked origin:", origin);
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+}));
+
+
+app.options('*', cors());
 
 app.use(express.json({
     limit: "10mb"
