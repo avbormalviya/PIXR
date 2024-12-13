@@ -28,7 +28,8 @@
     "react-router-dom": "^6.26.1",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.0",
-    "swiper": "^11.1.14"
+    "swiper": "^11.1.14",
+    "vite": "^5.4.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
