@@ -7,8 +7,8 @@ import { Chat } from "../models/chat.model.js";
 const activeSockets = new Map();
 
 const sslOptions = {
-    key: process.env.SELFSIGNED_KEY,
-    cert: process.env.SELFSIGNED_CERT,
+    key: fs.readFileSync("/etc/secrets/key"),
+    cert: fs.readFileSync("/etc/secrets/cert"),
 };
 
 const initSocket = (app) => {
