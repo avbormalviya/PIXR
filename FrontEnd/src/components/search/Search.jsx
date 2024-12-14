@@ -123,7 +123,7 @@ export const Search = () => {
                         <ImageListItem key={item.img}>
                             <img
                                 style={{ borderRadius: "2em" }}
-                                src={item.file.startsWith("https://") ? item.file : `https://${item.file.split("://")[1]}`}
+                                src={item.file.startsWith("https://") ? item.file : item.file.startsWith("data:") ? item.file : `https://${item.file.split("://")[1]}`}
                                 alt={item.title}
                                 loading="lazy"
                                 onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: item._id, feedType: item.type })}
