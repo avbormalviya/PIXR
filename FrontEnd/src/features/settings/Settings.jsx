@@ -405,7 +405,6 @@ export const Settings = () => {
                                         <ImageListItem key={item.img}>
                                             <img
                                                 style={{ borderRadius: "2em" }}
-                                                srcSet={`${item.file}?w=248&fit=crop&auto=format&dpr=2 2x`}
                                                 src={item.thumbnail.startsWith("https://") ? item.thumbnail : item.thumbnail.startsWith("data:") ? item.thumbnail : `https://${item.thumbnail.split("://")[1]}`}
                                                 alt={item.title}
                                                 loading="lazy"
