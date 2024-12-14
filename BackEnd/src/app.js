@@ -8,11 +8,6 @@ const app = express();
 
 initSocket(app);
 
-// app.use(cors({
-//     origin: process.env.CORS_ORIGIN,
-//     credentials: true
-// }))
-
 app.use(cors({
     origin: (origin, callback) => {
         console.log("Incoming request origin:", origin);

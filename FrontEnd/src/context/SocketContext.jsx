@@ -9,13 +9,12 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (!socketRef.current) {
-            socketRef.current = io("http://localhost:4000", {
+            socketRef.current = io("wss://pixr-backend.onrender.com", {
                 credentials: true,
-                transports: ["websocket"],
+                transports: ["websocket", "polling"],
             });
         }
 
-        // Log connection status
         socketRef.current.on("connect", () => {
             console.log("Connected to socket server");
         });
@@ -24,27 +23,24 @@ export const SocketProvider = ({ children }) => {
             console.log("Disconnected from socket server", reason);
         });
 
-        // Cleanup on unmount
         return () => {
             if (socketRef.current) {
                 socketRef.current.disconnect();
-                socketRef.current = null; // Prevents memory leaks
+                socketRef.current = null;
                 console.log("Disconnected from socket server");
             }
         };
     }, []);
 
-    // Function to emit events to the server
     const emit = (event, data) => {
         if (socketRef.current) {
             socketRef.current.emit(event, data);
         }
     };
 
-    // Function to listen for events from the server
     const on = (event, callback) => {
         if (socketRef.current) {
-            socketRef.current.off(event); // Clean up previous listener
+            socketRef.current.off(event);
             socketRef.current.on(event, callback);
         }
     };
