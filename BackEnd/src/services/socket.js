@@ -1,4 +1,4 @@
-import { createServer } from "https";
+import { createServer } from "http";
 import { Server } from "socket.io";
 import fs from 'fs';
 import { verifyJWTSocket } from "../middlewares/verifyJWTSocket.js";
@@ -12,7 +12,7 @@ const sslOptions = {
 };
 
 const initSocket = (app) => {
-    const httpServer = createServer(sslOptions, app);
+    const httpServer = createServer(app);
     const io = new Server(httpServer, {
         transports: ["websocket"],
         cors: {
