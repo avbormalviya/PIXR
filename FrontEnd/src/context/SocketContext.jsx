@@ -19,6 +19,10 @@ export const SocketProvider = ({ children }) => {
             console.log("Connected to socket server");
         });
 
+        socketRef.current.on("connect_error", (error) => {
+            console.log("WebSocket connection error:", error);
+        });
+
         socketRef.current.on("disconnect", (reason) => {
             console.log("Disconnected from socket server", reason);
         });
