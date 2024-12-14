@@ -123,12 +123,12 @@ export const Search = () => {
                         <ImageListItem key={item.img}>
                             <img
                                 style={{ borderRadius: "2em" }}
-                                srcSet={item.file}
-                                src={item.file}
+                                src={item.file.startsWith("https://") ? item.file : `https://${item.file.split("://")[1]}`}
                                 alt={item.title}
                                 loading="lazy"
                                 onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: item._id, feedType: item.type })}
                             />
+
                             {
                                 item.type === "reel" && (
                                     <PlayArrowRoundedIcon fontSize="large" style={{ position: "absolute", top: "10", right: "10", color: "aliceblue", filter: "drop-shadow(2px 4px 6px black)" }} />

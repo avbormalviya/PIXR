@@ -406,7 +406,7 @@ export const Settings = () => {
                                             <img
                                                 style={{ borderRadius: "2em" }}
                                                 srcSet={`${item.file}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                                                src={item.thumbnail}
+                                                src={item.thumbnail.startsWith("https://") ? item.thumbnail : `https://${item.thumbnail.split("://")[1]}`}
                                                 alt={item.title}
                                                 loading="lazy"
                                                 onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: item._id, feedType: item.saveType })}
@@ -420,6 +420,13 @@ export const Settings = () => {
                                     )
                                 ))}
                             </ImageList>
+                            {
+                                savedFeeds.length === 0 && (
+                                    <div className={style.nothingFound}>
+                                        <h1>Nothing Found</h1>
+                                    </div>
+                                )
+                            }
                         </section>
                     )
                 }
