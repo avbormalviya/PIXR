@@ -5,6 +5,7 @@
     height: 100dvh;
 
     padding: 1em;
+    margin-top: auto;
 
     background-color: var(--background-secondary);
 
@@ -107,6 +108,7 @@
         height: 95%;
 
         padding: 1em;
+        margin-top: unset;
         border-radius: 20px;
     }
 }
