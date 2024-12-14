@@ -1,12 +1,18 @@
-import { createServer } from "http";
+import { createServer } from "https";
 import { Server } from "socket.io";
+import fs from 'fs';
 import { verifyJWTSocket } from "../middlewares/verifyJWTSocket.js";
 import { Chat } from "../models/chat.model.js";
 
 const activeSockets = new Map();
 
+const sslOptions = {
+    key: process.env.SELFSIGNED_KEY,
+    cert: process.env.SELFSIGNED_CERT,
+};
+
 const initSocket = (app) => {
-    const httpServer = createServer(app);
+    const httpServer = createServer(sslOptions, app);
     const io = new Server(httpServer, {
         cors: {
             origin: [ "https://pixr-six.vercel.app", "http://192.168.29.35:5173", "http://localhost:5173" ],
