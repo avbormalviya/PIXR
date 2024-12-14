@@ -8,9 +8,8 @@ export const SocketProvider = ({ children }) => {
     const socketRef = useRef(null);
 
     useEffect(() => {
-        // Initialize socket connection only once
         if (!socketRef.current) {
-            socketRef.current = io("http://localhost:4000", {
+            socketRef.current = io("wss://pixr-backend.onrender.com", {
                 credentials: true,
                 transports: ["websocket"],
             });

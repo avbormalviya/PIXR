@@ -54,10 +54,10 @@ export const FeedDetails = ({ feedId, feedType, setIsDetailsOpen }) => {
 
     const handleLike = async () => {
         const newLikeStatus = !isLiked;
-        const newLikeCount = newLikeStatus ? likeCount + 1 : likeCount - 1;
 
-        setIsLiked(newLikeStatus);
-        setLikeCount(newLikeCount);
+        setIsLiked((prev) => !prev);
+        setLikeCount((prev) => (newLikeStatus ? prev + 1 : prev - 1));
+
 
         let thumbnail;
 
@@ -176,17 +176,18 @@ export const FeedDetails = ({ feedId, feedType, setIsDetailsOpen }) => {
                 </div>
 
                 <div className={style.feed_details_wrapper}>
-                    <DrawerUserCard userName={feed?.[feedOwner]?.userName} profilePic={feed?.[feedOwner]?.profilePic} fullName={feed?.[feedOwner]?.fullName} isRing={feed.hasStories} drawerInfo={ user.userName === feed?.[feedOwner]?.userName ? drawer : drawer2} />
+                    <DrawerUserCard styles={style.usercard} userName={feed?.[feedOwner]?.userName} profilePic={feed?.[feedOwner]?.profilePic} fullName={feed?.[feedOwner]?.fullName} isRing={feed.hasStories} drawerInfo={ user.userName === feed?.[feedOwner]?.userName ? drawer : drawer2} />
                     <div className={style.feed_description}>
                         <h1>{feed?.[feedTitle]}</h1>
                     </div>
                     <div className={style.feed_controllers}>
-                        <div className={style.icon_holder}>
-                            <LikeButton isLiked={ isLiked } event={ handleLike } />
-                            {feed.postLikes && (
-                                <h1>{ likeCount }</h1>
-                            )}
-                        </div>
+                    <div className={style.icon_holder}>
+                        <LikeButton isLiked={isLiked} event={handleLike} />
+                        {typeof likeCount === "number" && (
+                            <h1>{likeCount}</h1>
+                        )}
+                    </div>
+
 
                         {!feed.postCommentsDisabled && (
                             <div className={style.icon_holder}>

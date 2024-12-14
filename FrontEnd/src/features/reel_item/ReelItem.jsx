@@ -9,8 +9,11 @@ import { createThumbnail } from "../../utils/createThumbnail";
 import { Comment } from "../comment/Comment";
 import { DrawerButton } from "../../components/drawer/Drawer";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export const ReelItem = ({ reel, isMute, setIsMute }) => {
+
+    const navigate = useNavigate();
 
     const { user } = useSelector((state) => state.user);
 
@@ -263,11 +266,8 @@ export const ReelItem = ({ reel, isMute, setIsMute }) => {
                             <figure className={`${style.reel_creator_card}`}>
                                 <img src={reel.reelOwner.profilePic} alt="profile pic" />
                                 <figcaption>
-                                    <h1>{reel.reelOwner.userName}</h1>
+                                    <h1 onClick={() => navigate(`/user/${reel.reelOwner.userName}`)}>{reel.reelOwner.userName}</h1>
                                 </figcaption>
-                                
-                                <button>Follow</button>
-                                    
                             </figure>
 
                             <p 

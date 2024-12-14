@@ -35,7 +35,7 @@ const IconButton = ({ isActive, ActiveIcon, InactiveIcon, event }) => {
             // }}
             // animate={{ scale: 1, color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)" }}
             // transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            style={{ justifySelf: 'end', outline: 'none', color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)" }}
+            style={{ justifySelf: 'end', outline: 'none', color: isActive ? "rgb(237 20 61)" : "whitesmoke" }}
         />
 }
 
@@ -47,8 +47,8 @@ const Icon = ({ children, icon, ...props }) => {
 const FollowButton = ({ isFollower, setIsFollower, userName }) => {
 
     const handleFollow = async () => {
-        await followUser(userName);
         setIsFollower(!isFollower);
+        await followUser(userName);
     }
 
     return (

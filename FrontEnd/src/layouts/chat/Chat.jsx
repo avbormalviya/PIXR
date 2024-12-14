@@ -20,6 +20,8 @@ import { usePeerContext } from "../../context/PeerContext";
 
 import { useMediaQuery } from 'react-responsive';
 
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 export const Chat = () => {
     const navigate = useNavigate();
@@ -49,6 +51,8 @@ export const Chat = () => {
     const [chatUser, setChatUser] = useState();
 
     const [isChatOpen, setIsChatOpen] = useState(false);
+
+    const [isEmojiOpen, setIsEmojiOpen] = useState(false);
 
     const [sections, setSections] = useState([
         // { id: 0, title: "Mood Songs" },
@@ -160,7 +164,7 @@ export const Chat = () => {
             <div className={style.lobby_container}>
 
                 <motion.div
-                    animate={ isMobile ? isChatOpen ? { x: 0 } : { x: '-100%' } : null } transition={{ duration: 0.3 } }
+                    animate={ isMobile ? isChatOpen ? { display: 'flex' } : { display: 'none' } : null } transition={{ duration: 0.3 } }
                     className={style.lobby_room}
                 >
 
@@ -263,8 +267,21 @@ export const Chat = () => {
                         </AnimatePresence>
                     </section>
 
+                    
+
                     <footer className={style.lobby_footer}>
-                        <span className="material-symbols-rounded">attach_file</span>
+
+                        <AnimatePresence>
+                            {
+                                isEmojiOpen && (
+                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={style.emoji_wrapper}>
+                                        <Picker data={data} onEmojiSelect={(emoji) => setInputMessage(inputMessage + emoji.native)} previewPosition="none" theme={ localStorage.getItem("theme") === "dark" ? "dark" : "light" } />
+                                    </motion.div>
+                                )
+                            }
+                        </AnimatePresence>
+                        
+                        {/* <span className="material-symbols-rounded">attach_file</span> */}
                         <input
                             onChange={(e) => setInputMessage(e.target.value)}
                             onFocus={ handleTyping }
@@ -274,13 +291,12 @@ export const Chat = () => {
                             placeholder="Type a message..."
                         />
                         <span onClick={ handleSendMessage } className="material-symbols-rounded">send</span>
-                        <span className="material-symbols-rounded">mood</span>
-                        <span className="material-symbols-rounded">mic</span>
+                        <span className="material-symbols-rounded" onClick={() => setIsEmojiOpen(!isEmojiOpen)}>mood</span>
                     </footer>
                 </motion.div>
 
                 <motion.div 
-                    animate={ isMobile ? isChatOpen ? { x: 0 } : { x: '-100%' } : null } transition={{ duration: 0.3 } }
+                    animate={ isMobile ? isChatOpen ? { display: 'none' } : { display: 'block' } : null } transition={{ duration: 0.3 } }
                     className={style.chat_lobby}
                 >
                     <div className={style.chats_wrapper}>
