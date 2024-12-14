@@ -122,10 +122,9 @@ export const Search = () => {
                     {[...feeds].reverse().map((item) => (
                         <ImageListItem key={item.img}>
                             <img
-                                style={{ borderRadius: "2em" }}
+                                style={{ width: "100%", borderRadius: "2em" }}
                                 src={item.file.startsWith("https://") ? item.file : item.file.startsWith("data:") ? item.file : `https://${item.file.split("://")[1]}`}
                                 alt={item.title}
-                                loading="lazy"
                                 onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: item._id, feedType: item.type })}
                             />
 

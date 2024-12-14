@@ -14,6 +14,7 @@ import { createThumbnail } from "../../utils/createThumbnail";
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import { ImageCropper } from "../cropper/Cropper";
 import { FeedDetails } from "../../components/feedDetailes/FeedDetails";
+import { Img } from "../../components/img/Img";
 
 export const Settings = () => {
     const navigate = useNavigate();
@@ -403,11 +404,10 @@ export const Settings = () => {
                                 {[...savedFeeds].reverse().map((item) => (
                                     item.thumbnail && (
                                         <ImageListItem key={item.img}>
-                                            <img
-                                                style={{ borderRadius: "2em" }}
+                                            <Img
+                                                style={{ width: "100%", borderRadius: "2em" }}
                                                 src={item.thumbnail.startsWith("https://") ? item.thumbnail : item.thumbnail.startsWith("data:") ? item.thumbnail : `https://${item.thumbnail.split("://")[1]}`}
                                                 alt={item.title}
-                                                loading="lazy"
                                                 onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: item._id, feedType: item.saveType })}
                                             />
                                             {
