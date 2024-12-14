@@ -11,7 +11,7 @@ export const SocketProvider = ({ children }) => {
         if (!socketRef.current) {
             socketRef.current = io("wss://pixr-backend.onrender.com", {
                 credentials: true,
-                transports: ["websocket", "polling"],
+                transports: ["websocket"],
             });
         }
 

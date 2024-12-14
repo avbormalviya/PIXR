@@ -14,6 +14,7 @@ const sslOptions = {
 const initSocket = (app) => {
     const httpServer = createServer(sslOptions, app);
     const io = new Server(httpServer, {
+        transports: ["websocket"],
         cors: {
             origin: [ "https://pixr-six.vercel.app", "http://192.168.29.35:5173", "http://localhost:5173" ],
             credentials: true
