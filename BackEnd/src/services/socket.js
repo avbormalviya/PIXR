@@ -1,5 +1,4 @@
-import { createServer } from "https";
-import fs from "fs";
+import { createServer } from "http";
 import { Server } from "socket.io";
 import { verifyJWTSocket } from "../middlewares/verifyJWTSocket.js";
 import { Chat } from "../models/chat.model.js";
@@ -7,19 +6,12 @@ import { Chat } from "../models/chat.model.js";
 const activeSockets = new Map();
 
 const initSocket = (app) => {
-    const httpsServer = createServer(
-        {
-            key: fs.readFileSync("path/to/selfsigned.key"),
-            cert: fs.readFileSync("path/to/selfsigned.crt"),
-        },
-        app
-    );
-
-    const io = new Server(httpsServer, {
+    const httpServer = createServer(app);
+    const io = new Server(httpServer, {
         cors: {
-            origin: ["https://pixr-six.vercel.app", "http://192.168.29.35:5173"],
-            credentials: true,
-        },
+            origin: [ "https://pixr-six.vercel.app", "http://192.168.29.35:5173"],
+            credentials: true
+        }
     });
 
     io.use(verifyJWTSocket);
@@ -103,7 +95,7 @@ const initSocket = (app) => {
         });
     });
 
-    httpsServer.listen(4000, () => {
+    httpServer.listen(4000, () => {
         console.log(`Server is running on http://localhost:4000`);
     });
 };
