@@ -1,10 +1,10 @@
 .feed_wrapper {
-    height: 95%;
-    // max-width: 1000px;
-    // aspect-ratio: 11 / 9;
+    position: relative;
+
+    width: 100%;
+    height: 100%;
 
     padding: 1em;
-    border-radius: 20px;
 
     background-color: var(--background-secondary);
 
@@ -13,6 +13,9 @@
 
     .feed_section_wrapper, .feed_details_wrapper {
         height: 100%;
+        
+        flex-grow: 1;
+
         aspect-ratio: 9/16;
 
         border-radius: 15px;
@@ -27,25 +30,35 @@
     }
 
     .feed_details_wrapper {
-        padding: 1em;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 100%;
         
-        background-color: var(--background-ternary);
+        padding: 1em;
+        background-color: transparent;
 
         display: flex;
+        justify-content: space-between;
         flex-direction: column;
-        gap: 1em;
+
+        .usercard {
+            background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(0,0,0,1) 100%);
+            z-index: 1;
+        }
 
         .feed_description {
             width: 100%;
-            flex-grow: 1;
 
-            padding: 1.5em;
+            padding: 0 1.5em;
+            margin-top: auto;
             border-radius: 15px;
 
-            background-color: var(--background-secondary);
+            z-index: 1;
 
             h1 {
-                color: var(--text-primary-50);
+                color: var(--text-primary-70);
                 font-size: 1.3em;
                 font-weight: 500;
             }
@@ -58,11 +71,14 @@
             color: var(--text-primary-50);
             padding: 1.5em;
             border-radius: 10px;
-            background-color: var(--background-secondary);
+
+            background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(255,255,255,0) 100%);
 
             display: flex;
             align-items: center;
             gap: 2em;
+
+            z-index: 1;
 
             .icon_holder {
                 width: 40px;
@@ -80,6 +96,50 @@
                     color: var(--text-primary-50); 
                 }
             }
+        }
+    }
+}
+
+
+@media (min-width: 485px) {
+    .feed_wrapper {
+        width: unset;
+        height: 95%;
+
+        padding: 1em;
+        border-radius: 20px;
+    }
+}
+
+
+@media (min-width: 1024px) {
+    .feed_wrapper {
+
+        .feed_details_wrapper {
+            position: unset;
+
+            width: unset;
+
+            background-color: var(--background-ternary);
+
+            gap: 1em;
+
+            .usercard {
+                background: none;
+                background-color: var(--background-secondary);
+            }
+
+            .feed_description {
+                flex-grow: 1;
+                padding: 1.5em;
+                background-color: var(--background-secondary);
+            }
+            
+            .feed_controllers {
+                background: none;
+                background-color: var(--background-secondary);
+            }
+
         }
     }
 }

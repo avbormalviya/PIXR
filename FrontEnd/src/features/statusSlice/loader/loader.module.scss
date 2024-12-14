@@ -12,5 +12,7 @@
 
     background-color: var(--background-soft);
 
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(20px);
+
+    z-index: 80;
 }

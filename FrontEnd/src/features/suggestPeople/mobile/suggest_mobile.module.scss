@@ -14,10 +14,13 @@
 
         i {
             font-size: 1.3em;
+            cursor: pointer;
         }
     }
 
     .card_wrapper {
+        border-radius: 0.5em;
+
         display: flex;
 
         gap: 1em;

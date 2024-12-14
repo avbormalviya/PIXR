@@ -14,7 +14,7 @@
     flex-shrink: 0;
 
     height: 100%;
-    aspect-ratio: 9/16;
+    // width: 100%;
 
     border-radius: 10px;
 
@@ -120,5 +120,13 @@
         gap: 1em;
 
         overflow-y: scroll;
+    }
+}
+
+
+@media (min-width: 485px) {
+    .memoir_container {
+        width: unset;
+        aspect-ratio: 9/16;
     }
 }
