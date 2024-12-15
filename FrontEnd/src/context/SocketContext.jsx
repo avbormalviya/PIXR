@@ -12,8 +12,11 @@ export const SocketProvider = ({ children }) => {
             socketRef.current = io("wss://pixr-backend.onrender.com", {
                 credentials: true,
                 transports: ["websocket"],
-            });
-        }
+            },
+            {
+                secure: true,
+            }
+        )}
 
         socketRef.current.on("connect", () => {
             console.log("Connected to socket server");

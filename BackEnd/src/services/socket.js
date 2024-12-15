@@ -15,10 +15,30 @@ const initSocket = (app) => {
     const httpServer = createServer(sslOptions, app);
     const io = new Server(httpServer, {
         cors: {
-            origin: [ "https://pixr-six.vercel.app", "http://192.168.29.35:5173", "http://localhost:5173" ],
-            credentials: true
-        }
+            origin: (origin, callback) => {
+                const allowedOrigins = [
+                    "https://pixr-six.vercel.app",
+                    "http://192.168.29.35:5173",
+                    "http://localhost:5173",
+                ];
+                if (!origin || allowedOrigins.includes(origin)) {
+                    callback(null, true);
+                } else {
+                    callback(new Error("CORS not allowed"));
+                }
+            },
+            credentials: true,
+        },
     });
+
+    httpServer.on("error", (error) => {
+        console.error("HTTP Server Error:", error);
+    });
+    
+    io.on("error", (error) => {
+        console.error("Socket.IO Error:", error);
+    });
+    
 
     io.use(verifyJWTSocket);
     app.set("io", io);
