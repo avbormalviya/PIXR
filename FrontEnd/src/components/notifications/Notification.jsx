@@ -138,8 +138,8 @@ export const Notification = () => {
                                             <p>{ formatDistanceToNowStrict(notification.createdAt, { addSuffix: true }) }</p>
                                         </h2>
                                     </div>
-                                    {/* <Img url={ notification.thumbnail } style={{ borderRadius: "10px" }} /> */}
-                                    <FollowButton userName={ notification.sender.userName } />
+                                    <Img url={ notification.thumbnail } style={{ borderRadius: "10px" }} />
+                                    {/* <FollowButton userName={ notification.sender.userName } /> */}
                                 </div>
                             ))
                         }
