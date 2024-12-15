@@ -22,8 +22,10 @@ const initSocket = (app) => {
                     "http://localhost:5173",
                 ];
                 if (!origin || allowedOrigins.includes(origin)) {
+                    console.log("Origin allowed:", origin);
                     callback(null, true);
                 } else {
+                    console.log("Origin not allowed:", origin);
                     callback(new Error("CORS not allowed"));
                 }
             },
