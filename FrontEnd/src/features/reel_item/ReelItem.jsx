@@ -152,10 +152,9 @@ export const ReelItem = ({ reel, isMute, setIsMute }) => {
 
     const handleLike = async () => {
         const newLikeStatus = !isLiked;
-        const newLikeCount = newLikeStatus ? likeCount + 1 : likeCount - 1;
 
-        setIsLiked(newLikeStatus);
-        setLikeCount(newLikeCount);
+        setIsLiked((prev) => !prev);
+        setLikeCount((prev) => (newLikeStatus ? prev + 1 : prev - 1));
     
         try {
             const thumbnail = await createThumbnail(reel.reelFile);
