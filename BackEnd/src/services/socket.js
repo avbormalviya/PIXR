@@ -43,7 +43,7 @@ const initSocket = (app) => {
     });
     
 
-    // io.use(verifyJWTSocket);
+    io.use(verifyJWTSocket);
     app.set("io", io);
 
     io.on("connection", (socket) => {
