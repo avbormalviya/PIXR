@@ -11,20 +11,6 @@ const sslOptions = {
     cert: fs.readFileSync("/etc/secrets/cert"),
 };
 
-try {
-    const keyContent = fs.readFileSync("/etc/secrets/key", "utf8");
-    console.log("Key file successfully loaded:", keyContent.length > 0);
-} catch (error) {
-    console.error("Error reading key file:", error);
-}
-
-try {
-    const certContent = fs.readFileSync("/etc/secrets/cert", "utf8");
-    console.log("Cert file successfully loaded:", certContent.length > 0);
-} catch (error) {
-    console.error("Error reading cert file:", error);
-}
-
 const initSocket = (app) => {
     const httpServer = createServer(sslOptions, app);
     const io = new Server(httpServer, {
@@ -35,6 +21,7 @@ const initSocket = (app) => {
                     "http://192.168.29.35:5173",
                     "http://localhost:5173",
                 ];
+                
                 if (!origin || allowedOrigins.includes(origin)) {
                     console.log("Origin allowed:", origin);
                     callback(null, true);
