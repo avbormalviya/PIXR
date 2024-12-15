@@ -25,11 +25,7 @@ export const Suggest_desktop = () => {
 
                 {
                     suggestedUsers?.map((suggestedUser, index) => (
-                            user.userName !== suggestedUser.userName ? 
-                                <FollowUserCard key={ index } fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic } isFollower={ suggestedUser.isFollower } isRing={ suggestedUser.hasStories } />
-                            :
-                                <NormalUserCard key={ index } fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic }isRing={ suggestedUser.hasStories } isNavigate={true} />
-                            
+                        <FollowUserCard key={ index } fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic } isFollower={ suggestedUser.isFollower } isRing={ suggestedUser.hasStories } />    
                     ))
                 }
             </section>
