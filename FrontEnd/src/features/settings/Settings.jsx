@@ -300,7 +300,7 @@ export const Settings = () => {
                                 
                                 <div className={style.wrapper}>
                                     <h1>Full Name</h1>
-                                    <input type="text" value={account.fullName} />
+                                    <input type="text" value={account.fullName} onChange={(e) => setAccount({ ...account, fullName: e.target.value })} />
                                 </div>
                                 
                                 <div className={style.wrapper}>
