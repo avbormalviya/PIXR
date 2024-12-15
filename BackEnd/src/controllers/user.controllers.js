@@ -151,7 +151,7 @@ const userProfile = asyncHandler( async (req, res) => {
 
     user.fullName = fullName;
     user.birthDate = birthDate;
-    user.profilePic = profilePicCloudPath.url;
+    user.profilePic = profilePicCloudPath.secure_url;
     await user.save({ validateBeforeSave: false });
 
     res.status(200).json(
@@ -760,7 +760,7 @@ const addStory = asyncHandler( async (req, res) => {
                 throw new ApiError(500, "Internal server error during file upload");
             }
 
-            return url.url;
+            return url.secure_url;
         })
     );
 
@@ -1025,13 +1025,11 @@ const uploadPost = asyncHandler( async (req, res) => {
         postFilesArray.map(async (file) => {
             const url = await uploadOnCloudinary(file.path);
 
-            console.log(url);
-
             if (!url) {
                 throw new ApiError(500, "Internal server error during file upload");
             }
 
-            return url.url;
+            return url.secure_url;
         })
     );
 
@@ -1283,7 +1281,7 @@ const uploadReel = asyncHandler( async (req, res) => {
 
     const newReel = await Reel.create({
         reelTitle,
-        reelFile: reelUrl.url,
+        reelFile: reelUrl.secure_url,
         reelOwner: req.user._id,
         reelHideLikes,
         reelHideViews,
@@ -1932,7 +1930,7 @@ const updateAccount = asyncHandler(async (req, res) => {
 
     if (req.file) {
         const url = await uploadOnCloudinary(req.file.path);
-        req.body.profilePic = url.url;
+        req.body.profilePic = url.secure_url;
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.user._id, req.body, { new: true });
