@@ -679,6 +679,11 @@ const followUser = asyncHandler( async (req, res) => {
 const getSuggestedUsers = asyncHandler( async (req, res) => {
     const users = await User.aggregate([
         {
+            $match: {
+                _id: { $ne: req.user?._id }
+            }
+        },
+        {
             $sort: { createdAt: -1 }
         },
         {
