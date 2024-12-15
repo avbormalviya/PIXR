@@ -8,7 +8,7 @@ import { useEffect } from "react"
 
 export const Suggest_mobile = ({ setShowSuggest }) => {
 
-    const { suggestedUsers } = useSelector(state => state.user);
+    const { user, suggestedUsers } = useSelector(state => state.user);
 
     useEffect(() => {
         fetchAndSetSuggestedUsers();
@@ -25,7 +25,11 @@ export const Suggest_mobile = ({ setShowSuggest }) => {
                 <div className={style.card_wrapper}>
                     {
                         suggestedUsers?.map((user, index) => (
-                            <FollowUserCard key={ index } styles={style.usercard} fullName={ user.fullName } userName={ user.userName } profilePic={ user.profilePic } isFollower={ user.isFollower } isRing={ user.hasStories } />
+                            user.userName !== suggestedUser.userName ? 
+                                <FollowUserCard key={ index } styles={style.usercard} fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic } isFollower={ suggestedUser.isFollower } isRing={ suggestedUser.hasStories } />
+                            :
+                                <NormalUserCard key={ index } styles={style.usercard} fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic }isRing={ suggestedUser.hasStories } isNavigate={true} />
+                            
                         ))
                     }
                 </div>
