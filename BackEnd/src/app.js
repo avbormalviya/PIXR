@@ -10,14 +10,11 @@ initSocket(app);
 
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = [
-            "https://pixr-six.vercel.app",
-            "http://192.168.29.35:5173",
-            "http://localhost:5173"
-        ];
+        const allowedOrigins = ["https://pixr-six.vercel.app", "http://localhost:5173"];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
+            console.error(`Blocked by CORS: ${origin}`);
             callback(new Error("Not allowed by CORS"));
         }
     },
