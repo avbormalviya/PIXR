@@ -1,5 +1,5 @@
 import style from "./suggest_mobile.module.scss"
-import { FollowUserCard } from "../../../components/userCard/UserCard"
+import { FollowUserCard, NormalUserCard } from "../../../components/userCard/UserCard"
 
 import { useSelector } from "react-redux"
 import { fetchAndSetSuggestedUsers } from "../../../utils/getSuggestedUsers"
