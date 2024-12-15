@@ -79,14 +79,20 @@ const Post = ({ postObj }) => {
     const handleShare = async () => {
         const shareUrl = `http://localhost:5173/${postObj.postOwner.userName}/${postObj._id}`;
         const shareText = "Check out this amazing Post on PIXR!";
-            
+        const imageUrl = postObj.postFiles[0]; // URL of the image to share
+        
         if (navigator.share) {
             try {
+                // Fetch the image and convert it into a File object
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                const file = new File([blob], "post-image.jpg", { type: blob.type });
+    
                 await navigator.share({
                     title: "PIXR Post",
                     text: shareText,
                     url: shareUrl,
-                    
+                    files: [file], // Attach the image file
                 });
             } catch (error) {
                 console.error("Error sharing content:", error);
@@ -95,6 +101,7 @@ const Post = ({ postObj }) => {
             alert("Your browser does not support sharing content.");
         }
     };
+    
 
 
     const drawer = {
