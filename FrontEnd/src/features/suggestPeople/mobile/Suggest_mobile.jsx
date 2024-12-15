@@ -24,7 +24,7 @@ export const Suggest_mobile = ({ setShowSuggest }) => {
 
                 <div className={style.card_wrapper}>
                     {
-                        suggestedUsers?.map((user, index) => (
+                        suggestedUsers?.map((suggestedUser, index) => (
                             user.userName !== suggestedUser.userName ? 
                                 <FollowUserCard key={ index } styles={style.usercard} fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic } isFollower={ suggestedUser.isFollower } isRing={ suggestedUser.hasStories } />
                             :
