@@ -10,14 +10,9 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
 
         if (!socketRef.current) {
-            socketRef.current = io("https://pixr-backend.onrender.com", {
+            socketRef.current = io("http://localhost:4000", {
+                withCredentials: true,
                 transports: ["websocket"],
-                credentials: true,
-                reconnection: true,
-                reconnectionAttempts: 5,
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
-                timeout: 100000,
             },
         )}
 
