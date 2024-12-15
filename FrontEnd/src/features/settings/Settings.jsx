@@ -291,12 +291,12 @@ export const Settings = () => {
                                     <input type="text" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
                                 </div> */}
                                 
-                                <div className={style.wrapper}>
+                                {/* <div className={style.wrapper}>
                                     <h1>Birth Date</h1>
                                     {
                                         account.birthDate && <input type="text" value={format(account.birthDate, "yyyy-MM-dd")} onChange={(e) => setAccount({ ...account, birthDate: e.target.value })} />
                                     }
-                                </div>
+                                </div> */}
                                 
                                 <div className={style.wrapper}>
                                     <h1>Full Name</h1>
@@ -305,7 +305,7 @@ export const Settings = () => {
                                 
                                 <div className={style.wrapper}>
                                     <h1>Bio</h1>
-                                    <textarea type="text" value={account.bio || "New To Pixr"} onChange={(e) => setAccount({ ...account, bio: e.target.value })} />
+                                    <textarea type="text" value={account.bio} onChange={(e) => setAccount({ ...account, bio: e.target.value })} />
                                 </div>
 
                                 <div className={style.wrapper}>
