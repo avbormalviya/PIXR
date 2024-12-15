@@ -12,7 +12,9 @@ const sslOptions = {
 };
 
 const initSocket = (app) => {
+    console.log("Initializing Socket.IO...");
     const httpServer = createServer(sslOptions, app);
+    console.log("HTTP Server initialized");
     const io = new Server(httpServer, {
         cors: {
             origin: (origin, callback) => {
@@ -21,7 +23,7 @@ const initSocket = (app) => {
                     "http://192.168.29.35:5173",
                     "http://localhost:5173",
                 ];
-                
+
                 if (!origin || allowedOrigins.includes(origin)) {
                     console.log("Origin allowed:", origin);
                     callback(null, true);
@@ -34,6 +36,7 @@ const initSocket = (app) => {
         },
     });
 
+    console.log("Socket.IO initialized");
     httpServer.on("error", (error) => {
         console.error("HTTP Server Error:", error);
     });
