@@ -12,9 +12,7 @@ const sslOptions = {
 };
 
 const initSocket = (app) => {
-    console.log("Initializing Socket.IO...");
     const httpServer = createServer(sslOptions, app);
-    console.log("HTTP Server initialized");
     const io = new Server(httpServer, {
         cors: {
             origin: (origin, callback) => {
@@ -36,7 +34,6 @@ const initSocket = (app) => {
         },
     });
 
-    console.log("Socket.IO initialized");
     httpServer.on("error", (error) => {
         console.error("HTTP Server Error:", error);
     });
@@ -46,7 +43,7 @@ const initSocket = (app) => {
     });
     
 
-    io.use(verifyJWTSocket);
+    // io.use(verifyJWTSocket);
     app.set("io", io);
 
     io.on("connection", (socket) => {
