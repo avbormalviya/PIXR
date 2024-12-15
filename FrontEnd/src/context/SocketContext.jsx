@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (!socketRef.current) {
-            socketRef.current = io("wss://pixr-backend.onrender.com", {
+            socketRef.current = io("wss://pixr-backend.onrender.com:4000", {
                 credentials: true,
                 transports: ["websocket"],
             },
