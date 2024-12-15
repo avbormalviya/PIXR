@@ -1,7 +1,7 @@
 import style from "./suggest_desktop.module.scss"
 
 import { SwitchAccount } from "../../switchAccount/SwitchAccount"
-import { FollowUserCard } from "../../../components/userCard/UserCard"
+import { FollowUserCard, NormalUserCard } from "../../../components/userCard/UserCard"
 
 import { useSelector } from "react-redux"
 import { fetchAndSetSuggestedUsers } from "../../../utils/getSuggestedUsers"
@@ -25,8 +25,10 @@ export const Suggest_desktop = () => {
 
                 {
                     suggestedUsers?.map((suggestedUser, index) => (
-                            user.userName === suggestedUser.userName && 
+                            user.userName !== suggestedUser.userName ? 
                                 <FollowUserCard key={ index } fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic } isFollower={ suggestedUser.isFollower } isRing={ suggestedUser.hasStories } />
+                            :
+                                <NormalUserCard key={ index } fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic }isRing={ suggestedUser.hasStories } isNavigate={true} />
                             
                     ))
                 }
