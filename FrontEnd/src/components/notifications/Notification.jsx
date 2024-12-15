@@ -138,8 +138,12 @@ export const Notification = () => {
                                             <p>{ formatDistanceToNowStrict(notification.createdAt, { addSuffix: true }) }</p>
                                         </h2>
                                     </div>
-                                    <Img url={ notification.thumbnail } style={{ borderRadius: "10px" }} />
-                                    {/* <FollowButton userName={ notification.sender.userName } /> */}
+
+                                    {
+                                        isImageUrl(notification.thumbnail) && (
+                                            <Img url={ notification.thumbnail } style={{ borderRadius: "10px" }} />
+                                        )
+                                    }
                                 </div>
                             ))
                         }
@@ -179,11 +183,8 @@ export const Notification = () => {
                                                     </div>
 
                                                     {
-                                                        isImageUrl(notification.thumbnail) ? (
+                                                        isImageUrl(notification.thumbnail) && (
                                                             <Img  url={ notification.thumbnail } style={{ borderRadius: "10px" }} />
-                                                        ) : (
-                                                            notification.thumbnail !== "empty" &&  
-                                                                <Button variant="contained" style={{ fontSize: '0.9em' }} onClick={() => window.open(notification.thumbnail, '_blank')}>{ notification.thumbnail }</Button>
                                                         )
                                                     }
                                                 </div>
