@@ -8,10 +8,26 @@ export const SocketProvider = ({ children }) => {
     const socketRef = useRef(null);
 
     useEffect(() => {
+        const socket = new WebSocket("wss://pixr-backend.onrender.com:4000");
+        socket.onopen = () => {
+            console.log("WebSocket connected!");
+        };
+        socket.onerror = (error) => {
+            console.error("WebSocket connection error", error);
+        };
+        socket.onclose = () => {
+            console.log("WebSocket closed");
+        };
+
         if (!socketRef.current) {
             socketRef.current = io("wss://pixr-backend.onrender.com:4000", {
-                credentials: true,
                 transports: ["websocket"],
+                credentials: true,
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                timeout: 10000,
             },
         )}
 

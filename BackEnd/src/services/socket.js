@@ -15,33 +15,10 @@ const initSocket = (app) => {
     const httpServer = createServer(sslOptions, app);
     const io = new Server(httpServer, {
         cors: {
-            origin: (origin, callback) => {
-                const allowedOrigins = [
-                    "https://pixr-six.vercel.app",
-                    "http://192.168.29.35:5173",
-                    "http://localhost:5173",
-                ];
-
-                if (!origin || allowedOrigins.includes(origin)) {
-                    console.log("Origin allowed:", origin);
-                    callback(null, true);
-                } else {
-                    console.log("Origin not allowed:", origin);
-                    callback(new Error("CORS not allowed"));
-                }
-            },
-            credentials: true,
-        },
+            origin: [ "https://pixr-six.vercel.app", "http://192.168.29.35:5173", "http://localhost:5173" ],
+            credentials: true
+        }
     });
-
-    httpServer.on("error", (error) => {
-        console.error("HTTP Server Error:", error);
-    });
-    
-    io.on("error", (error) => {
-        console.error("Socket.IO Error:", error);
-    });
-    
 
     io.use(verifyJWTSocket);
     app.set("io", io);
@@ -51,10 +28,6 @@ const initSocket = (app) => {
         activeSockets.set(userId, socket.id);
 
         console.log("New user connected:", userId, socket.id);
-
-        socket.on("error", (err) => {
-            console.error("WebSocket error:", err);
-        });
 
         // Join Room
         socket.on("joinRoom", async (roomId) => {
