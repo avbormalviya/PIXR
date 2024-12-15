@@ -11,6 +11,20 @@ const sslOptions = {
     cert: fs.readFileSync("/etc/secrets/cert"),
 };
 
+try {
+    const keyContent = fs.readFileSync("/etc/secrets/key", "utf8");
+    console.log("Key file successfully loaded:", keyContent.length > 0);
+} catch (error) {
+    console.error("Error reading key file:", error);
+}
+
+try {
+    const certContent = fs.readFileSync("/etc/secrets/cert", "utf8");
+    console.log("Cert file successfully loaded:", certContent.length > 0);
+} catch (error) {
+    console.error("Error reading cert file:", error);
+}
+
 const initSocket = (app) => {
     const httpServer = createServer(sslOptions, app);
     const io = new Server(httpServer, {
