@@ -49,6 +49,10 @@ const initSocket = (app) => {
 
         console.log("New user connected:", userId, socket.id);
 
+        socket.on("error", (err) => {
+            console.error("WebSocket error:", err);
+        });
+
         // Join Room
         socket.on("joinRoom", async (roomId) => {
             try {
