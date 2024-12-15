@@ -10,7 +10,7 @@ import { useEffect } from "react"
 
 export const Suggest_desktop = () => {
 
-    const { suggestedUsers } = useSelector(state => state.user);
+    const { user,suggestedUsers } = useSelector(state => state.user);
 
     useEffect(() => {
         fetchAndSetSuggestedUsers();
@@ -24,8 +24,10 @@ export const Suggest_desktop = () => {
                 <h1>Suggested for you</h1>
 
                 {
-                    suggestedUsers?.map((user, index) => (
-                        <FollowUserCard key={ index } fullName={ user.fullName } userName={ user.userName } profilePic={ user.profilePic } isFollower={ user.isFollower } isRing={ user.hasStories } />
+                    suggestedUsers?.map((suggestedUser, index) => (
+                            user.userName === suggestedUser.userName && 
+                                <FollowUserCard key={ index } fullName={ suggestedUser.fullName } userName={ suggestedUser.userName } profilePic={ suggestedUser.profilePic } isFollower={ suggestedUser.isFollower } isRing={ suggestedUser.hasStories } />
+                            
                     ))
                 }
             </section>
