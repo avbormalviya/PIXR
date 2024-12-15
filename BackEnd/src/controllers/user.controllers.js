@@ -1025,6 +1025,8 @@ const uploadPost = asyncHandler( async (req, res) => {
         postFilesArray.map(async (file) => {
             const url = await uploadOnCloudinary(file.path);
 
+            console.log(url);
+
             if (!url) {
                 throw new ApiError(500, "Internal server error during file upload");
             }
