@@ -67,11 +67,11 @@ export const Comment = ({ feedId, setIsCommentsOpen, feedType, thumbnail }) => {
                                             <span>{ formatDistanceToNowStrict(new Date(comment.createdAt), { addSuffix: true }) }</span>
                                         )
                                     }
-                                    <div className={style.comment_like_wrapper}>
+                                    {/* <div className={style.comment_like_wrapper}>
                                         <div className={style.comment_like_button}>
                                             <LikeButton className={style.like_button} isLiked={ false } event={ () => { } } />
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         ))
