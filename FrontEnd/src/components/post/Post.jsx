@@ -42,10 +42,9 @@ const Post = ({ postObj }) => {
 
     const handleLike = async () => {
         const newLikeStatus = !isLiked;
-        const newLikeCount = newLikeStatus ? likeCount + 1 : likeCount - 1;
 
-        setIsLiked(newLikeStatus);
-        setLikeCount(newLikeCount);
+        setIsLiked((prev) => !prev);
+        setLikeCount((prev) => (newLikeStatus ? prev + 1 : prev - 1));
 
         try {
             await addLike({
@@ -167,7 +166,7 @@ const Post = ({ postObj }) => {
                     <div className={style.post_controller_inner}>
                         <div className={style.icon_holder}>
                             <LikeButton isLiked={ isLiked } event={ handleLike } />
-                            {postObj.postLikes && (
+                            {postObj.postLikes && typeof likeCount === "number" && (
                                 <h1>{ likeCount }</h1>
                             )}
                         </div>
