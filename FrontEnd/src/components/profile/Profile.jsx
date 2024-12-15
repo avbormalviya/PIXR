@@ -25,6 +25,7 @@ import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import LayersRoundedIcon from '@mui/icons-material/LayersRounded';
 import { FeedDetails } from "../feedDetailes/FeedDetails"
+import { Img } from "../img/Img"
 
 export const Profile = () => {
 
@@ -252,7 +253,7 @@ export const Profile = () => {
                                         !loading && userPosts?.length > 0 ?
                                             userPosts.map((post) => (
                                                 <div key={post._id} className={style.img_holder} onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: post._id, feedType: "post" })}>
-                                                    <img src={post.postFiles[0]} alt="" />
+                                                    <Img url={post.postFiles[0]} alt="" />
                                                     {post.postFiles.length > 1 && (
                                                         <LayersRoundedIcon fontSize="large" style={{ position: "absolute", top: "10px", right: "10px", color: "white", filter: "drop-shadow(2px 4px 6px black)" }} />
                                                     )}
@@ -284,7 +285,7 @@ export const Profile = () => {
                                         !loading && userReels?.length > 0 && reelsThumbnails?.length > 0 ?
                                             userReels?.map((reel, index) => (
                                                 <div key={reel._id} className={style.img_holder} onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: reel._id, feedType: "reel" })}>
-                                                    <img src={ reelsThumbnails[index] } alt="" />
+                                                    <Img url={ reelsThumbnails[index] } alt="" />
                                                     <div className={style.reel_views}>
                                                         <PlayArrowRoundedIcon fontSize="large" />
                                                         <h1>{reel.viewCount}</h1>

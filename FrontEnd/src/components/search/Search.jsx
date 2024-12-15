@@ -14,6 +14,7 @@ import { createThumbnail } from "../../utils/createThumbnail"
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import { searchUser } from "../../utils/searchUser"
 import { FeedDetails } from "../feedDetailes/FeedDetails"
+import { Img } from "../img/Img"
 
 export const Search = () => {
     const navigate = useNavigate();
@@ -121,9 +122,9 @@ export const Search = () => {
                 <ImageList variant="masonry" cols={3} gap={5}>
                     {[...feeds].reverse().map((item) => (
                         <ImageListItem key={item.img}>
-                            <img
+                            <Img
                                 style={{ width: "100%", borderRadius: "2em" }}
-                                src={item.file.startsWith("https://") ? item.file : item.file.startsWith("data:") ? item.file : `https://${item.file.split("://")[1]}`}
+                                url={item.file.startsWith("https://") ? item.file : item.file.startsWith("data:") ? item.file : `https://${item.file.split("://")[1]}`}
                                 alt={item.title}
                                 onClick={() => setIsFeedOpen({ isFeedOpen: true, feedId: item._id, feedType: item.type })}
                             />

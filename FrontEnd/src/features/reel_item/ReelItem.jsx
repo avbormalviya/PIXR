@@ -10,6 +10,7 @@ import { Comment } from "../comment/Comment";
 import { DrawerButton } from "../../components/drawer/Drawer";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Img } from "../../components/img/Img";
 
 export const ReelItem = ({ reel, isMute, setIsMute }) => {
 
@@ -305,7 +306,7 @@ export const ReelItem = ({ reel, isMute, setIsMute }) => {
                             </div>
 
                             <div className={style.button_wrapper}>
-                                <img src={ thumbnail } alt="music" />
+                                <Img url={ thumbnail } alt="music" />
                             </div>
                             
                         </div>

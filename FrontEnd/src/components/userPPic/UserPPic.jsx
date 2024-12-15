@@ -1,6 +1,7 @@
 import style from "./userPPic.module.scss";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Img } from "../img/Img";
 
 const HollowArc = ({ percentage = 0, isGradient = false, radius = 50, strokeWidth = 2.5 }) => {
   const circumference = 2 * Math.PI * radius;
@@ -58,8 +59,8 @@ export const UserPPic = ({
       onClick={() => navigate(`/memoir/${userName}`)}
     >
       <HollowArc percentage={100} isGradient={isRing} />
-      <img
-        src={profilePic}
+      <Img
+        url={profilePic}
         alt="profile-pic"
       />
     </div>

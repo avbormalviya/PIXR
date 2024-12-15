@@ -68,7 +68,7 @@ export const Navbar = () => {
             setActiveIndex(newIndex);
         } 
         else {
-            currentPath.includes("/create") ? setActiveIndex(5) : currentPath.includes("/settings") ? setActiveIndex(6) : setActiveIndex(1);
+            currentPath.includes("/create") ? setActiveIndex(5) : currentPath.includes("/settings") ? setActiveIndex(6) : setActiveIndex(0);
         }
     }, [location.pathname, isVertical, user]);
 

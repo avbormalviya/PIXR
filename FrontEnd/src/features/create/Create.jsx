@@ -12,6 +12,7 @@ import style from './create.module.scss'
 import { ImageCropper } from '../cropper/Cropper'
 import { addReel } from '../../utils/addReel'
 import { createThumbnail } from '../../utils/createThumbnail'
+import { Img } from '../../components/img/Img'
 
 export const Create = () => {
 
@@ -242,7 +243,7 @@ export const Create = () => {
                         { media?.length > 0 ?
                             (
                                 media[mediaIndex]?.type === 'image' ? (
-                                    <img className={style.overViewMedia} src={media[mediaIndex]?.url} alt="media" />
+                                    <Img className={style.overViewMedia} url={media[mediaIndex]?.url} alt="media" />
                                 ) : (
                                     <video className={style.overViewMedia} src={media[mediaIndex]?.url} autoPlay loop />
                                 )
@@ -331,7 +332,7 @@ export const Create = () => {
                                                 animate={ mediaIndex === index ? "active" : "inactive"}
                                                 exit="exit"
                                             >
-                                                <img src={media.thumbnail} alt="" />
+                                                <Img url={media.thumbnail} alt="" />
                                                 <span onClick={(e) => handleMediaRemove(e, index)} className="material-symbols-rounded">remove</span>
                                                 <i className="material-symbols-rounded">{ media.type === 'image' ? 'image' : media.type === 'video' ? 'videocam' : 'dangerous' }</i>
                                             </motion.div>

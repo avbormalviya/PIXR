@@ -5,8 +5,17 @@ export const Img = ({ url, alt, ...props }) => {
     const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
 
     const generateImageUrls = (baseUrl) => {
-        const lowQualityUrl = baseUrl?.replace('/upload/', '/upload/e_blur:200,q_10,w_auto/');
-        const highQualityUrl = baseUrl?.replace('/upload/', '/upload/q_auto,f_auto/');
+
+        let lowQualityUrl, highQualityUrl;
+
+        try {
+            lowQualityUrl = baseUrl?.replace('/upload/', '/upload/e_blur:200,q_10,w_auto/');
+            highQualityUrl = baseUrl?.replace('/upload/', '/upload/q_auto,f_auto/');
+        } catch (error) {
+            lowQualityUrl = baseUrl;
+            highQualityUrl = baseUrl;
+        }
+
         return { lowQualityUrl, highQualityUrl };
     };
 

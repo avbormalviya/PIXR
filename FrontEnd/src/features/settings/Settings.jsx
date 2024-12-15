@@ -267,7 +267,7 @@ export const Settings = () => {
                             <div className={style.account_item}>
                                 <h1>Profile Picture</h1>
                                 <div className={style.wrapper}>
-                                    <img src={account.profilePic} alt="Profile Picture" />
+                                    <Img url={account.profilePic} alt="Profile Picture" />
                                     <button onClick={() => document.querySelector("input[type=file]").click()}>Change</button>
                                     <input type="file" accept="image/*" onChange={(e) => handleImageChange(e)} />
                                 </div>
