@@ -135,16 +135,10 @@ const verifyEmail = asyncHandler( async (req, res) => {
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
 
-    const options = {
-        httpOnly: true,
-        sameSite: "none",
-        secure: true
-    }
-
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions.accessToken)
+        .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
         .json(
             new ApiResponse(200, user, "User verified successfully")
         )
@@ -239,12 +233,6 @@ const logoutUser = asyncHandler( async (req, res) => {
         }
     )
 
-    const options = {
-        httpOnly: true,
-        sameSite: "none",
-        secure: true
-    }
-
     res
         .status(200)
         .clearCookie("accessToken", cookieOptions.removeCookieOptions)
@@ -279,15 +267,10 @@ const refreshAccessToken = asyncHandler( async (req, res) => {
     user.refreshToken = newRefreshToken;
     user.save({ validateBeforeSave: false });
 
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
-
     res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions.accessToken)
+        .cookie("refreshToken", newRefreshToken, cookieOptions.refreshToken)
         .json(
             new ApiResponse(200, user, "Refresh access token successful")
         )
