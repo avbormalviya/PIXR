@@ -42,24 +42,23 @@ export const VideoCall = () => {
         }
     }, [location, navigate]);
 
+
     useEffect(() => {
         console.log("localStream", localStream);
         console.log("localVideoRef", localVideoRef);
         console.log("remoteVideoRef", remoteVideoRef);
         console.log(localVideoRef.current && localStream);
-        if (localVideoRef.current && localStream) {
-            console.log("localStream", localStream);
+        if (localStream && localVideoRef.current) {
             localVideoRef.current.srcObject = localStream;
         }
     }, [localStream]);
-    
 
     useEffect(() => {
-        if (remoteVideoRef.current && remoteStream) {
+        if (remoteStream && remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [remoteStream]);
-    
+
 
     const toggleCamera = () => {
         const videoTrack = localStream?.getVideoTracks()[0];
