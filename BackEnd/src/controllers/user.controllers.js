@@ -193,8 +193,10 @@ const loginUser = asyncHandler( async (req, res) => {
     const options = {
         httpOnly: true,
         sameSite: "none",
-        secure: true
-    }
+        secure: true,
+        domain: "pixr.vercel.app",
+    };
+    
 
     return res
         .status(200)
