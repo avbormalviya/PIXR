@@ -56,22 +56,29 @@ export const VideoCall = () => {
     }, [remoteStream]);
 
 
-    const toggleCamera = () => {
-        const videoTrack = localStream?.getVideoTracks()[0];
-        if (videoTrack) {
-            videoTrack.enabled = !videoTrack.enabled;
-            setIsLocalCameraOn(videoTrack.enabled);
-            emit("toggleCamera", { to: chatUser?._id, enabled: videoTrack.enabled });
+    useEffect(() => {
+        if (localStream && localVideoRef.current) {
+            localVideoRef.current.srcObject = localStream;
+
+            localVideoRef.current.onloadedmetadata = () => {
+                localVideoRef.current.play().catch((error) => {
+                    console.error("Failed to play video:", error);
+                });
+            };
         }
-    };
+    }, [localStream]);
     
-    const toggleMicrophone = () => {
-        const audioTrack = localStream?.getAudioTracks()[0];
-        if (audioTrack) {
-            audioTrack.enabled = !audioTrack.enabled;
-            setIsLocalMicOn(audioTrack.enabled);
+    useEffect(() => {
+        if (remoteStream && remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = remoteStream;
+
+            remoteVideoRef.current.onloadedmetadata = () => {
+                remoteVideoRef.current.play().catch((error) => {
+                    console.error("Failed to play video:", error);
+                });
+            };
         }
-    };
+    }, [remoteStream]);
     
 
     return (
