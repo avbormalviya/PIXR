@@ -106,7 +106,7 @@ export const PeerProvider = ({ children }) => {
         const handleCallAccepted = () => {
             setIsCallAccepted(true);
             startPeerConnection(calleeId);
-            setIsCalling(false);
+            setCalling(false);
             stopAudio(incomingCallRef);
             stopAudio(outgoingCallRef);
         };
