@@ -1517,7 +1517,7 @@ const addLike = asyncHandler(async (req, res) => {
         await deleteNotification(
             req.user._id,
             target[targetField],
-            `unliked your ${likeType}`,
+            `liked your ${likeType}`,
             thumbnail
         );
 

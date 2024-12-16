@@ -34,7 +34,9 @@ const deleteNotification = async (sender, receiver, message, thumbnail) => {
             receiver,
             message,
             thumbnail
-        });        
+        });
+
+        return true;
     } catch (error) {
         console.error("Error deleting notification:", error);        
     }
