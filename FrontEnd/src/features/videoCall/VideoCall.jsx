@@ -42,24 +42,20 @@ export const VideoCall = () => {
         }
     }, [location, navigate]);
 
-    // Attach local video stream to video element
     useEffect(() => {
         if (localVideoRef.current && localStream) {
             localVideoRef.current.srcObject = localStream;
 
             const videoTrack = localStream.getVideoTracks()[0];
-            if (videoTrack) videoTrack.enabled = false; // Start with the camera off
+            if (videoTrack) videoTrack.enabled = false;
         }
     }, [localStream]);
 
-    // Attach remote video stream to video element
     useEffect(() => {
         if (remoteVideoRef.current && remoteStream) {
             remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [remoteStream]);
-
-    // Toggle local camera
     const toggleCamera = () => {
         const videoTrack = localStream?.getVideoTracks()[0];
         if (videoTrack) {
@@ -69,7 +65,6 @@ export const VideoCall = () => {
         }
     };
 
-    // Toggle local microphone
     const toggleMicrophone = () => {
         const audioTrack = localStream?.getAudioTracks()[0];
         if (audioTrack) {

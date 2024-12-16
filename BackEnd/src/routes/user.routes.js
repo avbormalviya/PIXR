@@ -41,7 +41,8 @@ import {
     getExploreFeeds,
     getUserAccount,
     updateAccount,
-    getFeed
+    getFeed,
+    addReport
 
 } from "../controllers/user.controllers.js";
 
@@ -237,6 +238,11 @@ router.route("/updateAccount").post(
 router.route("/getFeed/:feedId/:feedType").get(
     verifyJWT,
     getFeed
+);
+
+router.route("/addReport").post(
+    verifyJWT,
+    addReport
 );
 
 export default router;

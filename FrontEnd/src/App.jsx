@@ -8,8 +8,7 @@ import { Loader } from "./features/statusSlice/loader/Loader"
 
 import { PeerProvider } from "./context/PeerContext"
 import { SocketProvider } from "./context/SocketContext"
-
-
+import { useEffect } from "react"
 
 document.body.classList.toggle('dark-theme', localStorage.getItem('theme') === 'dark');
 

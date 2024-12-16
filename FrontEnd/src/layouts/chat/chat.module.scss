@@ -133,6 +133,19 @@
                         background-color: var(--background-ternary);
                     }
                 }
+
+                .date_divider {
+                    padding: 1em;
+
+                    background-color: var(--background-secondary);
+                    border-radius: 10px;
+
+                    font-size: 1.2em;
+                    color: var(--secondary-color);
+                    font-weight: 500;
+
+                    align-self: center;
+                }
             }
 
             .lobby_footer {

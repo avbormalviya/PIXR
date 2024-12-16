@@ -14,14 +14,14 @@ import { useSocket } from "../../context/SocketContext"
 
 import { useNavigate } from "react-router-dom";
 
-import { format } from 'date-fns';
-
 import { usePeerContext } from "../../context/PeerContext";
 
 import { useMediaQuery } from 'react-responsive';
 
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
+
+import { format, isToday, isYesterday } from 'date-fns';
 
 export const Chat = () => {
     const navigate = useNavigate();
@@ -44,6 +44,7 @@ export const Chat = () => {
     const [inputMessage, setInputMessage] = useState("");
 
     const [messages, setMessages] = useState([]);
+    const [groupedMessages, setGroupedMessages] = useState({});
 
     const [typing, setTyping] = useState({});
 
@@ -63,7 +64,6 @@ export const Chat = () => {
 
     useEffect(() => {
         on("receiveMessage", (data) => {
-            console.log(data);
             setMessages((prev) => [...prev, data]);
         })
 
@@ -89,8 +89,13 @@ export const Chat = () => {
         childRefs.current[activeSection].current.style.maxHeight = childrenLength ? (childrenLength * 65) + ((childrenLength - 1) * 10) + 20 + "px" : "0"; 
     }, [childRefs, activeSection]);
 
+    useEffect(() => {
+        setGroupedMessages(groupMessagesByDate(messages));
+    }, [messages]);
+
 
     const handleSendMessage = async () => {
+        setIsEmojiOpen(false);
         await sendMessage(chat._id, inputMessage);
         setInputMessage("");
     };
@@ -126,15 +131,25 @@ export const Chat = () => {
 
     const groupMessagesByDate = (messages) => {
         return messages.reduce((groups, message) => {
-            const dateKey = format(new Date(message.createdAt), 'yyyy-MM-dd'); // Extract date as YYYY-MM-DD
+            const messageDate = new Date(message.createdAt);
+
+            let dateKey;
+            if (isToday(messageDate)) {
+                dateKey = "Today";
+            } else if (isYesterday(messageDate)) {
+                dateKey = "Yesterday";
+            } else {
+                dateKey = format(messageDate, 'dd MMM yyyy');
+            }
+
             if (!groups[dateKey]) {
                 groups[dateKey] = [];
             }
+
             groups[dateKey].push(message);
             return groups;
         }, {});
     };
-    
 
     const animations = {
         hover: { cursor: "grab" },
@@ -188,7 +203,7 @@ export const Chat = () => {
                     
                     <section className={style.lobby_messages_wrapper}>
                         
-                        <AnimatePresence >
+                        <AnimatePresence>
                             {
                                 typing.typing && (
                                     <motion.div
@@ -238,32 +253,45 @@ export const Chat = () => {
                                 )
                             }
 
-                            {[...messages].reverse()?.map((message, index) => {
-                                const isMyMessage = message?.sender === user._id;
-                                return (
-                                    <motion.div
-                                        key={index}
-                                        className={isMyMessage ? style.mySide_chat : style.otherSide_chat}
-                                        initial="hidden"
-                                        animate="visible"
-                                        exit="exit"
-                                        variants={messageVariants}
-                                        transition={{
-                                            duration: 0.3,
-                                            layout: { type: "spring", stiffness: 300, damping: 30 }
-                                        }}
-                                        layout
-                                    >
-                                        {!isMyMessage && <Img url={chatUser?.profilePic} />}
-                                        <div className={style.chat_message}>
-                                            {message.content}
-                                        </div>
-                                        <div className={style.chat_time}>
-                                            {format(new Date(message.createdAt), 'h:mm a')}
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
+                            
+                            {
+                                Object.keys(groupedMessages).reverse().map((date, dateIndex) => (
+                                    <>
+                                        {groupedMessages[date].reverse().map((message, messageIndex) => {
+                                            const isMyMessage = message?.sender === user._id;
+
+                                            return (
+                                                <motion.div
+                                                    key={messageIndex}
+                                                    className={isMyMessage ? style.mySide_chat : style.otherSide_chat}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                    exit="exit"
+                                                    variants={messageVariants}
+                                                    transition={{
+                                                    duration: 0.3,
+                                                    layout: { type: "spring", stiffness: 300, damping: 30 },
+                                                }}
+                                                    layout
+                                                >
+                                                    {!isMyMessage && <Img url={chatUser?.profilePic} />}
+
+                                                    <div className={style.chat_message}>
+                                                        {message.content}
+                                                    </div>
+
+                                                    <div className={style.chat_time}>
+                                                        {format(new Date(message.createdAt), 'h:mm a')}
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
+
+                                        <div className={style.date_divider}>{date}</div>
+                                    </>
+                                ))
+                            }
+
                         </AnimatePresence>
                     </section>
 

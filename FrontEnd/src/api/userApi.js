@@ -268,6 +268,14 @@ export const userApi = createApi({
             }),
         }),
 
+        addReport: builder.mutation({
+            query: (data) => ({
+                url: "addReport",
+                method: "POST",
+                body: data
+            })
+        }),
+
     })
 })
 

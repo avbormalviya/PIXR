@@ -6,8 +6,6 @@ import { ApiError } from "../utils/ApiError.js";
 export const verifyJWTSocket = async (socket, next) => {
     try {
         const cookieHeader = socket.handshake.headers.cookie;
-        console.log("Cookie Header:", cookieHeader);
-        console.error("Cookie Header:", cookieHeader);
 
         if (!cookieHeader) throw new ApiError(401, "No token provided. Unauthorized access");
 
@@ -27,7 +25,6 @@ export const verifyJWTSocket = async (socket, next) => {
         next();
 
     } catch (error) {
-        console.error("Error verifying JWT:", error);
         next(new Error("Invalid or expired token. Unauthorized access"));
     }
 };

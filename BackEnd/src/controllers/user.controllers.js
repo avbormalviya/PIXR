@@ -16,6 +16,7 @@ import { Reel } from "../models/reel.model.js";
 import { View } from "../models/view.model.js";
 import { Save } from "../models/bookmark.model.js";
 import { Comment } from "../models/comment.model.js";
+import { Report } from "../models/report.model.js";
 
 const cookieOptions = {
     accessToken: {
@@ -2083,6 +2084,21 @@ const getFeed = asyncHandler(async (req, res) => {
 })
 
 
+const addReport = asyncHandler(async (req, res) => {
+    const { message } = req.body;
+
+    if (!message) {
+        throw new ApiError(400, "Message is required");
+    }
+
+    const report = await Report.create({ reportBy: req.user._id, report: message });
+
+    res.status(200).json(
+        new ApiResponse(200, report, "Report added successfully")
+    )   
+})
+
+
 export {
     registerUser,
     verifyEmail,
@@ -2121,5 +2137,6 @@ export {
     getExploreFeeds,
     getUserAccount,
     updateAccount,
-    getFeed
+    getFeed,
+    addReport
 }

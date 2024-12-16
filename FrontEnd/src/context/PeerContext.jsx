@@ -28,7 +28,7 @@ export const PeerProvider = ({ children }) => {
     const playAudio = (ref, url) => {
         ref.current = new Audio(url);
         ref.current.loop = true;
-        ref.current.play();
+        ref.current?.play().catch(error => console.error("Failed to play audio:", error));
     };
 
     const stopAudio = (ref) => {
@@ -44,7 +44,7 @@ export const PeerProvider = ({ children }) => {
         setCalling(true);
         setInitiator(true);
         emit("call-request", { to: chatUserId });
-        playAudio(outgoingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1730713911/vtdhgrhgitdemfpmkimt.mp3");
+        playAudio(outgoingCallRef, "../assets/call.mp3");
     };
 
     const acceptCall = () => {
@@ -96,7 +96,7 @@ export const PeerProvider = ({ children }) => {
             setIncomingCall(true);
             setCallerId(from._id);
             navigate(`/chat/call/${from._id}`, { state: { user: from } });
-            playAudio(incomingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1730713911/wnhhv0ibzbeqg44wmhfd.mp3");
+            playAudio(incomingCallRef, "../assets/call.mp3");
         };
 
         const handleSignal = ({ data }) => {

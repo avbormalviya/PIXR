@@ -15,6 +15,7 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import { ImageCropper } from "../cropper/Cropper";
 import { FeedDetails } from "../../components/feedDetailes/FeedDetails";
 import { Img } from "../../components/img/Img";
+import { addReport } from "../../utils/addReport";
 
 export const Settings = () => {
     const navigate = useNavigate();
@@ -32,6 +33,7 @@ export const Settings = () => {
     const [showCrop, setShowCrop] = useState(false);
     const [croppedImage, setCroppedImage] = useState(null);
     const [theme, setTheme] = useState(localStorage.getItem("theme") === "dark");
+    const [report, setReport] = useState("");
 
     const [isFeedOpen, setIsFeedOpen] = useState({})
 
@@ -72,7 +74,7 @@ export const Settings = () => {
         setShowButton(true);
     }, [account]);
 
-    const items = ["Account", "Saved", "Theme", "Help", "Private Policy", "Logout", "Delete Account"]
+    const items = ["Account", "Saved", "Theme", "Help", "Private Policy", "Report", "Logout", "Delete Account"]
 
     const handleSettingsOpen = (item) => {
         if (["Theme", "Logout", "Delete Account"].includes(item)) return;
@@ -112,6 +114,11 @@ export const Settings = () => {
         setAccount({ ...account, profilePic: src });
         setCroppedImage(file);
         setShowCrop(false);
+    }
+
+    const handleReport = async () => {
+        await addReport({ report });
+        navigate(-1);
     }
 
     return (
@@ -426,6 +433,24 @@ export const Settings = () => {
                                     </div>
                                 )
                             }
+                        </section>
+                    )
+                }
+
+                {
+                    type === "report" && (
+                        <section className={style.container}>
+                            <section style={{ marginBottom: "1em" }} className={style.account_item}>
+                                <textarea value={report} onChange={(e) => setReport(e.target.value)} placeholder="Reason for report" />
+                                {
+                                    report && (
+                                        <div className={style.accountButtons}>
+                                            <button onClick={handleReport}>Report</button>
+                                            <button onClick={() => navigate(-1)}>Cancel</button>
+                                        </div>
+                                    )
+                                }
+                            </section>
                         </section>
                     )
                 }
