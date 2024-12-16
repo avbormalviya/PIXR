@@ -73,7 +73,6 @@ export const PeerProvider = ({ children }) => {
     const startPeerConnection = async (user) => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            console.log(stream);
             setLocalStream(stream);
 
             const newPeer = new SimplePeer({
