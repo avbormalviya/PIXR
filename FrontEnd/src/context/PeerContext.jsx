@@ -44,7 +44,7 @@ export const PeerProvider = ({ children }) => {
         setCalling(true);
         setInitiator(true);
         emit("call-request", { to: chatUserId });
-        playAudio(outgoingCallRef, "../assets/call.mp3");
+        playAudio(outgoingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374513/duo_ringtone_tehbgk.mp3");
     };
 
     const acceptCall = () => {
@@ -96,7 +96,7 @@ export const PeerProvider = ({ children }) => {
             setIncomingCall(true);
             setCallerId(from._id);
             navigate(`/chat/call/${from._id}`, { state: { user: from } });
-            playAudio(incomingCallRef, "../assets/call.mp3");
+            playAudio(incomingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374515/google_duo_sj9euw.mp3");
         };
 
         const handleSignal = ({ data }) => {
