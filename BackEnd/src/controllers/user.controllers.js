@@ -10,7 +10,7 @@ import { sendVerificationEmail } from "../utils/mails.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import { Like } from "../models/like.model.js";
-import { createNotification } from "../events/notification.js";
+import { createNotification, deleteNotification } from "../events/notification.js";
 import { Notification } from "../models/notification.model.js";
 import { Reel } from "../models/reel.model.js";
 import { View } from "../models/view.model.js";
@@ -1513,6 +1513,13 @@ const addLike = asyncHandler(async (req, res) => {
 
     if (existingLike) {
         await Like.deleteOne({ _id: existingLike._id });
+
+        await deleteNotification(
+            req.user._id,
+            target[targetField],
+            `unliked your ${likeType}`,
+            thumbnail
+        );
 
         return res.status(200).json(
             new ApiResponse(200, existingLike, "Unliked successfully")

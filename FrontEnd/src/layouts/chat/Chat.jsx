@@ -130,6 +130,7 @@ export const Chat = () => {
     }
 
     const groupMessagesByDate = (messages) => {
+        if (!messages.length) return {};
         return messages.reduce((groups, message) => {
             const messageDate = new Date(message.createdAt);
 
