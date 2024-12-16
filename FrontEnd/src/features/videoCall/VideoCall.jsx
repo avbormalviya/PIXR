@@ -44,8 +44,9 @@ export const VideoCall = () => {
 
     useEffect(() => {
         console.log("localStream", localStream);
-        console.log("remoteStream", remoteStream);
         console.log("localVideoRef", localVideoRef);
+        console.log("remoteVideoRef", remoteVideoRef);
+        console.log(localVideoRef.current && localStream);
         if (localVideoRef.current && localStream) {
             console.log("localStream", localStream);
             localVideoRef.current.srcObject = localStream;
@@ -95,7 +96,7 @@ export const VideoCall = () => {
             {!calling && !incomingCall && (
                 <div className={style.local_video_wrapper}>
                     <div className={style.local_video_holder}>
-                        <video className={style.local_video} ref={localVideoRef} autoPlay playsInline muted />
+                        <video className={style.local_video} ref={localVideoRef} autoPlay playsInline />
 
                         {!isLocalCameraOn && (
                             <div className={style.local_video_overlay}>
