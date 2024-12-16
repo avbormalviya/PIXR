@@ -29,12 +29,12 @@ const createNotification = async (io, sender, receiver, message, thumbnail) => {
 
 const deleteNotification = async (sender, receiver, message, thumbnail) => {
     try {
-        await Notification.findOneAndDelete(
-            {sender},
-            {receiver},
-            {message},
-            {thumbnail}
-        )
+        await Notification.findOneAndDelete({
+            sender,
+            receiver,
+            message,
+            thumbnail
+        });        
     } catch (error) {
         console.error("Error deleting notification:", error);        
     }
