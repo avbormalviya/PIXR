@@ -81,6 +81,24 @@ export const VideoCall = () => {
     }, [remoteStream]);
     
 
+    const toggleCamera = () => {
+        const videoTrack = localStream?.getVideoTracks()[0];
+        if (videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            setIsLocalCameraOn(videoTrack.enabled);
+            emit("toggleCamera", { to: chatUser?._id, enabled: videoTrack.enabled });
+        }
+    };
+    
+    const toggleMicrophone = () => {
+        const audioTrack = localStream?.getAudioTracks()[0];
+        if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            setIsLocalMicOn(audioTrack.enabled);
+        }
+    };
+    
+
     return (
         <section className={style.video_call}>
             <div className={style.remote_video_wrapper}>
