@@ -17,6 +17,32 @@ import { View } from "../models/view.model.js";
 import { Save } from "../models/bookmark.model.js";
 import { Comment } from "../models/comment.model.js";
 
+const cookieOptions = {
+    accessToken: {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        domain: "pixr-backend.onrender.com",
+        maxAge: process.env.ACCESS_TOKEN_EXPIRY
+    },
+
+    refreshToken: {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        domain: "pixr-backend.onrender.com",
+        maxAge: process.env.REFRESH_TOKEN_EXPIRY
+    },
+    
+    removeCookieOptions: {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        domain: "pixr-backend.onrender.com",
+        path: "/",
+    }
+}
+
 const generateAccessAndRefreshToken = async (user_id) => {
     try {
         const user = await User.findById(user_id);
@@ -190,18 +216,10 @@ const loginUser = asyncHandler( async (req, res) => {
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
 
-    const options = {
-        httpOnly: true,
-        sameSite: "none",
-        secure: true,
-        // domain: "pixr-six.vercel.app",
-    };
-    
-
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions.accessToken)
+        .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
         .json(
             new ApiResponse(200, user, "Login successful")
         )
@@ -223,13 +241,14 @@ const logoutUser = asyncHandler( async (req, res) => {
 
     const options = {
         httpOnly: true,
+        sameSite: "none",
         secure: true
     }
 
     res
         .status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", cookieOptions.removeCookieOptions)
+        .clearCookie("refreshToken", cookieOptions.removeCookieOptions)
         .json(
             new ApiResponse(200, null, "Logout successful")
         )
