@@ -194,7 +194,7 @@ const loginUser = asyncHandler( async (req, res) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        domain: "pixr.vercel.app",
+        domain: "pixr-six.vercel.app",
     };
     
 
