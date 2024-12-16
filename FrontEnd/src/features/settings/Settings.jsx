@@ -117,7 +117,7 @@ export const Settings = () => {
     }
 
     const handleReport = async () => {
-        await addReport({ report });
+        await addReport({ message: report });
         navigate(-1);
     }
 
