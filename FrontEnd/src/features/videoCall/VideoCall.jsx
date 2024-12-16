@@ -43,8 +43,8 @@ export const VideoCall = () => {
     }, [location, navigate]);
 
     useEffect(() => {
-        console.log("localStream", localStream);
         if (localVideoRef.current && localStream) {
+            console.log("localStream", localStream);
             localVideoRef.current.srcObject = localStream;
         }
     }, [localStream]);
