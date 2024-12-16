@@ -45,15 +45,23 @@ export const VideoCall = () => {
 
     useEffect(() => {
         console.log("localStream", localStream);
+        console.log("remoteStream", remoteStream);
         console.log("localVideoRef", localVideoRef);
         console.log("remoteVideoRef", remoteVideoRef);
         console.log(localVideoRef.current && localStream);
+        console.log(remoteVideoRef.current && remoteStream);
         if (localStream && localVideoRef.current) {
             localVideoRef.current.srcObject = localStream;
         }
     }, [localStream]);
 
     useEffect(() => {
+        console.log("localStream", localStream);
+        console.log("remoteStream", remoteStream);
+        console.log("localVideoRef", localVideoRef);
+        console.log("remoteVideoRef", remoteVideoRef);
+        console.log(localVideoRef.current && localStream);
+        console.log(remoteVideoRef.current && remoteStream);
         if (remoteStream && remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = remoteStream;
         }
