@@ -10,11 +10,12 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
 
         if (!socketRef.current) {
-            socketRef.current = io("http://localhost:4000", {
+            socketRef.current = io("https://pixr-backend.onrender.com", {
                 withCredentials: true,
                 transports: ["websocket"],
-            },
-        )}
+            });
+        }
+        
 
         socketRef.current.on("connect", () => {
             console.log("Connected to socket server");
