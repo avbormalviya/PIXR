@@ -45,17 +45,17 @@ export const VideoCall = () => {
     useEffect(() => {
         if (localVideoRef.current && localStream) {
             localVideoRef.current.srcObject = localStream;
-
-            const videoTrack = localStream.getVideoTracks()[0];
-            if (videoTrack) videoTrack.enabled = false;
         }
     }, [localStream]);
+    
 
     useEffect(() => {
         if (remoteVideoRef.current && remoteStream) {
             remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [remoteStream]);
+    
+
     const toggleCamera = () => {
         const videoTrack = localStream?.getVideoTracks()[0];
         if (videoTrack) {
@@ -64,7 +64,7 @@ export const VideoCall = () => {
             emit("toggleCamera", { to: chatUser?._id, enabled: videoTrack.enabled });
         }
     };
-
+    
     const toggleMicrophone = () => {
         const audioTrack = localStream?.getAudioTracks()[0];
         if (audioTrack) {
@@ -72,6 +72,7 @@ export const VideoCall = () => {
             setIsLocalMicOn(audioTrack.enabled);
         }
     };
+    
 
     return (
         <section className={style.video_call}>
@@ -84,6 +85,7 @@ export const VideoCall = () => {
                         <h1>{chatUser.userName}</h1>
                     </div>
                 )}
+
             </div>
 
             {!calling && !incomingCall && (
