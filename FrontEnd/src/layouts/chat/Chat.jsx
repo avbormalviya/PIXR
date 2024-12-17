@@ -64,8 +64,35 @@ export const Chat = () => {
 
     useEffect(() => {
         on("receiveMessage", (data) => {
-            setMessages((prev) => [...prev, data]);
-        })
+            setGroupedMessages((prevGroupedMessages) => {
+                const newMessageDate = new Date(data.createdAt);
+        
+                let dateKey;
+                if (isToday(newMessageDate)) {
+                    dateKey = "Today";
+                } else if (isYesterday(newMessageDate)) {
+                    dateKey = "Yesterday";
+                } else {
+                    dateKey = format(newMessageDate, 'dd MMM yyyy');
+                }
+        
+                const updatedGroupedMessages = { ...prevGroupedMessages };
+        
+                if (!updatedGroupedMessages[dateKey]) {
+                    updatedGroupedMessages[dateKey] = [];
+                }
+        
+                updatedGroupedMessages[dateKey].unshift(data);
+        
+                const reversedGroupedMessages = {};
+                Object.keys(updatedGroupedMessages).forEach((key) => {
+                    reversedGroupedMessages[key] = updatedGroupedMessages[key];
+                });
+        
+                return reversedGroupedMessages;
+            });
+        });
+        
 
         on("typing", (data) => {
             setTyping({ typing: true, user: data });
@@ -89,10 +116,6 @@ export const Chat = () => {
         childRefs.current[activeSection].current.style.maxHeight = childrenLength ? (childrenLength * 65) + ((childrenLength - 1) * 10) + 20 + "px" : "0"; 
     }, [childRefs, activeSection]);
 
-    useEffect(() => {
-        setGroupedMessages(groupMessagesByDate(messages));
-    }, [messages]);
-
 
     const handleSendMessage = async () => {
         setIsEmojiOpen(false);
@@ -110,7 +133,7 @@ export const Chat = () => {
 
         setChat(result.data);
 
-        setMessages(result.data.messages);
+        setGroupedMessages(groupMessagesByDate(result.data.messages));
 
         emit("joinRoom", result.data._id);
     };
@@ -131,7 +154,7 @@ export const Chat = () => {
 
     const groupMessagesByDate = (messages) => {
         if (!messages.length) return {};
-        return messages.reduce((groups, message) => {
+        const grouped = messages.reduce((groups, message) => {
             const messageDate = new Date(message.createdAt);
 
             let dateKey;
@@ -150,7 +173,15 @@ export const Chat = () => {
             groups[dateKey].push(message);
             return groups;
         }, {});
+
+        const reversedGrouped = {};
+        Object.keys(grouped).reverse().forEach((key) => {
+            reversedGrouped[key] = grouped[key].reverse();
+        });
+
+        return reversedGrouped;
     };
+
 
     const animations = {
         hover: { cursor: "grab" },
@@ -256,9 +287,9 @@ export const Chat = () => {
 
                             
                             {
-                                Object.keys(groupedMessages).reverse().map((date, dateIndex) => (
+                                Object.keys(groupedMessages).map((date, dateIndex) => (
                                     <>
-                                        {groupedMessages[date].reverse().map((message, messageIndex) => {
+                                        {groupedMessages[date].map((message, messageIndex) => {
                                             const isMyMessage = message?.sender === user._id;
 
                                             return (
