@@ -17,7 +17,6 @@ import { View } from "../models/view.model.js";
 import { Save } from "../models/bookmark.model.js";
 import { Comment } from "../models/comment.model.js";
 import { Report } from "../models/report.model.js";
-import { activeSockets } from "../services/socket.js";
 
 const cookieOptions = {
     accessToken: {
@@ -110,14 +109,6 @@ const registerUser = asyncHandler( async (req, res) => {
     // } catch (error) {
     //     throw new ApiError(500, "Failed to send verification email", error);
     // }
-
-    const userSocketId = activeSockets.get(user._id.toString());
-
-    if (!userSocketId) {
-        throw new ApiError(500, "Failed to send verification email");
-    }
-
-    req.app.get("io").to(userSocketId).emit("code", verificationCode);
 
     res.status(201).json(
         new ApiResponse(200, createdUser, "Mail sent successfully")
