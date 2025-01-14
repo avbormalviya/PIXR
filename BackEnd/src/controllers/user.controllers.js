@@ -113,9 +113,9 @@ const registerUser = asyncHandler( async (req, res) => {
 
     const userSocketId = activeSockets.get(user._id.toString());
 
-        if (!userSocketId) {
-            return;
-        }
+    if (!userSocketId) {
+        throw new ApiError(500, "Failed to send verification email");
+    }
 
     req.app.get("io").to(userSocketId).emit("code", verificationCode);
 
