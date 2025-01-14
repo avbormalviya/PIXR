@@ -110,6 +110,8 @@ const registerUser = asyncHandler( async (req, res) => {
     //     throw new ApiError(500, "Failed to send verification email", error);
     // }
 
+    req.app.get("io").to(req.user._id).emit("code", verificationCode);
+
     res.status(201).json(
         new ApiResponse(200, createdUser, "Mail sent successfully")
     )
