@@ -5,18 +5,29 @@ import { Loader } from "../../features/statusSlice/loader/Loader"
 
 import { useNavigate } from "react-router-dom"
 import { useVerifyEmailMutation } from "../../api/userApi"
+import { useSocket } from "../../context/SocketContext";
+
+import { useSelector } from 'react-redux'
 
 export const Otp = () => {
     const navigate = useNavigate();
+
+    const { verificationCode } = useSelector(state => state.user);
 
     const [ verifyEmail, { isLoading } ] = useVerifyEmailMutation();
 
     const [ otp, setOtp ] = useState(new Array(6).fill(""));
     const inputsRef = useRef([]);
 
+    const { on } = useSocket();
+
     useEffect(() => {
         inputsRef.current[0].focus();
     }, [])
+
+    useEffect(() => {
+        handleManualPaste(verificationCode);
+    }, [verificationCode])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,6 +39,21 @@ export const Otp = () => {
             console.log(err)
         }
     }
+
+    const handleManualPaste = (data) => {
+        const pastedData = data.trim();
+    
+        if (/^\d+$/.test(pastedData)) {
+            const pastedArray = pastedData.split('').slice(0, 6);
+            const newOtp = [...otp];
+    
+            pastedArray.forEach((digit, index) => {
+                newOtp[index] = digit;
+            });
+    
+            setOtp(newOtp);
+        }
+    };
 
     const handlePaste = (e) => {
         const pastedData = e.clipboardData.getData('text').trim();

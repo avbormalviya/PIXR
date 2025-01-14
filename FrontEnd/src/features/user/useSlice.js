@@ -18,7 +18,9 @@ const initialState = {
 
     notification: false,
 
-    feedUpload: false
+    feedUpload: false,
+
+    verificationCode: "",
 }
 
 const userSlice = createSlice({
@@ -74,6 +76,10 @@ const userSlice = createSlice({
         setFeedUpload: (state, action) => {
             state.feedUpload = action.payload;
         },
+
+        setVerificationCode: (state, action) => {
+            state.verificationCode = action.payload;
+        }
     },
 });
 
@@ -89,7 +95,8 @@ export const {
     setMyMemoir,
     setMemoirLoading,
     setNotification,
-    setFeedUpload
+    setFeedUpload,
+    setVerificationCode,
 
 } = userSlice.actions;
 export default userSlice.reducer;

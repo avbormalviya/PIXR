@@ -6,12 +6,12 @@
     align-items: center;
     justify-content: center;
 
+    z-index: 100;
+
     .logo_Text {
         color: var(--text-primary-70);
         font-family: anurati, sans-serif;
         font-size: clamp(5em, 7vw, 10em);
     }
-
-    z-index: 100;
 }
 

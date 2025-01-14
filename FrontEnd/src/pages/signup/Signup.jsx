@@ -4,10 +4,14 @@ import style from "./signup.module.scss"
 import { useNavigate } from "react-router-dom"
 
 import { useRegisterUserMutation } from "../../api/userApi"
+import { useDispatch } from "react-redux"
 
+import { setVerificationCode } from "../../features/user/useSlice"
 
 export const SignUp = () => {
     const navigate = useNavigate();
+
+    const dispatch = useDispatch();
 
     const [registerUser, { isLoading }] = useRegisterUserMutation();
 
@@ -19,7 +23,8 @@ export const SignUp = () => {
         e.preventDefault();
 
         try {
-            await registerUser({ email, userName: username, password }).unwrap();
+            const { data } = await registerUser({ email, userName: username, password }).unwrap();
+            dispatch(setVerificationCode(data.verificationCode));
             navigate("/auth/signup/verifyEmail");
         } 
         catch (err) {
