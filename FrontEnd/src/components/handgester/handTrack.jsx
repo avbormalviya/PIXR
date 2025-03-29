@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera } from "@mediapipe/camera_utils";
 
-import { Hands } from "@mediapipe/hands";
-console.log("Loaded Hands:", Hands); // Should not be undefined
+import mpHands from "@mediapipe/hands";
+
+const Hands = mpHands.Hands; // Extract Hands from default export
+console.log("Loaded Hands:", Hands);
 
 
 const HandMouseControl = ({ showDisplay }) => {
