@@ -2,12 +2,12 @@
     "rewrites": [
       { "source": "/(.*)", "destination": "/index.html" }
     ],
-    "build": {
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "installCommand": "npm install",
-    "buildCommand": "npm run build",
-    "outputDirectory": "dist"
+    
+      "build": {
+        "env": {
+          "NODE_ENV": "production"
+        }
+      },
+      "installCommand": "npm install --force && npm install -g vite"
+
   }
