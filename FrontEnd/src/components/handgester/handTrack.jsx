@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Hands } from "@mediapipe/hands";
+import * as mpHands from "@mediapipe/hands";
+const Hands = mpHands.Hands;
+
 import { Camera } from "@mediapipe/camera_utils";
 
-console.log("Mediapipe Hands module:", Hands);
+console.log(window.Hands);
+console.log(import("@mediapipe/hands"));
+
 
 const HandMouseControl = ({ showDisplay }) => {
   const videoRef = useRef(null);
