@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Hands } from "@mediapipe/hands";
-
 import { Camera } from "@mediapipe/camera_utils";
 
-console.log(Hands);
+let Hands;
+
+import("@mediapipe/hands").then((mpHands) => {
+  Hands = mpHands.default?.Hands || mpHands.Hands;
+  console.log("Loaded Hands:", Hands);
+});
 
 const HandMouseControl = ({ showDisplay }) => {
   const videoRef = useRef(null);
@@ -23,6 +26,7 @@ const HandMouseControl = ({ showDisplay }) => {
   }, []);
 
   useEffect(() => {
+    if (!Hands) return;
     if (!deviceId) return;
 
     const hands = new Hands({
