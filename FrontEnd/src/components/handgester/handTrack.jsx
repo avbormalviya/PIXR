@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera } from "@mediapipe/camera_utils";
 
-import mpHands from "@mediapipe/hands";
+import * as mpHands from "@mediapipe/hands";
 
-const Hands = mpHands.Hands; // Extract Hands from default export
-console.log("Loaded Hands:", Hands);
-
+console.log("Mediapipe Hands Exports:", Object.keys(mpHands)); // List available exports
+console.log("Direct Hands:", mpHands.Hands);
+console.log("Default Hands:", mpHands.default?.Hands);
 
 const HandMouseControl = ({ showDisplay }) => {
   const videoRef = useRef(null);
