@@ -1,11 +1,13 @@
 {
     "rewrites": [
-        { "source": "/(.*)", "destination": "/index.html" }
+      { "source": "/(.*)", "destination": "/index.html" }
     ],
     "build": {
-        "env": {
+      "env": {
         "NODE_ENV": "production"
-        }
+      }
     },
-    "installCommand": "npm install --force"
-}
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist"
+  }
