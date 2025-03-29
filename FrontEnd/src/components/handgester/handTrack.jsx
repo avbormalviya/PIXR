@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Camera } from "@mediapipe/camera_utils";
+import * as camUtils from "@mediapipe/camera_utils";
 
 import * as mpHands from "@mediapipe/hands";
 
-console.log("Mediapipe Hands Exports:", Object.keys(mpHands)); // List available exports
-console.log("Direct Hands:", mpHands.Hands);
-console.log("Default Hands:", mpHands.default?.Hands);
 
 const HandMouseControl = ({ showDisplay }) => {
   const videoRef = useRef(null);
@@ -25,10 +22,10 @@ const HandMouseControl = ({ showDisplay }) => {
   }, []);
 
   useEffect(() => {
-    if (!Hands) return;
+    if (!mpHands.Hands) return;
     if (!deviceId) return;
 
-    const hands = new Hands({
+    const hands = new mpHands.Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@latest/${file}`,
     });
 
@@ -83,7 +80,7 @@ const HandMouseControl = ({ showDisplay }) => {
           videoRef.current.srcObject = stream;
         }
 
-        const camera = new Camera(videoRef.current, {
+        const camera = new camUtils.Camera(videoRef.current, {
           onFrame: async () => {
             if (isMounted && handsRef.current) {
               await handsRef.current.send({ image: videoRef.current });
@@ -92,6 +89,7 @@ const HandMouseControl = ({ showDisplay }) => {
           width: 640,
           height: 480,
         });
+
 
         camera.start();
       })
