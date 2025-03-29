@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Hands } from "@mediapipe/hands";
 import { Camera } from "@mediapipe/camera_utils";
 
 const HandMouseControl = ({ showDisplay }) => {
@@ -12,6 +11,8 @@ const HandMouseControl = ({ showDisplay }) => {
   const lastScrollY = useRef(null);
   const isClickingAllowed = useRef(true);
 
+  let isMounted = useRef(true);
+
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       const videoDevices = devices.filter((device) => device.kind === "videoinput");
@@ -20,76 +21,81 @@ const HandMouseControl = ({ showDisplay }) => {
   }, []);
 
   useEffect(() => {
-    if (!deviceId) return;
+    (async () => {
+      const { Hands } = await import("@mediapipe/hands");
 
-    const hands = new Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@latest/${file}`,
-    });
+      if (!deviceId) return;
 
-    hands.setOptions({
-      maxNumHands: 1,
-      minDetectionConfidence: 0.7,
-      minTrackingConfidence: 0.7,
-      modelComplexity: 1,
-    });
+      const hands = new Hands({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@latest/${file}`,
+      });
 
-    handsRef.current = hands; // Store hands instance
+      hands.setOptions({
+        maxNumHands: 1,
+        minDetectionConfidence: 0.7,
+        minTrackingConfidence: 0.7,
+        modelComplexity: 1,
+      });
 
-    hands.onResults((results) => {
-      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) return;
+      handsRef.current = hands; // Store hands instance
 
-      const landmarks = results.multiHandLandmarks[0];
-      const indexFingerTip = landmarks[8]; // Index finger tip
-      const thumbTip = landmarks[4]; // Thumb tip
-      const middleTip = landmarks[12]; // Middle finger tip
-      const middleMCP = landmarks[9]; // Middle finger base joint
+      hands.onResults((results) => {
+        if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) return;
 
-      // Calculate distance between thumb & index finger
-      const pinchDistance = Math.sqrt(
-        Math.pow(indexFingerTip.x - thumbTip.x, 2) +
-        Math.pow(indexFingerTip.y - thumbTip.y, 2)
-      );
+        const landmarks = results.multiHandLandmarks[0];
+        const indexFingerTip = landmarks[8]; // Index finger tip
+        const thumbTip = landmarks[4]; // Thumb tip
+        const middleTip = landmarks[12]; // Middle finger tip
+        const middleMCP = landmarks[9]; // Middle finger base joint
 
-      // Define pinch threshold (adjust if needed)
-      const PINCH_THRESHOLD = 0.02;
-      const isPinching = pinchDistance < PINCH_THRESHOLD;
+        // Calculate distance between thumb & index finger
+        const pinchDistance = Math.sqrt(
+          Math.pow(indexFingerTip.x - thumbTip.x, 2) +
+          Math.pow(indexFingerTip.y - thumbTip.y, 2)
+        );
 
-      let handX = window.innerWidth - indexFingerTip.x * window.innerWidth;
-      let handY = indexFingerTip.y * window.innerHeight;
-      moveCursor(handX, handY);
+        // Define pinch threshold (adjust if needed)
+        const PINCH_THRESHOLD = 0.02;
+        const isPinching = pinchDistance < PINCH_THRESHOLD;
 
-      // **Pinch Click Detection**
-      if (pinchDistance < 0.05 && isClickingAllowed.current) {
-        console.log("Click detected!");
-        simulateClick();
-      }
+        let handX = window.innerWidth - indexFingerTip.x * window.innerWidth;
+        let handY = indexFingerTip.y * window.innerHeight;
+        moveCursor(handX, handY);
 
-      console.log("✅ Hand detected!", landmarks);
-      detectScrollGesture(landmarks);
-    });
-
-
-    let isMounted = true;
-
-    navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
-      .then((stream) => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+        // **Pinch Click Detection**
+        if (pinchDistance < 0.05 && isClickingAllowed.current) {
+          console.log("Click detected!");
+          simulateClick();
         }
 
-        const camera = new Camera(videoRef.current, {
-          onFrame: async () => {
-            if (isMounted && handsRef.current) {
-              await handsRef.current.send({ image: videoRef.current });
-            }
-          },
-          width: 640,
-          height: 480,
-        });
+        console.log("✅ Hand detected!", landmarks);
+        detectScrollGesture(landmarks);
+      });
 
-        camera.start();
-      })
-      .catch((error) => console.error("Camera selection error:", error));
+
+      let isMounted = true;
+
+      navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
+        .then((stream) => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+
+          const camera = new Camera(videoRef.current, {
+            onFrame: async () => {
+              if (isMounted && handsRef.current) {
+                await handsRef.current.send({ image: videoRef.current });
+              }
+            },
+            width: 640,
+            height: 480,
+          });
+
+          camera.start();
+        })
+        .catch((error) => console.error("Camera selection error:", error));
+
+    })();
 
     return () => {
       isMounted = false;
