@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera } from "@mediapipe/camera_utils";
 
-let Hands = null; // Initialize Hands variable
-import("@mediapipe/hands").then((mpHands) => {
-  Hands = mpHands.Hands || mpHands.default?.Hands;
-  console.log("Loaded Hands:", Hands); // Should log a function/class
-});
+import { Hands } from "@mediapipe/hands";
+console.log("Loaded Hands:", Hands); // Should not be undefined
+
 
 const HandMouseControl = ({ showDisplay }) => {
   const videoRef = useRef(null);
