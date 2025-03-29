@@ -1,14 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const sass = await import('sass'); // ✅ Use dynamic import in ESM
+
 export default defineConfig({
     plugins: [react()],
     css: {
         preprocessorOptions: {
-          scss: {
-            // Enable the new Dart Sass API
-            implementation: require('sass'),
-          },
+            scss: {
+                implementation: sass.default, // ✅ Use `.default`
+            },
         },
     },
     base: '/',
