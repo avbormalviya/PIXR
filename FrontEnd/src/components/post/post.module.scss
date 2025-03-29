@@ -54,7 +54,7 @@
                 }
             }
         }
-        
+
         & > span {
             justify-self: end;
             font-weight: 300;
@@ -64,7 +64,7 @@
             font-size: 1.3em;
             font-weight: 200;
             grid-column: 1 / 3;
-        
+
             .text {
                 display: -webkit-box;
                 -webkit-box-orient: vertical;
@@ -76,12 +76,12 @@
             .fold {
                 max-height: 4em;
             }
-        
+
             .unfold {
                 max-height: 20em;
             }
         }
-        
+
 
         .view_comment_button {
             font-size: 1.2em;

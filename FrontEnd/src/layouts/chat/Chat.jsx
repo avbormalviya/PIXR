@@ -66,7 +66,7 @@ export const Chat = () => {
         on("receiveMessage", (data) => {
             setGroupedMessages((prevGroupedMessages) => {
                 const newMessageDate = new Date(data.createdAt);
-        
+
                 let dateKey;
                 if (isToday(newMessageDate)) {
                     dateKey = "Today";
@@ -75,24 +75,24 @@ export const Chat = () => {
                 } else {
                     dateKey = format(newMessageDate, 'dd MMM yyyy');
                 }
-        
+
                 const updatedGroupedMessages = { ...prevGroupedMessages };
-        
+
                 if (!updatedGroupedMessages[dateKey]) {
                     updatedGroupedMessages[dateKey] = [];
                 }
-        
+
                 updatedGroupedMessages[dateKey].unshift(data);
-        
+
                 const reversedGroupedMessages = {};
                 Object.keys(updatedGroupedMessages).forEach((key) => {
                     reversedGroupedMessages[key] = updatedGroupedMessages[key];
                 });
-        
+
                 return reversedGroupedMessages;
             });
         });
-        
+
 
         on("typing", (data) => {
             setTyping({ typing: true, user: data });
@@ -113,7 +113,7 @@ export const Chat = () => {
     useEffect(() => {
         const childrenLength = childRefs.current[activeSection]?.current?.children.length;
         if (!childRefs.current[activeSection]) return;
-        childRefs.current[activeSection].current.style.maxHeight = childrenLength ? (childrenLength * 65) + ((childrenLength - 1) * 10) + 20 + "px" : "0"; 
+        childRefs.current[activeSection].current.style.maxHeight = childrenLength ? (childrenLength * 65) + ((childrenLength - 1) * 10) + 20 + "px" : "0";
     }, [childRefs, activeSection]);
 
 
@@ -137,7 +137,7 @@ export const Chat = () => {
 
         emit("joinRoom", result.data._id);
     };
-    
+
     const handleTyping = () => {
         emit("typing", chat._id);
     }
@@ -218,23 +218,23 @@ export const Chat = () => {
                     {
                         !chat && (
                             <div className={style.lobby_illustration}>
-                                <Img url="https://res.cloudinary.com/dr6gycjza/image/upload/f_auto,q_auto/mot2vmwnhvnbryoyut02" />
+                                <img src="https://res-console.cloudinary.com/dr6gycjza/thumbnails/v1/image/upload/v1743242136/c2NyZWVuc2hvdC0xNzQzMjQxODQ2NTI1X18xXy1yZW1vdmViZy1wcmV2aWV3X3lkdDJtOQ==/preview" alt="illustration" />
                             </div>
-                        ) 
+                        )
                     }
 
-                    <NormalUserCard 
-                        styles={style.chat_header} 
+                    <NormalUserCard
+                        styles={style.chat_header}
                         userName={chatUser?.userName}
                         fullName={chatUser?.fullName}
-                        profilePic={chatUser?.profilePic} 
+                        profilePic={chatUser?.profilePic}
                         callButton={true}
                         event={handleCallButton}
                     />
 
-                    
+
                     <section className={style.lobby_messages_wrapper}>
-                        
+
                         <AnimatePresence>
                             {
                                 typing.typing && (
@@ -285,7 +285,7 @@ export const Chat = () => {
                                 )
                             }
 
-                            
+
                             {
                                 Object.keys(groupedMessages).map((date, dateIndex) => (
                                     <>
@@ -327,7 +327,7 @@ export const Chat = () => {
                         </AnimatePresence>
                     </section>
 
-                    
+
 
                     <footer className={style.lobby_footer}>
 
@@ -340,7 +340,7 @@ export const Chat = () => {
                                 )
                             }
                         </AnimatePresence>
-                        
+
                         {/* <span className="material-symbols-rounded">attach_file</span> */}
                         <input
                             onChange={(e) => setInputMessage(e.target.value)}
@@ -355,7 +355,7 @@ export const Chat = () => {
                     </footer>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                     animate={ isMobile ? isChatOpen ? { display: 'none' } : { display: 'block' } : null } transition={{ duration: 0.3 } }
                     className={style.chat_lobby}
                 >
@@ -383,7 +383,7 @@ export const Chat = () => {
                                     >
                                         {section.id === 0 && <UserPPic name="Khushi" profilePic="https://i.pinimg.com/originals/92/9a/48/929a488e6170e5423c394705a52de932.gif" />}
                                         {section.id === 1 && <NormalUserCard styles={style.user_card} name="AI" userName="PIXR AI" profilePic="https://i.pinimg.com/originals/6d/3c/fd/6d3cfda6e7bae017c8b264fb3a821e12.gif" />}
-                                        {section.id !== 0 && section.id !== 1 && 
+                                        {section.id !== 0 && section.id !== 1 &&
                                             (
                                                 followings?.map((following, index) => (
                                                         <NormalUserCard key={index} styles={style.user_card} fullName={following.fullName} userName={following.userName} profilePic={following.profilePic} event={() => handleChatOpen(following) } />

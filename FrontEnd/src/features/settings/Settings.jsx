@@ -1,5 +1,5 @@
 import style from "./settings.module.scss"
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getUserAccount } from "../../utils/getAccount";
 import { format, formatDistanceToNowStrict } from 'date-fns';
@@ -16,6 +16,28 @@ import { ImageCropper } from "../cropper/Cropper";
 import { FeedDetails } from "../../components/feedDetailes/FeedDetails";
 import { Img } from "../../components/img/Img";
 import { addReport } from "../../utils/addReport";
+import HandGestureContext from "../../context/HandContext";
+
+const themes = [
+    "light",
+    "dark",
+    "warm",
+    "neumorphism",
+    "hacker",
+    "google-light",
+    "google-dark",
+    "clutchup-light",
+    "clutchup-dark",
+    "soft-gradient-light",
+    "soft-gradient-dark",
+    "big-sur-light",
+    "big-sur-dark",
+    "bugatti-light",
+    "bugatti-dark",
+    "windows11-light",
+    "windows11-dark",
+];
+
 
 export const Settings = () => {
     const navigate = useNavigate();
@@ -32,14 +54,17 @@ export const Settings = () => {
     const [cropImage, setCropImage] = useState(null);
     const [showCrop, setShowCrop] = useState(false);
     const [croppedImage, setCroppedImage] = useState(null);
-    const [theme, setTheme] = useState(localStorage.getItem("theme") === "dark");
+    const [theme, setTheme] = useState(localStorage.getItem("theme"));
     const [report, setReport] = useState("");
 
     const [isFeedOpen, setIsFeedOpen] = useState({})
 
+    const { isHandGesture, setIsHandGesture, showDisplay, setShowDisplay } = useContext(HandGestureContext);
+
     useEffect(() => {
-        document.body.classList.toggle('dark-theme', theme);
-        localStorage.setItem("theme", theme ? "dark" : "light");
+        document.body.classList.remove(...themes);
+        document.body.classList.add(theme);
+        localStorage.setItem("theme", theme);
     }, [theme]);
 
     useEffect(() => {
@@ -60,8 +85,8 @@ export const Settings = () => {
                     })
                 );
                 setSavedFeeds(updatedData);
-            }            
-            
+            }
+
         })();
     }, [type]);
 
@@ -74,10 +99,10 @@ export const Settings = () => {
         setShowButton(true);
     }, [account]);
 
-    const items = ["Account", "Saved", "Theme", "Help", "Private Policy", "Report", "Logout", "Delete Account"]
+    const items = ["Account", "Saved", "Theme", "Hand Gesture", "Help", "Private Policy", "Report", "Logout", "Delete Account"]
 
     const handleSettingsOpen = (item) => {
-        if (["Theme", "Logout", "Delete Account"].includes(item)) return;
+        if (["Theme", "Hand Gesture", "Logout", "Delete Account"].includes(item)) return;
         navigate(`/settings/${item.toLowerCase()}`);
     }
 
@@ -127,14 +152,34 @@ export const Settings = () => {
                 <h1 className={style.settings_heading}>
                     <span onClick={ () => navigate(-1) }>Settings</span> { type && `/ ${type.charAt(0).toUpperCase() + type.slice(1)}` }
                 </h1>
-                
+
                 {
                     !type && <section className={style.settings_wrapper}>
                         {
                             items.map((item, index) => (
                                 <div key={ index } onClick={ () => handleSettingsOpen(item) } className={style.settings_card_heading}>
-                                    { item } 
-                                    { item === "Theme" && <SwitchButton checked={ theme } setChecked={setTheme} /> }
+                                    { item }
+                                    { item === "Theme" && (
+                                        <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+                                            {themes.map((t) => (
+                                                <option key={t} value={t}>
+                                                    {t.replace("-theme", " ")}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                    { item === "Hand Gesture" && (
+                                        <div className={style.handGesture}>
+                                            <SwitchButton checked={isHandGesture} setChecked={setIsHandGesture} />
+                                            { isHandGesture && (
+                                                <>
+                                                    <h1 className={style.handGestureText}>Display</h1>
+                                                    <SwitchButton checked={showDisplay} setChecked={setShowDisplay} />
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
                                     { item === "Logout" && <button onClick={ handleUserLogout }>Logout</button> }
                                     { item === "Delete Account" && <button onClick={ () => {} }>Delete Account</button> }
                                 </div>
@@ -278,38 +323,38 @@ export const Settings = () => {
                                     <button onClick={() => document.querySelector("input[type=file]").click()}>Change</button>
                                     <input type="file" accept="image/*" onChange={(e) => handleImageChange(e)} />
                                 </div>
-                                
+
                                 {
                                     showCrop && <ImageCropper imageSrc={cropImage} aspect={1} onCropComplete={handleCropperComplete} />
                                 }
-                                
+
                                 <div className={style.wrapper}>
                                     <h1>Email</h1>
                                     <input type="text" value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
                                 </div>
-                                
+
                                 <div className={style.wrapper}>
                                     <h1>Username</h1>
                                     <input type="text" value={account.userName} onChange={(e) => setAccount({ ...account, userName: e.target.value })} />
                                 </div>
-                                
+
                                 {/* <div className={style.wrapper}>
                                     <h1>Password</h1>
                                     <input type="text" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
                                 </div> */}
-                                
+
                                 {/* <div className={style.wrapper}>
                                     <h1>Birth Date</h1>
                                     {
                                         account.birthDate && <input type="text" value={format(account.birthDate, "yyyy-MM-dd")} onChange={(e) => setAccount({ ...account, birthDate: e.target.value })} />
                                     }
                                 </div> */}
-                                
+
                                 <div className={style.wrapper}>
                                     <h1>Full Name</h1>
                                     <input type="text" value={account.fullName} onChange={(e) => setAccount({ ...account, fullName: e.target.value })} />
                                 </div>
-                                
+
                                 <div className={style.wrapper}>
                                     <h1>Bio</h1>
                                     <textarea type="text" value={account.bio} onChange={(e) => setAccount({ ...account, bio: e.target.value })} />
@@ -390,7 +435,7 @@ export const Settings = () => {
                                         </li>
                                     </ul>
                                 </div>
-                                
+
                                 {
                                     showButton && (
                                         <div className={style.accountButtons}>
@@ -459,6 +504,7 @@ export const Settings = () => {
             {
                 isFeedOpen.isFeedOpen && <FeedDetails feedId={isFeedOpen.feedId} feedType={isFeedOpen.feedType} setIsDetailsOpen={setIsFeedOpen} />
             }
+
         </section>
     )
 }

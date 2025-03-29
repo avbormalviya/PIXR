@@ -35,7 +35,7 @@ const IconButton = ({ isActive, ActiveIcon, InactiveIcon, event }) => {
             // }}
             // animate={{ scale: 1, color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)" }}
             // transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            style={{ justifySelf: 'end', outline: 'none', color: isActive ? "rgb(237 20 61)" : "whitesmoke" }}
+            style={{ justifySelf: 'end', outline: 'none', color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)" }}
         />
 }
 

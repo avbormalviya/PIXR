@@ -28,12 +28,12 @@
 
             display: flex;
             flex-direction: column;
-            
+
             overflow: scroll;
 
             .lobby_illustration {
                 position: absolute;
-    
+
                 width: 100%;
                 height: 100%;
 
@@ -46,11 +46,13 @@
                 box-shadow: inset 0 0 20px 20px var(--background-secondary);
 
                 z-index: 5;
-    
+
                 img {
-                    width: 40%;
+                    width: 80%;
                     object-fit: contain;
                     object-position: center;
+                    filter: invert(1);
+                    mix-blend-mode: difference;
                 }
             }
 
@@ -76,11 +78,11 @@
                 padding: 7em 1em 1em 1em;
 
                 background-color: var(--background-primary);
-                
+
                 display: flex;
                 flex-direction: column-reverse;
                 gap: 1em;
-                
+
                 overflow-y: auto;
 
                 .otherSide_chat, .mySide_chat {
@@ -98,15 +100,15 @@
 
                     .chat_message {
                         max-width: 50%;
-                        
+
                         font-size: 1.5em;
                         padding: 0.5em 1em;
                         border-radius: 10px;
                         color: var(--text-primary);
                         background-color: var(--background-secondary);
-    
+
                         align-self: flex-end;
-    
+
                         flex-shrink: 0;
                     }
 
@@ -189,7 +191,7 @@
                     font-size: 2.2em;
                     color: var(--text-primary-50);
                     background-color: var(--background-ternary);
-                    
+
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -229,20 +231,20 @@
                     font-size: 1.8em;
                     color: var(--text-primary-70);
                 }
-    
+
                 .moods_wrapper {
                     width: 100%;
                     height: 80px;
 
-                    max-height: 80px; 
-    
+                    max-height: 80px;
+
                     padding: 1em 0;
-    
+
                     display: flex;
                     align-items: center;
-    
+
                     gap: 1em;
-    
+
                     overflow-x: scroll;
                     scroll-snap-type: x mandatory;
                 }
@@ -251,38 +253,38 @@
                     max-height: 100%;
 
                     padding: 1em 0;
-    
+
                     display: flex;
                     flex-direction: column;
                     gap: 0.5em;
 
                     overflow: hidden;
                 }
-    
+
                 .pinned_chats {
                     max-height: 100%;
 
                     padding: 1em 0;
-    
+
                     display: flex;
                     flex-direction: column;
                     gap: 0.5em;
 
                     overflow: hidden;
                 }
-    
+
                 .all_chats {
                     max-height: 100%;
 
                     padding: 1em 0;
-    
+
                     display: flex;
                     flex-direction: column;
                     gap: 0.5em;
 
                     overflow: hidden;
                 }
-    
+
                 .user_card {
                     background-color: var(--background-ternary);
                 }
@@ -295,7 +297,7 @@
 @media (min-width: 768px) {
     .lobby {
         padding: 2em;
-    
+
         .lobby_container {
             padding: 0.5em;
             border-radius: 20px;

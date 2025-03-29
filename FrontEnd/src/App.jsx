@@ -8,29 +8,33 @@ import { Loader } from "./features/statusSlice/loader/Loader"
 
 import { PeerProvider } from "./context/PeerContext"
 import { SocketProvider } from "./context/SocketContext"
-import { useEffect } from "react"
+import { useContext, useEffect, useState } from "react"
+import HandMouseControl from "./components/handgester/handTrack"
+import HandGestureContext from "./context/HandContext"
 
-document.body.classList.toggle('dark-theme', localStorage.getItem('theme') === 'dark');
+const savedTheme = localStorage.getItem('theme') || 'light-theme';
+document.body.classList.add(savedTheme);
 
 function App() {
-  
+  const { isHandGesture, showDisplay } = useContext(HandGestureContext);
+
   return (
     <BrowserRouter>
-      <Provider store={ store }>
-
+      <Provider store={store}>
         <SocketProvider>
           <PeerProvider>
+            {isHandGesture && (
+              <HandMouseControl showDisplay={showDisplay} />
+            )}
 
-            <AppRoute />
-            <Error />
-            <Loader />
-
+              <AppRoute />
+              <Error />
+              <Loader />
           </PeerProvider>
         </SocketProvider>
-
       </Provider>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -52,7 +52,7 @@ html {
 
 :root {
     font-size: 10px;
-    
+
     --background-primary: #fff;
     --background-secondary: #f0f0f0;
     --background-ternary: #dedede;
@@ -63,14 +63,14 @@ html {
     --text-primary-70: #000000b3;
     --text-primary-50: #00000080;
     --text-secondary: #000;
-    
+
     --primary-color: #0095f6;
     --secondary-color: #60efff;
 
     --accent-border-color: #e0e0e0;
 }
 
-.dark-theme {
+.dark {
     --background-primary: #000;
     --background-secondary: #141414;
     --background-ternary: #222222;
@@ -81,11 +81,305 @@ html {
     --text-primary-70: #ffffffb3;
     --text-primary-50: #ffffff80;
     --text-secondary: #fff;
-    
+
     --primary-color: #0095f6;
     --secondary-color: #60efff;
 
     --accent-border-color: #353535;
+}
+
+.warm {
+    --background-primary: #FAF3E0;
+    --background-secondary: #EED9C4;
+    --background-ternary: #D8B384;
+    --background-soft: rgba(250, 243, 224, 0.1);
+    --background-soft-2: #E5C69E;
+
+    --text-primary: #4A3F35;
+    --text-primary-70: #4A3F35B3;
+    --text-primary-50: #4A3F3580;
+    --text-secondary: #5C493D;
+
+    --primary-color: #D88A2A;
+    --secondary-color: #B75D3D;
+
+    --accent-border-color: #C9A66B;
+}
+
+.hacker {
+    --background-primary: #000000;
+    --background-secondary: #001100;
+    --background-ternary: #002200;
+    --background-soft: rgba(0, 17, 0, 0.3);
+    --background-soft-2: rgba(0, 34, 0, 0.5);
+
+    --text-primary: #33FF33;
+    --text-primary-70: rgba(51, 255, 51, 0.7);
+    --text-primary-50: rgba(51, 255, 51, 0.5);
+    --text-secondary: #00FF00;
+
+    --primary-color: #33FF33;
+    --secondary-color: #00FF99;
+
+    --accent-border-color: #008800;
+    font-family: 'Courier New', monospace;
+}
+
+.neumorphism {
+    --background-primary: #E0E5EC;
+    --background-secondary: #F8FAFC;
+    --background-ternary: #CBD5E1;
+    --background-soft: rgba(255, 255, 255, 0.6);
+    --background-soft-2: rgba(224, 229, 236, 0.5);
+
+    --text-primary: #2D3748;
+    --text-primary-70: rgba(45, 55, 72, 0.7);
+    --text-primary-50: rgba(45, 55, 72, 0.5);
+    --text-secondary: #4A5568;
+
+    --primary-color: #6366F1;
+    --secondary-color: #A5B4FC;
+
+    --accent-border-color: #E2E8F0;
+    box-shadow: 5px 5px 15px #b8bec7, -5px -5px 15px #ffffff;
+    border-radius: 12px;
+}
+
+.google-light {
+    --background-primary: #FFFFFF; /* Clean Google White */
+    --background-secondary: #F8F9FA; /* Slightly Off-White */
+    --background-ternary: #E8EAED; /* Soft Gray */
+    --background-soft: rgba(0, 0, 0, 0.05);
+    --background-soft-2: rgba(0, 0, 0, 0.03);
+
+    --text-primary: #202124; /* Google Dark Gray */
+    --text-primary-70: rgba(32, 33, 36, 0.7);
+    --text-primary-50: rgba(32, 33, 36, 0.5);
+    --text-secondary: #5F6368;
+
+    --primary-color: #1A73E8; /* Google Blue */
+    --secondary-color: #34A853; /* Google Green */
+
+    --accent-border-color: #DADCE0; /* Soft Google Border */
+
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1); /* Subtle Material Design Shadow */
+    border-radius: 8px; /* Soft, rounded edges */
+}
+
+.google-dark {
+    --background-primary: #202124; /* Google's dark gray */
+    --background-secondary: #292A2D;
+    --background-ternary: #171717;
+    --background-soft: rgba(255, 255, 255, 0.05);
+    --background-soft-2: rgba(255, 255, 255, 0.03);
+
+    --text-primary: #E8EAED; /* Google Light Gray Text */
+    --text-primary-70: rgba(232, 234, 237, 0.7);
+    --text-primary-50: rgba(232, 234, 237, 0.5);
+    --text-secondary: #9AA0A6;
+
+    --primary-color: #8AB4F8; /* Google Blue in Dark Mode */
+    --secondary-color: #81C995; /* Google Green */
+
+    --accent-border-color: #3C4043;
+
+    box-shadow: 0px 1px 3px rgba(255, 255, 255, 0.05); /* Subtle shadow */
+    border-radius: 8px; /* Consistent rounded edges */
+}
+
+/* ClutchUp Theme */
+.clutchup-light {
+    font-size: 10px;
+
+    --background-primary: #0074e4;
+    --background-secondary: #005bb5;
+    --background-ternary: #004b9a;
+    --background-soft: rgba(0, 116, 228, 0.2);
+    --background-soft-2: #003c7e;
+
+    --text-primary: #ffffff;
+    --text-primary-70: #ffffffb3;
+    --text-primary-50: #ffffff80;
+    --text-secondary: #ffcc00;
+
+    --primary-color: #8a2be2;
+    --secondary-color: #ff8800;
+
+    --accent-border-color: #f0a500;
+}
+
+.clutchup-dark {
+    --background-primary: #00274d;
+    --background-secondary: #001a33;
+    --background-ternary: #000f1f;
+    --background-soft: rgba(0, 39, 77, 0.3);
+    --background-soft-2: #000c18;
+
+    --text-primary: #ffffff;
+    --text-primary-70: #ffffffb3;
+    --text-primary-50: #ffffff80;
+    --text-secondary: #ffcc00;
+
+    --primary-color: #8a2be2;
+    --secondary-color: #ff8800;
+
+    --accent-border-color: #f0a500;
+}
+
+/* Soft Gradient Theme */
+.soft-gradient-light {
+    font-size: 10px;
+
+    --background-primary: #f8ebff;
+    --background-secondary: #efe1ff;
+    --background-ternary: #e4d6ff;
+    --background-soft: rgba(248, 235, 255, 0.2);
+    --background-soft-2: #dacaff;
+
+    --text-primary: #1a1a1a;
+    --text-primary-70: #1a1a1ab3;
+    --text-primary-50: #1a1a1a80;
+    --text-secondary: #5f5f5f;
+
+    --primary-color: #ff5e9a;
+    --secondary-color: #a97aff;
+
+    --accent-border-color: #d8b4ff;
+}
+
+.soft-gradient-dark {
+    --background-primary: #1c1b29;
+    --background-secondary: #292840;
+    --background-ternary: #35344d;
+    --background-soft: rgba(28, 27, 41, 0.3);
+    --background-soft-2: #403f5c;
+
+    --text-primary: #ffffff;
+    --text-primary-70: #ffffffb3;
+    --text-primary-50: #ffffff80;
+    --text-secondary: #b3b3b3;
+
+    --primary-color: #ff5e9a;
+    --secondary-color: #a97aff;
+
+    --accent-border-color: #6d6aa5;
+}
+
+/* Big Sur Fluidic Theme */
+.big-sur-light {
+    font-size: 10px;
+
+    --background-primary: #ffedf0;
+    --background-secondary: #ffd5dc;
+    --background-ternary: #ffbdc8;
+    --background-soft: rgba(255, 221, 226, 0.2);
+    --background-soft-2: #ffabb7;
+
+    --text-primary: #1a1a1a;
+    --text-primary-70: #1a1a1ab3;
+    --text-primary-50: #1a1a1a80;
+    --text-secondary: #5f5f5f;
+
+    --primary-color: #ff4757;
+    --secondary-color: #4bcffa;
+
+    --accent-border-color: #ff6b81;
+}
+
+.big-sur-dark {
+    --background-primary: #1a0f2b;
+    --background-secondary: #2a0e40;
+    --background-ternary: #420d5c;
+    --background-soft: rgba(26, 15, 43, 0.3);
+    --background-soft-2: #5a0b80;
+
+    --text-primary: #ffffff;
+    --text-primary-70: #ffffffb3;
+    --text-primary-50: #ffffff80;
+    --text-secondary: #b3b3b3;
+
+    --primary-color: #ff3b5c;
+    --secondary-color: #48dbfb;
+
+    --accent-border-color: #f368e0;
+}
+
+/* Bugatti Tourbillon Theme */
+.bugatti-light {
+    font-size: 10px;
+
+    --background-primary: #d8e1e6;
+    --background-secondary: #b0bec5;
+    --background-ternary: #90a4ae;
+    --background-soft: rgba(216, 225, 230, 0.2);
+    --background-soft-2: #cfd8dc;
+
+    --text-primary: #0a0a0a;
+    --text-primary-70: #0a0a0ab3;
+    --text-primary-50: #0a0a0a80;
+    --text-secondary: #263238;
+
+    --primary-color: #005b7f;
+    --secondary-color: #d10000;
+
+    --accent-border-color: #546e7a;
+}
+
+.bugatti-dark {
+    --background-primary: #0d1115;
+    --background-secondary: #141a1f;
+    --background-ternary: #1c252b;
+    --background-soft: rgba(13, 17, 21, 0.3);
+    --background-soft-2: #222d35;
+
+    --text-primary: #e0e6eb;
+    --text-primary-70: #e0e6ebb3;
+    --text-primary-50: #e0e6eb80;
+    --text-secondary: #90a4ae;
+
+    --primary-color: #0072a8;
+    --secondary-color: #ff001f;
+
+    --accent-border-color: #324048;
+}
+
+/* Windows 11 Aesthetic Theme */
+.windows11-light {
+    font-size: 10px;
+
+    --background-primary: #f4f5fa;
+    --background-secondary: #e5e8f2;
+    --background-ternary: #ccd6ee;
+    --background-soft: rgba(244, 245, 250, 0.5);
+    --background-soft-2: #dde4f6;
+
+    --text-primary: #121826;
+    --text-primary-70: #121826b3;
+    --text-primary-50: #12182680;
+    --text-secondary: #334155;
+
+    --primary-color: #5b8ef1;
+    --secondary-color: #a77de3;
+
+    --accent-border-color: #8da6de;
+}
+
+.windows11-dark {
+    --background-primary: #0d0f14;
+    --background-secondary: #161a22;
+    --background-ternary: #1f2733;
+    --background-soft: rgba(13, 15, 20, 0.5);
+    --background-soft-2: #2a3545;
+
+    --text-primary: #e0e3eb;
+    --text-primary-70: #e0e3ebb3;
+    --text-primary-50: #e0e3eb80;
+    --text-secondary: #9da6b8;
+
+    --primary-color: #4c88f0;
+    --secondary-color: #986fe3;
+
+    --accent-border-color: #7b91c9;
 }
 
 body {

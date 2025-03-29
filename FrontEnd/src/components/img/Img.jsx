@@ -21,7 +21,7 @@ export const Img = ({ url, alt, ...props }) => {
 
     useEffect(() => {
         const { lowQualityUrl, highQualityUrl } = generateImageUrls(url);
-        
+
         setImage(lowQualityUrl);
 
         const highQualityImg = new Image();
@@ -37,6 +37,7 @@ export const Img = ({ url, alt, ...props }) => {
         <img
             src={image}
             alt={alt}
+            onError={(e) => {setImage("https://static.vecteezy.com/system/resources/previews/020/765/399/original/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"); e.target.onerror = null; }}
             {...props}
         />
     );

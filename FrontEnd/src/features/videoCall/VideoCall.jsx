@@ -9,7 +9,6 @@ import { useSelector } from "react-redux";
 export const VideoCall = () => {
     const location = useLocation();
     const navigate = useNavigate();
-
     const { emit } = useSocket();
     const user = useSelector(state => state.user.user);
 
@@ -33,15 +32,13 @@ export const VideoCall = () => {
     const [isLocalMicOn, setIsLocalMicOn] = useState(true);
     const [chatUser, setChatUser] = useState({});
 
-    // Set chat user from location state
     useEffect(() => {
-        if (location.state?.user) {
+        if (location.state?.user && !chatUser?._id) {
             setChatUser(location.state.user);
-        } else {
-            navigate(location.pathname, { replace: true });
+        } else if (!location.state?.user && chatUser?._id) {
+            navigate("/", { replace: true });
         }
-    }, [location, navigate]);
-
+    }, [location.state?.user, chatUser?._id, navigate]);
 
     useEffect(() => {
         if (localStream && localVideoRef.current) {
@@ -54,70 +51,60 @@ export const VideoCall = () => {
             remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [remoteStream]);
-
-
-    useEffect(() => {
-        if (localStream && localVideoRef.current) {
-            localVideoRef.current.srcObject = localStream;
-
-            localVideoRef.current.onloadedmetadata = () => {
-                localVideoRef.current.play().catch((error) => {
-                    console.error("Failed to play video:", error);
-                });
-            };
-        }
-    }, [localStream]);
-    
-    useEffect(() => {
-        if (remoteStream && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = remoteStream;
-
-            remoteVideoRef.current.onloadedmetadata = () => {
-                remoteVideoRef.current.play().catch((error) => {
-                    console.error("Failed to play video:", error);
-                });
-            };
-        }
-    }, [remoteStream]);
-    
 
     const toggleCamera = () => {
-        const videoTrack = localStream?.getVideoTracks()[0];
+        if (!localStream) return;
+
+        const videoTrack = localStream.getVideoTracks()[0];
         if (videoTrack) {
             videoTrack.enabled = !videoTrack.enabled;
             setIsLocalCameraOn(videoTrack.enabled);
-            emit("toggleCamera", { to: chatUser?._id, enabled: videoTrack.enabled });
+            if (chatUser?._id) {
+                emit("toggleCamera", { to: chatUser._id, enabled: videoTrack.enabled });
+            }
         }
     };
-    
+
     const toggleMicrophone = () => {
-        const audioTrack = localStream?.getAudioTracks()[0];
+        if (!localStream) return;
+
+        const audioTrack = localStream.getAudioTracks()[0];
         if (audioTrack) {
             audioTrack.enabled = !audioTrack.enabled;
             setIsLocalMicOn(audioTrack.enabled);
         }
     };
-    
+
+    const onCallEnd = () => {
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+
+        setIsLocalCameraOn(false);
+        setIsLocalMicOn(false);
+        setChatUser({});
+
+        rejectCall(user._id);
+
+        navigate("/");
+    };
 
     return (
         <section className={style.video_call}>
             <div className={style.remote_video_wrapper}>
                 <video className={style.remote_video} ref={remoteVideoRef} autoPlay playsInline />
-
                 {!isRemoteCameraOn && (
                     <div className={style.remote_video_overlay}>
                         <Img url={chatUser.profilePic} alt="" />
                         <h1>{chatUser.userName}</h1>
                     </div>
                 )}
-
             </div>
 
             {!calling && !incomingCall && (
                 <div className={style.local_video_wrapper}>
                     <div className={style.local_video_holder}>
                         <video className={style.local_video} ref={localVideoRef} autoPlay playsInline />
-
                         {!isLocalCameraOn && (
                             <div className={style.local_video_overlay}>
                                 <Img url={user.profilePic} alt="" />
@@ -128,10 +115,7 @@ export const VideoCall = () => {
             )}
 
             <div className={style.controls_bar}>
-                {incomingCall && (
-                    <i className="material-symbols-rounded" onClick={acceptCall}>call</i>
-                )}
-
+                {incomingCall && <i className="material-symbols-rounded" onClick={acceptCall}>call</i>}
                 {isCallAccepted && (
                     <>
                         <i className="material-symbols-rounded" onClick={toggleCamera}>
@@ -142,8 +126,7 @@ export const VideoCall = () => {
                         </i>
                     </>
                 )}
-
-                <i className="material-symbols-rounded" onClick={() => rejectCall(user._id)}>call_end</i>
+                <i className="material-symbols-rounded" onClick={onCallEnd}>call_end</i>
             </div>
         </section>
     );

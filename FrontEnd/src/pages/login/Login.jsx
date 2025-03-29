@@ -63,8 +63,7 @@ export const Login = () => {
                 <Input state={ password } setState={ setPassword } placeholder="Password" icon="visibility" />
             </div>
 
-            <button type="submit">Create account</button>
+            <button type="submit">Login</button>
         </form>
     )
 }
-

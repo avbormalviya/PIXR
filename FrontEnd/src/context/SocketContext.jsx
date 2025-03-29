@@ -15,7 +15,7 @@ export const SocketProvider = ({ children }) => {
                 transports: ["websocket"],
             });
         }
-        
+
 
         socketRef.current.on("connect", () => {
             console.log("Connected to socket server");
@@ -36,6 +36,7 @@ export const SocketProvider = ({ children }) => {
                 console.log("Disconnected from socket server");
             }
         };
+
     }, []);
 
     const emit = (event, data) => {
