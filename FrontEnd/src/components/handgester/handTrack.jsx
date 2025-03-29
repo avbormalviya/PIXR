@@ -30,6 +30,8 @@ const HandMouseControl = ({ showDisplay }) => {
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@latest/${file}`,
       });
 
+      console.log("Hands object:", Hands);
+
       hands.setOptions({
         maxNumHands: 1,
         minDetectionConfidence: 0.7,
