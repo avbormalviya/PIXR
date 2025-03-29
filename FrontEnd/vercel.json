@@ -1,13 +1,11 @@
 {
-    "rewrites": [
+  "rewrites": [
       { "source": "/(.*)", "destination": "/index.html" }
-    ],
-    
-      "build": {
-        "env": {
+  ],
+  "build": {
+      "env": {
           "NODE_ENV": "production"
-        }
-      },
-      "installCommand": "npm install --force && npm install -g vite"
-
-  }
+      }
+  },
+  "installCommand": "npm install --force && npm install vite"
+}
