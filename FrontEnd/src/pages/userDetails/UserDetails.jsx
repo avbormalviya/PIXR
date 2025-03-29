@@ -21,7 +21,7 @@ export const UserDetails = () => {
 
     const [fullName, setFullName] = useState("");
     const [birthDate, setBirthDate] = useState("");
-    const [profilePic, setProfilePic] = useState({src:"https://i.pinimg.com/564x/90/eb/85/90eb85f727f3b3a9e5145f78f39d88da.jpg", file: ""});
+    const [profilePic, setProfilePic] = useState({src:"https://static.vecteezy.com/system/resources/previews/020/765/399/original/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg", file: ""});
     const [cropImage, setCropImage] = useState({});
 
     const fetchImageAsFile = async () => {
