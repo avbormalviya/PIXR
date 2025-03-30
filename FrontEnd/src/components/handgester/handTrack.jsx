@@ -15,15 +15,27 @@ const HandMouseControl = ({ showDisplay }) => {
   const isClickingAllowed = useRef(true);
 
   useEffect(() => {
+    console.log("Enumerating devices...");
     navigator.mediaDevices.enumerateDevices().then((devices) => {
+      console.log("Video devices found:", videoDevices);
       const videoDevices = devices.filter((device) => device.kind === "videoinput");
-      setDeviceId(videoDevices[0]?.deviceId);
+      if (videoDevices.length > 0) {
+        setDeviceId(videoDevices[0].deviceId);
+      } else {
+        console.error("❌ No video input devices found.");
+      }
     });
   }, []);
 
   useEffect(() => {
-    if (!mpHands.Hands) return;
-    if (!deviceId) return;
+    if (!mpHands.Hands) {
+      console.error("❌ Mediapipe Hands module not loaded!");
+      return;
+    }
+    if (!deviceId) {
+      console.warn("⚠️ Device ID not set yet");
+      return;
+    }
 
     const hands = new mpHands.Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
@@ -39,7 +51,10 @@ const HandMouseControl = ({ showDisplay }) => {
     handsRef.current = hands; // Store hands instance
 
     hands.onResults((results) => {
-      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) return;
+      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+        console.log("❌ No hands detected!");
+        return;
+      };
 
       const landmarks = results.multiHandLandmarks[0];
       const indexFingerTip = landmarks[8]; // Index finger tip
@@ -74,8 +89,10 @@ const HandMouseControl = ({ showDisplay }) => {
 
     let isMounted = true;
 
+    console.log("Requesting camera access...");
     window.navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
       .then((stream) => {
+        console.log("Camera stream started:", stream);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
