@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import * as camUtils from "@mediapipe/camera_utils";
 
 
 const HandMouseControl = ({ showDisplay }) => {
@@ -26,7 +25,7 @@ const HandMouseControl = ({ showDisplay }) => {
   }, []);
 
   useEffect(() => {
-    if (!Hands) {
+    if (!window.Hands) {
       console.error("❌ Mediapipe Hands module not loaded!");
       return;
     }
@@ -35,7 +34,7 @@ const HandMouseControl = ({ showDisplay }) => {
       return;
     }
 
-    const hands = new Hands({
+    const hands = new window.Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
     });
 
@@ -95,7 +94,7 @@ const HandMouseControl = ({ showDisplay }) => {
           videoRef.current.srcObject = stream;
         }
 
-        const camera = new camUtils.Camera(videoRef.current, {
+        const camera = new window.Camera(videoRef.current, {
           onFrame: async () => {
             if (isMounted && handsRef.current) {
               await handsRef.current.send({ image: videoRef.current });
