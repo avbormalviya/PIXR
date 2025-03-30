@@ -17,8 +17,8 @@ const HandMouseControl = ({ showDisplay }) => {
   useEffect(() => {
     console.log("Enumerating devices...");
     navigator.mediaDevices.enumerateDevices().then((devices) => {
-      console.log("Video devices found:", videoDevices);
       const videoDevices = devices.filter((device) => device.kind === "videoinput");
+      console.log("Video devices found:", videoDevices);
       if (videoDevices.length > 0) {
         setDeviceId(videoDevices[0].deviceId);
       } else {
@@ -28,7 +28,7 @@ const HandMouseControl = ({ showDisplay }) => {
   }, []);
 
   useEffect(() => {
-    if (!mpHands.Hands) {
+    if (!mpHands || !mpHands.Hands) {
       console.error("❌ Mediapipe Hands module not loaded!");
       return;
     }
