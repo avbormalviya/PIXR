@@ -26,7 +26,7 @@ const HandMouseControl = ({ showDisplay }) => {
     if (!deviceId) return;
 
     const hands = new mpHands.Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@latest/${file}`,
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
     });
 
     hands.setOptions({
@@ -74,7 +74,7 @@ const HandMouseControl = ({ showDisplay }) => {
 
     let isMounted = true;
 
-    navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
+    window.navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
       .then((stream) => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -263,20 +263,20 @@ const getScrollableParent = (element) => {
   return (
     <div>
         <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        style={{
-          position: "absolute",
-          bottom: "10px",
-          right: "10px",
-          width: "200px",
-          height: "200px",
-          zIndex: 9999,
-          transform: "scaleX(-1)",
-          display: showDisplay ? "block" : "none",
-          borderRadius: "10px",
-        }}
+          ref={videoRef}
+          autoPlay
+          playsInline
+          style={{
+            position: "absolute",
+            bottom: "10px",
+            right: "10px",
+            width: "200px",
+            height: "200px",
+            zIndex: 9999,
+            transform: "scaleX(-1)",
+            display: showDisplay ? "block" : "none",
+            borderRadius: "10px",
+          }}
       />
     </div>
   );
