@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as camUtils from "@mediapipe/camera_utils";
 
-import * as mpHands from "@mediapipe/hands";
-
 
 const HandMouseControl = ({ showDisplay }) => {
   const videoRef = useRef(null);
@@ -28,7 +26,7 @@ const HandMouseControl = ({ showDisplay }) => {
   }, []);
 
   useEffect(() => {
-    if (!mpHands || !mpHands.Hands) {
+    if (!Hands) {
       console.error("❌ Mediapipe Hands module not loaded!");
       return;
     }
@@ -37,7 +35,7 @@ const HandMouseControl = ({ showDisplay }) => {
       return;
     }
 
-    const hands = new mpHands.Hands({
+    const hands = new Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
     });
 
