@@ -41,16 +41,24 @@ export const VideoCall = () => {
     }, [location.state?.user, chatUser?._id, navigate]);
 
     useEffect(() => {
-        if (localStream && localVideoRef.current) {
-            localVideoRef.current.srcObject = localStream;
+        if (localStream) {
+            console.log("Local stream available:", localStream);
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = localStream;
+            }
         }
     }, [localStream]);
 
     useEffect(() => {
-        if (remoteStream && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = remoteStream;
+        if (remoteStream) {
+            console.log("Remote stream set:", remoteStream);
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = remoteStream;
+            }
         }
     }, [remoteStream]);
+
+
 
     const toggleCamera = () => {
         if (!localStream) return;
@@ -81,7 +89,7 @@ export const VideoCall = () => {
         }
 
         setIsLocalCameraOn(false);
-        setIsLocalMicOn(false);
+        setIsLocalMicOn(true);
         setChatUser({});
 
         rejectCall(user._id);

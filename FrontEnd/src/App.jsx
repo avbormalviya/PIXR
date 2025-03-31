@@ -12,11 +12,15 @@ import { useContext, useEffect, useState } from "react"
 import HandMouseControl from "./components/handgester/handTrack"
 import HandGestureContext from "./context/HandContext"
 
+import { Music } from "./features/music/Music"
+
 const savedTheme = localStorage.getItem('theme') || 'light-theme';
 document.body.classList.add(savedTheme);
 
 function App() {
   const { isHandGesture, showDisplay } = useContext(HandGestureContext);
+
+  const [musicMainWindow, setMusicMainWindow] = useState(false);
 
   return (
     <BrowserRouter>
@@ -30,6 +34,9 @@ function App() {
               <AppRoute />
               <Error />
               <Loader />
+
+              <Music musicMainWindow={musicMainWindow} setMusicMainWindow={setMusicMainWindow} />
+
           </PeerProvider>
         </SocketProvider>
       </Provider>

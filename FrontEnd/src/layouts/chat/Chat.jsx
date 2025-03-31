@@ -235,7 +235,7 @@ export const Chat = () => {
 
                     <section className={style.lobby_messages_wrapper}>
 
-                        <AnimatePresence>
+                        {/* <AnimatePresence> */}
                             {
                                 typing.typing && (
                                     <motion.div
@@ -324,7 +324,7 @@ export const Chat = () => {
                                 ))
                             }
 
-                        </AnimatePresence>
+                        {/* </AnimatePresence> */}
                     </section>
 
 

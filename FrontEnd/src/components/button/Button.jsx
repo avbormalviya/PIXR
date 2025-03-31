@@ -9,6 +9,7 @@ import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import CommentIcon from '@mui/icons-material/Comment';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 const Button = ({ children, text, event, ...props }) => {
     return (
@@ -27,7 +28,10 @@ const IconButton = ({ isActive, ActiveIcon, InactiveIcon, event }) => {
     const MotionIcon = motion(Icon);
     return <MotionIcon
             fontSize="large"
-            onClick={event}
+            onClick={(e) => {
+                e.stopPropagation();
+                event();
+            }}
             // whileHover={{ scale: 1.2 }}
             // whileTap={{
             //     scale: 0.8,
@@ -110,6 +114,13 @@ const CommentButton = ({ event }) => {
     );
 }
 
+const CloseButton = ({ event }) => {
+    return (
+        <Icon icon={CloseRoundedIcon} onClick={event} />
+    );
+}
+
+
 export {
     Icon,
     FollowButton,
@@ -118,5 +129,6 @@ export {
     LikeButton,
     BookmarkButton,
     ShareButton,
-    CommentButton
+    CommentButton,
+    CloseButton
 }
