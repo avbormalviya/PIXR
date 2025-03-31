@@ -50,11 +50,19 @@ const initSocket = (app) => {
 
         // Call Events
         socket.on("call-request", ({ to }) => {
+            console.log(`Received call-request from ${socket.user._id} to ${to}`);
+
             const recipientSocketId = activeSockets.get(to);
+            console.log(`Recipient socket ID:`, recipientSocketId);
+
             if (recipientSocketId) {
+                console.log(`Emitting call-request to ${recipientSocketId}`);
                 socket.to(recipientSocketId).emit("call-request", { from: socket.user });
+            } else {
+                console.warn(`User ${to} is not connected.`);
             }
         });
+
 
         socket.on("call-accepted", ({ from }) => {
             const callerSocketId = activeSockets.get(from);

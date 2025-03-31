@@ -41,6 +41,7 @@ export const PeerProvider = ({ children }) => {
     };
 
     const initiateCall = (chatUserId, InitUserId) => {
+        console.log("Emitting call-request to:", chatUserId);
         setCalleeId(chatUserId);
         setCallerId(InitUserId);
         setCalling(true);
@@ -50,6 +51,7 @@ export const PeerProvider = ({ children }) => {
     };
 
     const acceptCall = () => {
+        console.log("Emitting call-accepted to:", callerId);
         setIncomingCall(false);
         setIsCallAccepted(true);
         startPeerConnection(callerId);
@@ -58,6 +60,7 @@ export const PeerProvider = ({ children }) => {
     };
 
     const rejectCall = (userId) => {
+        console.log("Emitting call-rejected to:", callerId === userId ? calleeId : callerId);
         emit("call-rejected", { from: callerId === userId ? calleeId : callerId });
         setCallerId(null);
         setCalleeId(null);
@@ -66,6 +69,7 @@ export const PeerProvider = ({ children }) => {
 
 
     const resetCallState = () => {
+
         setIncomingCall(false);
         setCalling(false);
         setIsCallAccepted(false);
@@ -171,19 +175,10 @@ export const PeerProvider = ({ children }) => {
 
             const iceServers = [
                 { urls: "stun:stun.l.google.com:19302" },
-                { urls: "stun:stun1.l.google.com:19302" },
-                { urls: "stun:stun2.l.google.com:19302" },
-                { urls: "stun:stun3.l.google.com:19302" },
-                { urls: "stun:stun4.l.google.com:19302" },
                 {
-                    urls: "turn:relay.backups.cz",
-                    username: "webrtc",
-                    credential: "webrtc"
-                },
-                {
-                    urls: "turn:turn.anyfirewall.com:443?transport=tcp",
-                    credential: "webrtc",
-                    username: "webrtc"
+                    urls: "turn:openrelay.metered.ca:80",
+                    username: "openrelayproject",
+                    credential: "openrelayproject"
                 }
             ];
 
@@ -216,6 +211,7 @@ export const PeerProvider = ({ children }) => {
 
     useEffect(() => {
         const handleCallRequest = ({ from }) => {
+            console.log("Incoming call from:", from);
             setIncomingCall(true);
             setCallerId(from._id);
             navigate(`/chat/call/${from._id}`, { state: { user: from } });
@@ -244,6 +240,7 @@ export const PeerProvider = ({ children }) => {
 
 
         const handleCallRejected = () => {
+            console.log("Call rejected by callee.");
             resetCallState();
         };
 

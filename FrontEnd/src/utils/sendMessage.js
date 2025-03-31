@@ -1,18 +1,15 @@
-import { store } from "../store/reduxStore";
-import { chatApi } from "../api/chatApi";
+import axios from 'axios';
 
 export const sendMessage = async (chatId, message) => {
-    try {
-        const result = await store.dispatch(chatApi.endpoints.sendMessage.initiate({ chatId, message }));
+    const config = {
+        withCredentials: true,
+    };
 
-        if (result?.data) {
-            return { data: result.data, error: result.error };
-        }
+    const response = await axios.post(
+        `https://pixr-backend.onrender.com/api/v1/chats/sendMessage?chatId=${chatId}&message=${encodeURIComponent(message)}`,
+        {},  // Empty body since we're sending data in query params
+        config
+    );
 
-        return { data: null, error: result.error };
-
-    } catch (error) {
-        console.error("Error fetching user data:", error);
-        return { data: null, error };
-    }
+    return response;
 };
