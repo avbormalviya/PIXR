@@ -12,7 +12,7 @@ import { useContext, useEffect, useState } from "react"
 import HandMouseControl from "./components/handgester/handTrack"
 import HandGestureContext from "./context/HandContext"
 
-import { Music } from "./features/music/Music"
+import { Music } from "./features/music/music"
 
 const savedTheme = localStorage.getItem('theme') || 'light-theme';
 document.body.classList.add(savedTheme);
