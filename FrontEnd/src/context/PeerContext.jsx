@@ -8,10 +8,10 @@ const PeerContext = createContext();
 export const PeerProvider = ({ children }) => {
     const navigate = useNavigate();
     const { emit, on, off } = useSocket();
-
     const outgoingCallRef = useRef(null);
     const incomingCallRef = useRef(null);
 
+    // State variables
     const [peer, setPeer] = useState(null);
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
@@ -25,10 +25,11 @@ export const PeerProvider = ({ children }) => {
     const [isRemoteCameraOn, setIsRemoteCameraOn] = useState(false);
     const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
 
+    // Play and stop audio functions for call notifications
     const playAudio = (ref, url) => {
         ref.current = new Audio(url);
         ref.current.loop = true;
-        ref.current?.play().catch(error => console.error("Failed to play audio:", error));
+        ref.current.play().catch(err => console.error("Audio play failed:", err));
     };
 
     const stopAudio = (ref) => {
@@ -38,6 +39,7 @@ export const PeerProvider = ({ children }) => {
         }
     };
 
+    // Start or end a call
     const initiateCall = (chatUserId, InitUserId) => {
         setCalleeId(chatUserId);
         setCallerId(InitUserId);
@@ -56,82 +58,65 @@ export const PeerProvider = ({ children }) => {
     };
 
     const rejectCall = (userId) => {
-        emit("call-rejected", { from: callerId == userId ? calleeId : callerId });
+        emit("call-rejected", { from: callerId === userId ? calleeId : callerId });
         resetCallState();
     };
 
     const resetCallState = () => {
         console.log("Resetting call state...");
 
-        if (peer) {
-            peer.removeAllListeners();
-            peer.destroy();
-            setPeer(null);
-        }
+        // Cleanup peer connection and streams
+        peer?.removeAllListeners();
+        peer?.destroy();
+        setPeer(null);
 
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            setLocalStream(null);
-        }
+        localStream?.getTracks().forEach(track => track.stop());
+        setLocalStream(null);
 
-        if (remoteStream) {
-            remoteStream.getTracks().forEach(track => track.stop());
-            setRemoteStream(null);
-        }
+        remoteStream?.getTracks().forEach(track => track.stop());
+        setRemoteStream(null);
 
+        // Reset UI state
         setIncomingCall(false);
         setCalling(false);
         setIsCallAccepted(false);
-        navigate("/");
-
         stopAudio(incomingCallRef);
         stopAudio(outgoingCallRef);
 
         setIsRemoteCameraOn(false);
         setIsRemoteMicOn(false);
-    };
 
+        navigate("/");
+    };
 
     const startPeerConnection = async (user) => {
         try {
-            console.log("Cleaning up old peer connection before creating a new one...");
-
-            // Destroy old peer connection if it exists
-            if (peer) {
-                peer.removeAllListeners();
-                peer.destroy();
-                setPeer(null);
-            }
-
-            // Stop old local stream tracks if any
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                setLocalStream(null);
-            }
-
             // Request new media stream
             const stream = await requestPermissions();
             if (!stream) return;
 
             setLocalStream(stream);
 
-            console.log("Creating new peer connection...");
+            // Create a new peer connection
             const newPeer = new SimplePeer({
                 initiator,
                 trickle: false,
                 stream,
             });
 
+            // Handle signal data for signaling process
             newPeer.on("signal", (data) => {
                 console.log("Sending signal:", data);
                 emit("signal", { to: user, data });
             });
 
+            // Handle incoming remote stream
             newPeer.on("stream", (incomingStream) => {
                 console.log("Received remote stream:", incomingStream);
                 setRemoteStream(incomingStream);
             });
 
+            // Error handling
             newPeer.on("error", (err) => console.error("Peer error:", err));
 
             setPeer(newPeer);
@@ -141,27 +126,24 @@ export const PeerProvider = ({ children }) => {
         }
     };
 
-
-
-
     const requestPermissions = async () => {
         try {
-            // Request permission first to populate device list
+            // Request initial media stream to detect devices
             const initialStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             initialStream.getTracks().forEach(track => track.stop()); // Stop the initial stream
 
-            // Get the list of available devices
+            // Get available devices (audio/video)
             const devices = await navigator.mediaDevices.enumerateDevices();
             console.log("Available devices:", devices);
 
-            // Find the first available video and audio input devices
             const videoDevices = devices.filter(device => device.kind === "videoinput");
             const audioDevices = devices.filter(device => device.kind === "audioinput");
 
+            // Select the first available video and audio devices
             const preferredCameraId = videoDevices.length > 0 ? videoDevices[0].deviceId : null;
             const preferredMicId = audioDevices.length > 0 ? audioDevices[0].deviceId : null;
 
-            // Request media with selected devices
+            // Request media stream with selected devices
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: preferredCameraId ? { deviceId: { exact: preferredCameraId } } : true,
                 audio: preferredMicId ? { deviceId: { exact: preferredMicId } } : true,
@@ -176,29 +158,6 @@ export const PeerProvider = ({ children }) => {
         }
     };
 
-
-
-    useEffect(() => {
-        navigator.permissions.query({ name: "microphone" }).then((micPerm) => {
-            micPerm.onchange = () => {
-                console.log("Microphone permission changed:", micPerm.state);
-                if (micPerm.state === "granted") {
-                    alert("Microphone access granted! You can now start a call.");
-                }
-            };
-        });
-
-        navigator.permissions.query({ name: "camera" }).then((camPerm) => {
-            camPerm.onchange = () => {
-                console.log("Camera permission changed:", camPerm.state);
-                if (camPerm.state === "granted") {
-                    alert("Camera access granted! You can now start a call.");
-                }
-            };
-        });
-    }, []);
-
-
     useEffect(() => {
         const handleCallRequest = ({ from }) => {
             setIncomingCall(true);
@@ -211,27 +170,15 @@ export const PeerProvider = ({ children }) => {
             if (!peer || peer.destroyed) return;
 
             try {
-                console.log("Received signaling data:", data);
-
-                if (data.type === "answer" && peer._pc.signalingState === "stable") {
-                    console.warn("Ignoring duplicate answer, already in stable state.");
-                    return;
-                }
-
-                console.log("Processing signal:", data);
                 peer.signal(data);
             } catch (error) {
                 console.error("Error handling signal:", error);
             }
         };
 
-
-
         const handleCallAccepted = () => {
             setIsCallAccepted(true);
-            console.log("Call accepted, starting peer connection...");
-
-            startPeerConnection(calleeId); // Start connection for the receiver too
+            startPeerConnection(calleeId);
             setCalling(false);
             stopAudio(incomingCallRef);
             stopAudio(outgoingCallRef);
@@ -252,7 +199,6 @@ export const PeerProvider = ({ children }) => {
             off("signal", handleSignal);
             off("call-accepted", handleCallAccepted);
             off("call-rejected", handleCallRejected);
-
             peer?.destroy();
             localStream?.getTracks().forEach((track) => track.stop());
         };

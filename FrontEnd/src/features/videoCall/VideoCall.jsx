@@ -58,7 +58,9 @@ export const VideoCall = () => {
         }
     }, [remoteStream]);
 
-
+    useEffect(() => {
+        console.log(isCallAccepted);
+    }, [isCallAccepted]);
 
     const toggleCamera = () => {
         if (!localStream) return;
