@@ -61,6 +61,24 @@ export const PeerProvider = ({ children }) => {
     };
 
     const resetCallState = () => {
+        console.log("Resetting call state...");
+
+        if (peer) {
+            peer.removeAllListeners();
+            peer.destroy();
+            setPeer(null);
+        }
+
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            setLocalStream(null);
+        }
+
+        if (remoteStream) {
+            remoteStream.getTracks().forEach(track => track.stop());
+            setRemoteStream(null);
+        }
+
         setIncomingCall(false);
         setCalling(false);
         setIsCallAccepted(false);
@@ -73,17 +91,31 @@ export const PeerProvider = ({ children }) => {
         setIsRemoteMicOn(false);
     };
 
+
     const startPeerConnection = async (user) => {
         try {
-            const stream = await requestPermissions();
-            if (!stream) return;
-            setLocalStream(stream);
+            console.log("Cleaning up old peer connection before creating a new one...");
 
+            // Destroy old peer connection if it exists
             if (peer) {
-                console.log("Destroying old peer before creating a new one.");
+                peer.removeAllListeners();
                 peer.destroy();
+                setPeer(null);
             }
 
+            // Stop old local stream tracks if any
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                setLocalStream(null);
+            }
+
+            // Request new media stream
+            const stream = await requestPermissions();
+            if (!stream) return;
+
+            setLocalStream(stream);
+
+            console.log("Creating new peer connection...");
             const newPeer = new SimplePeer({
                 initiator,
                 trickle: false,
@@ -111,24 +143,40 @@ export const PeerProvider = ({ children }) => {
 
 
 
+
     const requestPermissions = async () => {
-        const micPermission = await navigator.permissions.query({ name: "microphone" });
-        const camPermission = await navigator.permissions.query({ name: "camera" });
-
-        if (micPermission.state === "denied" || camPermission.state === "denied") {
-            alert("Microphone and Camera access is required for video calls. Please enable them in your browser settings.");
-            return false;
-        }
-
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            return stream; // Return the stream if access is granted
+            // Request permission first to populate device list
+            const initialStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            initialStream.getTracks().forEach(track => track.stop()); // Stop the initial stream
+
+            // Get the list of available devices
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            console.log("Available devices:", devices);
+
+            // Find the first available video and audio input devices
+            const videoDevices = devices.filter(device => device.kind === "videoinput");
+            const audioDevices = devices.filter(device => device.kind === "audioinput");
+
+            const preferredCameraId = videoDevices.length > 0 ? videoDevices[0].deviceId : null;
+            const preferredMicId = audioDevices.length > 0 ? audioDevices[0].deviceId : null;
+
+            // Request media with selected devices
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: preferredCameraId ? { deviceId: { exact: preferredCameraId } } : true,
+                audio: preferredMicId ? { deviceId: { exact: preferredMicId } } : true,
+            });
+
+            console.log("Access granted:", stream);
+            return stream;
         } catch (error) {
-            alert("You need to allow microphone and camera access to use this feature.");
             console.error("Permission error:", error);
+            alert("You need to allow microphone and camera access to use this feature.");
             return false;
         }
     };
+
+
 
     useEffect(() => {
         navigator.permissions.query({ name: "microphone" }).then((micPerm) => {
@@ -165,11 +213,9 @@ export const PeerProvider = ({ children }) => {
             try {
                 console.log("Received signaling data:", data);
 
-                if (data.type === "answer") {
-                    if (peer._pc.signalingState === "stable") {
-                        console.warn("Ignoring duplicate answer, already in stable state.");
-                        return;
-                    }
+                if (data.type === "answer" && peer._pc.signalingState === "stable") {
+                    console.warn("Ignoring duplicate answer, already in stable state.");
+                    return;
                 }
 
                 console.log("Processing signal:", data);
@@ -178,6 +224,7 @@ export const PeerProvider = ({ children }) => {
                 console.error("Error handling signal:", error);
             }
         };
+
 
 
         const handleCallAccepted = () => {
