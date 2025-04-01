@@ -65,18 +65,6 @@ export const Music = ({ musicMainWindow, setMusicMainWindow }) => {
         localStorage.setItem('likedSongs', JSON.stringify(likedSongs));
     }, [likedSongs]);
 
-    useEffect(() => {
-        const iframe = document.querySelector("iframe");
-        if (!iframe) return;
-
-        iframe.onload = () => {
-            // Delay to ensure song starts playing
-            setTimeout(() => {
-                playNextSong(); // Play next song when iframe reloads
-            }, 3000); // Adjust delay as needed
-        };
-    }, [selectedSongId]);
-
     const searchSong = async () => {
         if (!query.trim()) return;
         setLoading(true);

@@ -154,6 +154,7 @@ export const PeerProvider = ({ children }) => {
         } catch (error) {
             console.error("Permission error:", error);
             alert("You need to allow microphone and camera access to use this feature.");
+            resetCallState();
             return false;
         }
     };
