@@ -34,9 +34,7 @@ async function getAccessToken() {
     return accessToken;
 }
 
-
 const popularGenres = ["pop", "rock", "hip-hop", "jazz", "electronic", "classical", "reggae"];
-
 
 export const Music = ({ musicMainWindow, setMusicMainWindow }) => {
     const draggableRef = useRef(null);
@@ -53,6 +51,14 @@ export const Music = ({ musicMainWindow, setMusicMainWindow }) => {
     });
     const [loading, setLoading] = useState(false);
 
+    // Load the last played song from localStorage on component mount
+    useEffect(() => {
+        const lastPlayedSongId = localStorage.getItem("lastPlayedSongId");
+        if (lastPlayedSongId) {
+            setSelectedSongId(lastPlayedSongId);
+            playSongById(lastPlayedSongId); // Play the song on start
+        }
+    }, []);
 
     // Save liked songs to localStorage whenever it changes
     useEffect(() => {
@@ -71,7 +77,6 @@ export const Music = ({ musicMainWindow, setMusicMainWindow }) => {
         };
     }, [selectedSongId]);
 
-
     const searchSong = async () => {
         if (!query.trim()) return;
         setLoading(true);
@@ -89,8 +94,18 @@ export const Music = ({ musicMainWindow, setMusicMainWindow }) => {
     const playSong = (song, index) => {
         setSelectedSongId(song.id);
         setCurrentIndex(index);
+
+        // Save the last played song ID to localStorage
+        localStorage.setItem("lastPlayedSongId", song.id);
     };
 
+    const playSongById = (songId) => {
+        // Find the song by its ID and play it
+        const song = songs.find((s) => s.id === songId);
+        if (song) {
+            playSong(song, songs.indexOf(song));
+        }
+    };
 
     const toggleLike = (song) => {
         if (!song || !song.id) return; // Prevent adding invalid songs
@@ -120,7 +135,6 @@ export const Music = ({ musicMainWindow, setMusicMainWindow }) => {
         }
     };
 
-
     return (
         <>
             <Draggable nodeRef={draggableRef} handle=".drag-handle" bounds="body">
@@ -134,101 +148,91 @@ export const Music = ({ musicMainWindow, setMusicMainWindow }) => {
                         allow="autoplay; encrypted-media"
                     ></iframe>
                     <div className={style.icons}>
-                        <div fontSize="large" onClick={() => setMusicMainWindow(true)} className={style.openButton}><OpenInNewRoundedIcon /></div>
-                        <div className="drag-handle"><DragIndicatorRoundedIcon fontSize="large" /></div>
+                        <div onClick={() => setMusicMainWindow(true)} className={style.openButton}><OpenInNewRoundedIcon style={{ fontSize: "2rem" }} /></div>
+                        <div className="drag-handle"><DragIndicatorRoundedIcon style={{ fontSize: "2.5rem" }} /></div>
                     </div>
                 </div>
             </Draggable>
 
-            {
-                musicMainWindow &&
-                    <FloatingCon>
-                        <div className={style.music}>
-                            <div className={style.tabs}>
-                                <button
-                                    onClick={() => setActiveTab("search")}
-                                    className={activeTab === "search" ? style.active : style.inactive}
-                                    style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}
-                                >
-                                    PIXR Music<span style={{ fontSize: "0.9rem", fontStyle: "italic", color: "var(--text-primary-50)" }}>By Spotify</span>
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab("liked")}
-                                    className={activeTab === "liked" ? style.active : style.inactive}
-                                >
-                                    Liked
-                                </button>
-                                <button
-                                    style={{ aspectRatio: "1 / 1", padding: 0, flexGrow: 0, borderRadius: "50%", background: "var(--background-ternary)", color: "red" }}
-                                >
-                                    <CloseButton event={() => setMusicMainWindow(false)} />
-                                </button>
-                            </div>
-
-                            <div className={`${style.tabContainer} ${activeTab === "search" ? style.activeSearch : style.activeLiked}`}>
-                                {activeTab === "search" && (
-                                    <div className={style.searchContainer}>
-                                        <div className={style.searchBar}>
-                                            <input
-                                                className={style.searchInput}
-                                                type="text"
-                                                placeholder="Search for a song..."
-                                                value={query}
-                                                onChange={(e) => setQuery(e.target.value)}
-                                            />
-                                            <button onClick={searchSong}>Search</button>
-                                        </div>
-                                        <div className={style.songList}>
-                                            {/* {!query && homeSongs.map((song) => (
-                                                <div key={song.id} className={style.songItem} onClick={() => playSong(song)}>
-                                                    <img src={song.album.images[0]?.url} alt={song.name} />
-                                                    <div>
-                                                        <h3>{song.name}</h3>
-                                                        <p>{song.artists.map((artist) => artist.name).join(", ")}</p>
-                                                    </div>
-                                                </div>
-                                            ))} */}
-                                            {loading && <MiniLoader />}
-                                            {!loading && songs.length === 0 && <p className={style.noSongs} style={{ textAlign: "center", color: "var(--text-primary-70)", fontSize: "1.5rem" }}>No songs found</p>}
-                                            {songs.map((song) => (
-                                                <div key={song.id} className={style.songItem} onClick={() => playSong(song)}>
-                                                    <img src={song.album.images[0]?.url || "placeholder.jpg"} alt={song.name} />
-                                                    <div>
-                                                        <h3>{song.name}</h3>
-                                                        <p>{song.artists.map((artist) => artist.name).join(", ")}</p>
-                                                    </div>
-                                                    <button>
-                                                        <LikeButton isLiked={likedSongs.some((s) => s.id === song.id)} event={() => toggleLike(song)} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === "liked" && (
-                                    <div className={style.likedContainer}>
-                                        <div className={style.songList}>
-                                            {!likedSongs.length && <p className={style.noSongs} style={{ textAlign: "center", color: "var(--text-primary-70)", fontSize: "1.5rem" }}>No liked songs found</p>}
-                                            {likedSongs.map((song) => (
-                                                <div key={song.id} className={style.songItem} onClick={() => playSong(song)}>
-                                                    <img src={song.album.images[0]?.url} alt={song.name} />
-                                                    <div>
-                                                        <h3>{song.name}</h3>
-                                                        <p>{song.artists.map((artist) => artist.name).join(", ")}</p>
-                                                    </div>
-                                                    <button>
-                                                        <LikeButton isLiked={likedSongs.some((s) => s.id === song.id)} event={() => toggleLike(song)} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+            {musicMainWindow && (
+                <FloatingCon>
+                    <div className={style.music}>
+                        <div className={style.tabs}>
+                            <button
+                                onClick={() => setActiveTab("search")}
+                                className={activeTab === "search" ? style.active : style.inactive}
+                                style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}
+                            >
+                                PIXR Music<span style={{ fontSize: "0.9rem", fontStyle: "italic", color: "var(--text-primary-50)" }}>By Spotify</span>
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("liked")}
+                                className={activeTab === "liked" ? style.active : style.inactive}
+                            >
+                                Liked
+                            </button>
+                            <button
+                                style={{ aspectRatio: "1 / 1", padding: 0, flexGrow: 0, borderRadius: "50%", background: "var(--background-ternary)", color: "red" }}
+                            >
+                                <CloseButton event={() => setMusicMainWindow(false)} />
+                            </button>
                         </div>
-                    </FloatingCon>
-            }
+
+                        <div className={`${style.tabContainer} ${activeTab === "search" ? style.activeSearch : style.activeLiked}`}>
+                            {activeTab === "search" && (
+                                <div className={style.searchContainer}>
+                                    <div className={style.searchBar}>
+                                        <input
+                                            className={style.searchInput}
+                                            type="text"
+                                            placeholder="Search for a song..."
+                                            value={query}
+                                            onChange={(e) => setQuery(e.target.value)}
+                                        />
+                                        <button onClick={searchSong}>Search</button>
+                                    </div>
+                                    <div className={style.songList}>
+                                        {loading && <MiniLoader />}
+                                        {!loading && songs.length === 0 && <p className={style.noSongs}>No songs found</p>}
+                                        {songs.map((song) => (
+                                            <div key={song.id} className={style.songItem} onClick={() => playSong(song, songs.indexOf(song))}>
+                                                <img src={song.album.images[0]?.url || "placeholder.jpg"} alt={song.name} />
+                                                <div>
+                                                    <h3>{song.name}</h3>
+                                                    <p>{song.artists.map((artist) => artist.name).join(", ")}</p>
+                                                </div>
+                                                <button>
+                                                    <LikeButton isLiked={likedSongs.some((s) => s.id === song.id)} event={() => toggleLike(song)} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === "liked" && (
+                                <div className={style.likedContainer}>
+                                    <div className={style.songList}>
+                                        {!likedSongs.length && <p className={style.noSongs}>No liked songs found</p>}
+                                        {likedSongs.map((song) => (
+                                            <div key={song.id} className={style.songItem} onClick={() => playSong(song, likedSongs.indexOf(song))}>
+                                                <img src={song.album.images[0]?.url} alt={song.name} />
+                                                <div>
+                                                    <h3>{song.name}</h3>
+                                                    <p>{song.artists.map((artist) => artist.name).join(", ")}</p>
+                                                </div>
+                                                <button>
+                                                    <LikeButton isLiked={likedSongs.some((s) => s.id === song.id)} event={() => toggleLike(song)} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </FloatingCon>
+            )}
         </>
     );
 };

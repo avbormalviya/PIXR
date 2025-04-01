@@ -123,6 +123,7 @@
                             color: var(--text-primary);
                             white-space: nowrap;
                             text-overflow: ellipsis;
+                            margin-bottom: 0.5em;
                             overflow: hidden;
                         }
 
@@ -188,7 +189,7 @@
     }
 
     .icons {
-        width: 30px;
+        width: 50px;
         height: 100%;
 
         color: var(--text-primary-50);
@@ -197,6 +198,7 @@
         align-items: center;
         justify-content: center;
         flex-direction: column;
+        gap: 1em;
 
         div {
             height: 30px;

@@ -218,7 +218,7 @@ export const Chat = () => {
                     {
                         !chat && (
                             <div className={style.lobby_illustration}>
-                                <img src="https://res-console.cloudinary.com/dr6gycjza/thumbnails/v1/image/upload/v1743242136/c2NyZWVuc2hvdC0xNzQzMjQxODQ2NTI1X18xXy1yZW1vdmViZy1wcmV2aWV3X3lkdDJtOQ==/preview" alt="illustration" />
+                                <img src="https://res.cloudinary.com/dr6gycjza/image/upload/v1743242136/screenshot-1743241846525__1_-removebg-preview_ydt2m9.png" alt="illustration" />
                             </div>
                         )
                     }

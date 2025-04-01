@@ -20,13 +20,16 @@ import { useEffect, useState } from "react";
 import { useGetUser } from "../utils/getUser";
 import { InitialLoading } from "../pages/initialLoading/InitialLoading";
 import { setUserData } from "../features/user/useSlice";
+import { Music } from "../features/music/music"
 
 export const AppRoute = () => {
-    
+
     const dispatch = useDispatch();
     const { fetchUser, data, loading } = useGetUser();
 
     const [path, setPath] = useState(window.location.pathname);
+
+    const [musicMainWindow, setMusicMainWindow] = useState(false);
 
 
     useEffect(() => {
@@ -50,37 +53,42 @@ export const AppRoute = () => {
     }
 
     return (
-        <Routes>
-            {user ? (
-                <>
-                    <Route path="/" element={<Home />}>
-                        <Route index element={<FeedLayout />} />
-                        <Route path="/memoir/:username" element={<Memoir />} />
-                        <Route path="search" element={<Search />} />
-                        <Route path="reels" element={<Reel />} />
-                        <Route path="create/:content" element={<Create />} />
-                        <Route path="user/:username" element={<Profile />}>
-                            <Route path=":type" element={<Profile />} />
+        <>
+            <Routes>
+                {user ? (
+                    <>
+                        <Route path="/" element={<Home />}>
+                            <Route index element={<FeedLayout />} />
+                            <Route path="/memoir/:username" element={<Memoir />} />
+                            <Route path="search" element={<Search />} />
+                            <Route path="reels" element={<Reel />} />
+                            <Route path="create/:content" element={<Create />} />
+                            <Route path="user/:username" element={<Profile />}>
+                                <Route path=":type" element={<Profile />} />
+                            </Route>
+                            <Route path="chat" element={<Chat />} />
+                            <Route path="notifications" element={<Notification />} />
+                            <Route path="settings" element={<Settings />}>
+                                <Route path=":type" element={<Settings />} />
+                            </Route>
                         </Route>
-                        <Route path="chat" element={<Chat />} />
-                        <Route path="notifications" element={<Notification />} />
-                        <Route path="settings" element={<Settings />}>
-                            <Route path=":type" element={<Settings />} />
-                        </Route>
-                    </Route>
 
-                    <Route path="chat/call/:user" element={<VideoCall />} />
-                </>
-            ) : (
-                <Route path="*" element={<Navigate to="/auth/login" />} />
-            )}
+                        <Route path="chat/call/:user" element={<VideoCall />} />
+                    </>
+                ) : (
+                    <Route path="*" element={<Navigate to="/auth/login" />} />
+                )}
 
-            <Route path="/auth" element={<Auth />} >
-                <Route path="login" element={user ? <Navigate to={path.includes("login") ? "/" : path} /> : <Login />} />
-                <Route path="signup" element={user ? <Navigate to="/" /> : <SignUp />} />
-                <Route path="signup/verifyEmail" element={<Otp />} />
-                <Route path="signup/userDetails" element={<UserDetails />} />
-            </Route>
-        </Routes>
+                <Route path="/auth" element={<Auth />} >
+                    <Route path="login" element={user ? <Navigate to={path.includes("login") ? "/" : path} /> : <Login />} />
+                    <Route path="signup" element={user ? <Navigate to="/" /> : <SignUp />} />
+                    <Route path="signup/verifyEmail" element={<Otp />} />
+                    <Route path="signup/userDetails" element={<UserDetails />} />
+                </Route>
+            </Routes>
+            {
+                user && <Music musicMainWindow={musicMainWindow} setMusicMainWindow={setMusicMainWindow} />
+            }
+        </>
     );
 };
