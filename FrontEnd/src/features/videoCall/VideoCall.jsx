@@ -50,11 +50,10 @@ export const VideoCall = () => {
     }, [localStream]);
 
     useEffect(() => {
-        if (remoteStream) {
-            console.log("Remote stream set:", remoteStream);
-            if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = remoteStream;
-            }
+        if (remoteStream && remoteVideoRef.current) {
+            console.log("✅ Setting remote video stream", remoteStream);
+            remoteVideoRef.current.srcObject = remoteStream;
+            remoteVideoRef.current.play().catch(err => console.error("❌ Remote video play error:", err));
         }
     }, [remoteStream]);
 
