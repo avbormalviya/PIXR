@@ -85,17 +85,20 @@ const registerUser = asyncHandler( async (req, res) => {
     if (descriptor) {
         const allUsers = await User.find({ descriptor: { $exists: true } });
 
-        let matched = null;
+        const THRESHOLD = 0.38; // tweak this based on test results
+
+        let matchedUser = null;
 
         for (let user of allUsers) {
-            const dist = euclideanDistance(user.descriptor, descriptor); // write this helper
-            if (dist < 0.6) {
-                matched = user;
+            const dist = euclideanDistance(user.descriptor, descriptor);
+            console.log(`Distance to ${user.userName}:`, dist); // helpful debug!
+            if (dist < THRESHOLD) {
+                matchedUser = user;
                 break;
             }
         }
 
-        if (matched) {
+        if (matchedUser) {
             throw new ApiError(400, "User already exists");
         }
 
