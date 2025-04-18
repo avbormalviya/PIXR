@@ -252,7 +252,7 @@ const loginUser = asyncHandler( async (req, res) => {
             }
         }
 
-        if (!matched) {
+        if (!matchedUser) {
             throw new ApiError(400, "User not found");
         }
 
@@ -262,7 +262,7 @@ const loginUser = asyncHandler( async (req, res) => {
             .status(200)
             .cookie("accessToken", accessToken, cookieOptions.accessToken)
             .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
-            .json(new ApiResponse(200, matched, "Login successful"));
+            .json(new ApiResponse(200, matchedUser, "Login successful"));
     }
 
     if ((!userName?.trim() && !email?.trim()) || !password?.trim()) {
