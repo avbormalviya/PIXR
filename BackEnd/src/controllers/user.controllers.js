@@ -216,7 +216,7 @@ const loginUser = asyncHandler( async (req, res) => {
     const trimmedUserName = userName?.trim();
     const trimmedEmail = email?.trim();
     const trimmedPassword = password?.trim();
-    const trimmedDescriptor = descriptor?.trim();
+    const trimmedDescriptor = descriptor
 
     if ((!trimmedUserName && !trimmedEmail) || (!trimmedPassword && !trimmedDescriptor)) {
         throw new ApiError(400, "All fields are required");
@@ -236,7 +236,7 @@ const loginUser = asyncHandler( async (req, res) => {
 
     if (password?.trim()) {
         isMatch = await user.matchPassword(password);
-    } else if (descriptor?.trim()) {
+    } else if (descriptor) {
         isMatch = await matchUser(user, descriptor);
     }
 
