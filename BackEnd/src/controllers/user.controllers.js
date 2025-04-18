@@ -18,10 +18,6 @@ import { Save } from "../models/bookmark.model.js";
 import { Comment } from "../models/comment.model.js";
 import { Report } from "../models/report.model.js";
 
-function generateGuestName() {
-    const randomPart = Math.random().toString(36).substring(2, 7); // 5 chars
-    return "guest_" + randomPart;
-}
 
 function euclideanDistance(a, b) {
     if (!a || !b || a.length !== b.length) return Infinity;
@@ -32,6 +28,18 @@ function euclideanDistance(a, b) {
         sum += diff * diff;
     }
     return Math.sqrt(sum);
+}
+
+async function matchUser(user, descriptor) {
+    if (descriptor) {
+        const THRESHOLD = 0.38; // tweak this based on test results
+
+        const dist = euclideanDistance(user.descriptor, descriptor);
+        console.log(`Distance to ${user.userName}:`, dist); // helpful debug!
+        return dist < THRESHOLD;
+    }
+
+    return false;
 }
 
 
@@ -80,45 +88,7 @@ const generateAccessAndRefreshToken = async (user_id) => {
 
 
 const registerUser = asyncHandler( async (req, res) => {
-    const { email, password, userName, descriptor } = req.body;
-
-    if (descriptor) {
-        const allUsers = await User.find({ descriptor: { $exists: true } });
-
-        const THRESHOLD = 0.38; // tweak this based on test results
-
-        let matchedUser = null;
-
-        for (let user of allUsers) {
-            const dist = euclideanDistance(user.descriptor, descriptor);
-            console.log(`Distance to ${user.userName}:`, dist); // helpful debug!
-            if (dist < THRESHOLD) {
-                matchedUser = user;
-                break;
-            }
-        }
-
-        if (matchedUser) {
-            throw new ApiError(400, "User already exists");
-        }
-
-        const plainDescriptor = Array.from(descriptor);
-
-        const newUser = await User.create({
-            descriptor: plainDescriptor,
-            userName: generateGuestName(),
-        })
-
-        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser._id);
-
-        return res
-            .status(200)
-            .cookie("accessToken", accessToken, cookieOptions.accessToken)
-            .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
-            .json(
-                new ApiResponse(200, newUser, "User verified successfully")
-            )
-    }
+    const { email, password, userName } = req.body;
 
     if (email?.trim() == "") {
         throw new ApiError(400, "Email cannot be empty");
@@ -202,14 +172,13 @@ const verifyEmail = asyncHandler( async (req, res) => {
 
 
 const userProfile = asyncHandler( async (req, res) => {
-    const { fullName, birthDate } = req.body;
+    const { fullName, birthDate, descriptor } = req.body;
 
-    if (
-        [ fullName, birthDate ].some(
-            (field) => field?.trim() === ""
-        )
-    ) {
-        throw new ApiError(400, `${field} cannot be empty`);
+    if (!fullName?.trim()) {
+        throw new ApiError(400, "Full name cannot be empty");
+    }
+    if (!birthDate?.trim()) {
+        throw new ApiError(400, "Birth date cannot be empty");
     }
 
     const profilePicLocalPath = req.file?.path;
@@ -228,6 +197,11 @@ const userProfile = asyncHandler( async (req, res) => {
     user.fullName = fullName;
     user.birthDate = birthDate;
     user.profilePic = profilePicCloudPath.secure_url;
+
+    if (descriptor) {
+        user.descriptor = descriptor;
+    }
+
     await user.save({ validateBeforeSave: false });
 
     res.status(200).json(
@@ -239,47 +213,18 @@ const userProfile = asyncHandler( async (req, res) => {
 const loginUser = asyncHandler( async (req, res) => {
     const { userName, email, password, descriptor } = req.body;
 
-    if (descriptor) {
-        const allUsers = await User.find({ descriptor: { $exists: true } });
+    const trimmedUserName = userName?.trim();
+    const trimmedEmail = email?.trim();
+    const trimmedPassword = password?.trim();
+    const trimmedDescriptor = descriptor?.trim();
 
-        const THRESHOLD = 0.38; // tweak this based on test results
-
-        let matchedUser = null;
-
-        for (let user of allUsers) {
-            const dist = euclideanDistance(user.descriptor, descriptor);
-            console.log(`Distance to ${user.userName}:`, dist); // helpful debug!
-            if (dist < THRESHOLD) {
-                matchedUser = user;
-                break;
-            }
-        }
-
-        if (!matchedUser) {
-            throw new ApiError(400, "User not found");
-        }
-
-        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(matchedUser._id);
-
-        return res
-            .status(200)
-            .cookie("accessToken", accessToken, cookieOptions.accessToken)
-            .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
-            .json(new ApiResponse(200, matchedUser, "Login successful"));
-    }
-
-    if ((!userName?.trim() && !email?.trim()) || !password?.trim()) {
+    if ((!trimmedUserName && !trimmedEmail) || (!trimmedPassword && !trimmedDescriptor)) {
         throw new ApiError(400, "All fields are required");
     }
 
     const query = {};
-
-    if (userName?.trim()) {
-        query.userName = userName.trim();
-    }
-    if (email?.trim()) {
-        query.email = email.trim();
-    }
+    if (trimmedUserName) query.userName = trimmedUserName;
+    if (trimmedEmail) query.email = trimmedEmail;
 
     const user = await User.findOne(query);
 
@@ -287,10 +232,17 @@ const loginUser = asyncHandler( async (req, res) => {
         throw new ApiError(400, "User not found");
     }
 
-    const isMatch = await user.matchPassword(password);
+    let isMatch = false;
+
+    if (password?.trim()) {
+        isMatch = await user.matchPassword(password);
+    } else if (descriptor?.trim()) {
+        isMatch = await matchUser(user, descriptor);
+    }
 
     if (!isMatch) {
-        throw new ApiError(400, "Incorrect password");
+        const type = trimmedPassword ? "password" : "face descriptor";
+        throw new ApiError(400, `Incorrect ${type}`);
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
