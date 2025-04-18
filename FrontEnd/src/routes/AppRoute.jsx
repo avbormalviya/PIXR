@@ -20,7 +20,9 @@ import { useEffect, useState } from "react";
 import { useGetUser } from "../utils/getUser";
 import { InitialLoading } from "../pages/initialLoading/InitialLoading";
 import { setUserData } from "../features/user/useSlice";
-import { Music } from "../features/music/music"
+import { Music } from "../layouts/music/Music";
+import { MusicHome } from "../features/music/MusicHome";
+import { MusicDetails } from "../features/music/MusicDetails";
 
 export const AppRoute = () => {
 
@@ -71,6 +73,10 @@ export const AppRoute = () => {
                             <Route path="settings" element={<Settings />}>
                                 <Route path=":type" element={<Settings />} />
                             </Route>
+                            <Route path="music" element={<Music />} >
+                                <Route index element={<MusicHome />} />
+                                <Route path=":type/:id" element={<MusicDetails/>} />
+                            </Route>
                         </Route>
 
                         <Route path="chat/call/:user" element={<VideoCall />} />
@@ -86,9 +92,6 @@ export const AppRoute = () => {
                     <Route path="signup/userDetails" element={<UserDetails />} />
                 </Route>
             </Routes>
-            {
-                user && <Music musicMainWindow={musicMainWindow} setMusicMainWindow={setMusicMainWindow} />
-            }
         </>
     );
 };

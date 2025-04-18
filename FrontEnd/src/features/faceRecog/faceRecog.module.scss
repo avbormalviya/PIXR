@@ -1,0 +1,93 @@
+
+.faceCaptureWrapper {
+    width: 40%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .faceCaptureHeader {
+        width: 100%;
+        padding: 1em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h2, .closeIcon {
+            font-size: 2em;
+            color: var(--text-primary);
+            text-transform: capitalize;
+        }
+
+        .closeIcon {
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+
+            &:hover {
+                color: var(--text-primary-50);
+            }
+        }
+    }
+
+    .faceCaptureBody {
+        width: 100%;
+        height: 100%;
+        position: relative;
+
+        .webcam {
+            height: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 20px;
+            object-fit: cover;
+            object-position: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            transform: scaleX(-1);
+        }
+
+        .overlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            transform: scaleX(-1);
+        }
+    }
+
+
+
+    .faceCaptureFooter {
+        width: 100%;
+        padding: 1em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .status, .captureButton {
+            width: fit-content;
+            padding: 0.5em 1em;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--text-primary-50);
+            z-index: 10;
+            background-color: var(--background-ternary);
+        }
+
+        .captureButton {
+            background-color: var(--primary-color);
+            color: var(--text-primary-70);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+
+            &:hover {
+                background-color: var(--background-ternary);
+            }
+        }
+    }
+}

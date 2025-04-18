@@ -6,5 +6,4 @@ import { HandGestureProvider } from './context/HandContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <HandGestureProvider><App /></HandGestureProvider>
-
 )

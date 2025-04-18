@@ -18,6 +18,7 @@ import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import SmartDisplayRoundedIcon from '@mui/icons-material/SmartDisplayRounded';
 import { Badge } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
 
 export const Navbar = () => {
 
@@ -32,7 +33,7 @@ export const Navbar = () => {
 
     const menuRefs = useRef([]);
 
-    
+
 
     useEffect(() => {
         const handleResize = () => setIsVertical(window.innerWidth < 768);
@@ -54,9 +55,9 @@ export const Navbar = () => {
 
     useEffect(() => {
         const currentPath = location.pathname;
-        
+
         let newIndex;
-        
+
         if (isVertical) {
             newIndex = menuItems.horizontal.findIndex(item => item.to === currentPath);
         }
@@ -66,9 +67,9 @@ export const Navbar = () => {
 
         if (newIndex !== -1) {
             setActiveIndex(newIndex);
-        } 
+        }
         else {
-            currentPath.includes("/create") ? setActiveIndex(5) : currentPath.includes("/settings") ? setActiveIndex(6) : setActiveIndex(0);
+            currentPath.includes("/create") ? setActiveIndex(4) : currentPath.includes("/settings") ? setActiveIndex(7) : currentPath.includes("/music") ? setActiveIndex(3) : setActiveIndex(0);
         }
     }, [location.pathname, isVertical, user]);
 
@@ -83,21 +84,23 @@ export const Navbar = () => {
         horizontal: [
             { to:"/", icon: HomeRoundedIcon, label: 'Home' },
             { to:"/search", icon: SearchRoundedIcon, label: 'Search'},
-            { to:"/create/post", icon: AddCircleRoundedIcon, label: 'Create' },
             { to:"/reels", icon: SmartDisplayRoundedIcon, label: 'Reels' },
+            { to: "/music", icon: MusicNoteRoundedIcon, label: 'Music' },
+            { to:"/create/post", icon: AddCircleRoundedIcon, label: 'Create' },
             { to:`/user/${user?.userName}`, icon: user?.profilePic, label: 'Profile', class: 'Profile_Pic' }
         ],
         vertical: [
             { to: "/", icon: HomeRoundedIcon, label: 'Home' },
             { to: "/search", icon: SearchRoundedIcon, label: 'Search'},
             { to: "/reels", icon: SmartDisplayRoundedIcon, label: 'Reels' },
-            { to: "/chat", icon: ChatIcon, label: 'Message' },
-            { to: "/notifications", icon: FavoriteRoundedIcon, label: 'Notification'},
+            { to: "/music", icon: MusicNoteRoundedIcon, label: 'Music' },
             { to: "/create/post", icon: AddCircleRoundedIcon, label: 'Create' },
+            { to: "/notifications", icon: FavoriteRoundedIcon, label: 'Notification'},
+            { to: "/chat", icon: ChatIcon, label: 'Message' },
             { to: `/user/${user?.userName}`, icon: user?.profilePic, label: 'Profile', class: 'Profile_Pic' }
         ]
     };
-    
+
     const currentMenuItems = isVertical ? menuItems.horizontal : menuItems.vertical;
 
     return (

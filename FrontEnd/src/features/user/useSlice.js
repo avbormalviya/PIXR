@@ -52,7 +52,7 @@ const userSlice = createSlice({
         setFollowing: (state, action) => {
             state.followings = action.payload;
         },
-        
+
         setSuggestedUsers: (state, action) => {
             state.suggestedUsers = action.payload;
         },

@@ -18,4 +18,9 @@ export default defineConfig({
         assetsDir: 'assets',
         emptyOutDir: true,
     },
+    server: {
+        proxy: {
+            '/api': 'http://localhost:5000',
+        },
+    }
 });
