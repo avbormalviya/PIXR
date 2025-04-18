@@ -198,8 +198,11 @@ const userProfile = asyncHandler( async (req, res) => {
     user.birthDate = birthDate;
     user.profilePic = profilePicCloudPath.secure_url;
 
-    if (descriptor) {
-        user.descriptor = descriptor;
+    const plainDescriptor = Array.from(descriptor);
+
+
+    if (plainDescriptor) {
+        user.descriptor = plainDescriptor;
     }
 
     await user.save({ validateBeforeSave: false });
