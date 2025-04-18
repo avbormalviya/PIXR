@@ -256,7 +256,7 @@ const loginUser = asyncHandler( async (req, res) => {
             throw new ApiError(400, "User not found");
         }
 
-        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(matched._id);
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(matchedUser._id);
 
         return res
             .status(200)
