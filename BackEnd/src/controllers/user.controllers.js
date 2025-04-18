@@ -23,16 +23,17 @@ function generateGuestName() {
     return "guest_" + randomPart;
 }
 
-function euclideanDistance(arr1, arr2) {
-    if (!arr1 || !arr2 || arr1.length !== arr2.length) return Infinity;
+function euclideanDistance(a, b) {
+    if (!a || !b || a.length !== b.length) return Infinity;
 
     let sum = 0;
-    for (let i = 0; i < arr1.length; i++) {
-        const diff = arr1[i] - arr2[i];
+    for (let i = 0; i < a.length; i++) {
+        const diff = a[i] - b[i];
         sum += diff * diff;
     }
     return Math.sqrt(sum);
 }
+
 
 const cookieOptions = {
     accessToken: {
@@ -98,8 +99,10 @@ const registerUser = asyncHandler( async (req, res) => {
             throw new ApiError(400, "User already exists");
         }
 
+        const plainDescriptor = Array.from(descriptor);
+
         const newUser = await User.create({
-            descriptor,
+            descriptor: plainDescriptor,
             userName: generateGuestName(),
         })
 
@@ -236,12 +239,15 @@ const loginUser = asyncHandler( async (req, res) => {
     if (descriptor) {
         const allUsers = await User.find({ descriptor: { $exists: true } });
 
-        let matched = null;
+        const THRESHOLD = 0.38; // tweak this based on test results
+
+        let matchedUser = null;
 
         for (let user of allUsers) {
             const dist = euclideanDistance(user.descriptor, descriptor);
-            if (dist < 0.6) {
-                matched = user;
+            console.log(`Distance to ${user.userName}:`, dist); // helpful debug!
+            if (dist < THRESHOLD) {
+                matchedUser = user;
                 break;
             }
         }
