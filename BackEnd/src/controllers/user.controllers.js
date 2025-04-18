@@ -110,7 +110,7 @@ const registerUser = asyncHandler( async (req, res) => {
             .cookie("accessToken", accessToken, cookieOptions.accessToken)
             .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
             .json(
-                new ApiResponse(200, user, "User verified successfully")
+                new ApiResponse(200, newUser, "User verified successfully")
             )
     }
 
