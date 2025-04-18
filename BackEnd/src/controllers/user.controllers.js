@@ -198,10 +198,10 @@ const userProfile = asyncHandler( async (req, res) => {
     user.birthDate = birthDate;
     user.profilePic = profilePicCloudPath.secure_url;
 
-    const plainDescriptor = Array.from(descriptor);
+    let plainDescriptor = [];
 
-
-    if (plainDescriptor) {
+    if (descriptor) {
+        plainDescriptor = descriptor.split(",").map(Number);
         user.descriptor = plainDescriptor;
     }
 
@@ -219,9 +219,8 @@ const loginUser = asyncHandler( async (req, res) => {
     const trimmedUserName = userName?.trim();
     const trimmedEmail = email?.trim();
     const trimmedPassword = password?.trim();
-    const trimmedDescriptor = descriptor
 
-    if ((!trimmedUserName && !trimmedEmail) || (!trimmedPassword && !trimmedDescriptor)) {
+    if ((!trimmedUserName && !trimmedEmail) || (!trimmedPassword && !descriptor)) {
         throw new ApiError(400, "All fields are required");
     }
 
