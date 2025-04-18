@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getRandomImageUrl } from "../../utils/getRandomImg";
 
 export const Img = ({ url, alt, ...props }) => {
     const [image, setImage] = useState(null);
@@ -37,7 +38,7 @@ export const Img = ({ url, alt, ...props }) => {
         <img
             src={image}
             alt={alt}
-            onError={(e) => {setImage("https://static.vecteezy.com/system/resources/previews/020/765/399/original/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"); e.target.onerror = null; }}
+            onError={(e) => {setImage(getRandomImageUrl()); e.target.onerror = null; }}
             {...props}
         />
     );
