@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux"
 
 import { setVerificationCode } from "../../features/user/useSlice"
 
+
 export const SignUp = () => {
     const navigate = useNavigate();
 
@@ -26,7 +27,7 @@ export const SignUp = () => {
             const { data } = await registerUser({ email, userName: username, password }).unwrap();
             dispatch(setVerificationCode(data.verificationCode));
             navigate("/auth/signup/verifyEmail");
-        } 
+        }
         catch (err) {
             console.log(err);
         }
@@ -46,7 +47,6 @@ export const SignUp = () => {
                 </div>
 
                 <button type="submit">Create account</button>
-
             </form>
         </>
     )

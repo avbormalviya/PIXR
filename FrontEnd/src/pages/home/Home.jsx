@@ -23,11 +23,11 @@ export const Home = () => {
             <section className={style.navbar}>
                 <Navbar />
             </section>
-            
+
             <section className={style.outlet}>
                 <Outlet />
             </section>
-            
+
             {location.pathname !== '/chat' && (
                 <section className={style.suggest} >
                     <Suggest_desktop />
