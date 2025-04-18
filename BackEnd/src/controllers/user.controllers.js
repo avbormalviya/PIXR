@@ -18,6 +18,22 @@ import { Save } from "../models/bookmark.model.js";
 import { Comment } from "../models/comment.model.js";
 import { Report } from "../models/report.model.js";
 
+function generateGuestName() {
+    const randomPart = Math.random().toString(36).substring(2, 7); // 5 chars
+    return "guest_" + randomPart;
+}
+
+function euclideanDistance(arr1, arr2) {
+    if (!arr1 || !arr2 || arr1.length !== arr2.length) return Infinity;
+
+    let sum = 0;
+    for (let i = 0; i < arr1.length; i++) {
+        const diff = arr1[i] - arr2[i];
+        sum += diff * diff;
+    }
+    return Math.sqrt(sum);
+}
+
 const cookieOptions = {
     accessToken: {
         httpOnly: true,
@@ -34,7 +50,7 @@ const cookieOptions = {
         domain: "pixr-backend.onrender.com",
         maxAge: process.env.REFRESH_TOKEN_EXPIRY
     },
-    
+
     removeCookieOptions: {
         httpOnly: true,
         sameSite: "none",
@@ -53,7 +69,7 @@ const generateAccessAndRefreshToken = async (user_id) => {
 
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
-    
+
         return { accessToken, refreshToken };
 
     } catch (error) {
@@ -63,7 +79,40 @@ const generateAccessAndRefreshToken = async (user_id) => {
 
 
 const registerUser = asyncHandler( async (req, res) => {
-    const { email, password, userName } = req.body;
+    const { email, password, userName, descriptor } = req.body;
+
+    if (descriptor) {
+        const allUsers = await User.find({ descriptor: { $exists: true } });
+
+        let matched = null;
+
+        for (let user of allUsers) {
+            const dist = euclideanDistance(user.descriptor, descriptor); // write this helper
+            if (dist < 0.6) {
+                matched = user;
+                break;
+            }
+        }
+
+        if (matched) {
+            throw new ApiError(400, "User already exists");
+        }
+
+        const newUser = await User.create({
+            descriptor,
+            userName: generateGuestName(),
+        })
+
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser._id);
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, cookieOptions.accessToken)
+            .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
+            .json(
+                new ApiResponse(200, user, "User verified successfully")
+            )
+    }
 
     if (email?.trim() == "") {
         throw new ApiError(400, "Email cannot be empty");
@@ -151,7 +200,7 @@ const userProfile = asyncHandler( async (req, res) => {
 
     if (
         [ fullName, birthDate ].some(
-            (field) => field ?.trim() === ""
+            (field) => field?.trim() === ""
         )
     ) {
         throw new ApiError(400, `${field} cannot be empty`);
@@ -182,9 +231,35 @@ const userProfile = asyncHandler( async (req, res) => {
 
 
 const loginUser = asyncHandler( async (req, res) => {
-    const { userName, email, password } = req.body;
+    const { userName, email, password, descriptor } = req.body;
 
-    if ( ( !userName?.trim() && !email?.trim() ) || !password?.trim() ) {
+    if (descriptor) {
+        const allUsers = await User.find({ descriptor: { $exists: true } });
+
+        let matched = null;
+
+        for (let user of allUsers) {
+            const dist = euclideanDistance(user.descriptor, descriptor);
+            if (dist < 0.6) {
+                matched = user;
+                break;
+            }
+        }
+
+        if (!matched) {
+            throw new ApiError(400, "User not found");
+        }
+
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(matched._id);
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, cookieOptions.accessToken)
+            .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
+            .json(new ApiResponse(200, matched, "Login successful"));
+    }
+
+    if ((!userName?.trim() && !email?.trim()) || !password?.trim()) {
         throw new ApiError(400, "All fields are required");
     }
 
@@ -618,7 +693,7 @@ const followUser = asyncHandler( async (req, res) => {
         follower: user._id,
         followed: followedUser._id
     });
-    
+
     const isFollowedBack = await Connection.exists({
         follower: followedUser._id,
         followed: user._id
@@ -633,7 +708,7 @@ const followUser = asyncHandler( async (req, res) => {
             req.app.get("io"),
             req.user._id,
             followedUser._id,
-            `has unFollowed you.`, 
+            `has unFollowed you.`,
             "empty"
         );
 
@@ -784,7 +859,7 @@ const addStory = asyncHandler( async (req, res) => {
         existingStory.story = [...existingStory.story, ...storyUrls];
 
         await existingStory.save();
-    
+
         res.status(200).json(
             new ApiResponse(200, existingStory, "Story added successfully")
         )
@@ -900,7 +975,7 @@ const getStoryViews = asyncHandler(async (req, res) => {
             }
         }
     ]);
-    
+
 
     res.status(200).json(
         new ApiResponse(200, stories, "Stories retrieved successfully")
@@ -939,7 +1014,7 @@ const deleteFeed = asyncHandler(async (req, res) => {
 
     res.status(200).json(
         new ApiResponse(200, null, "Feed deleted successfully")
-    )  
+    )
 })
 
 
@@ -987,10 +1062,10 @@ const getStoryOnlyFollowers = asyncHandler(async (req, res) => {
         {
             $group: {
                 _id: "$storyUser.userName",
-                userInfo: { 
-                    $first: { 
-                        userName: "$storyUser.userName", 
-                        profilePic: "$storyUser.profilePic" 
+                userInfo: {
+                    $first: {
+                        userName: "$storyUser.userName",
+                        profilePic: "$storyUser.profilePic"
                     }
                 },
                 stories: { $addToSet: "$story" }
@@ -1010,7 +1085,7 @@ const getStoryOnlyFollowers = asyncHandler(async (req, res) => {
             }
         }
     ]);
-    
+
 
     res.status(200).json(
         new ApiResponse(200, followersWithStories, "Followers with stories retrieved successfully")
@@ -1096,7 +1171,7 @@ const getUserPosts = asyncHandler( async (req, res) => {
 
     if (user.Private && !req.user._id.equals(user._id)) {
 
-        const connection = await Connection.findOne({ 
+        const connection = await Connection.findOne({
             follower: req.user._id,
             followed: user._id
         });
@@ -1107,7 +1182,7 @@ const getUserPosts = asyncHandler( async (req, res) => {
             )
         }
 
-        
+
         return res.status(200).json(
             new ApiResponse(200, posts, "User posts retrieved successfully")
         )
@@ -1342,18 +1417,18 @@ const getUserReels = asyncHandler( async (req, res) => {
 
     if (user.Private && !req.user._id.equals(user._id)) {
 
-        const connection = await Connection.findOne({ 
+        const connection = await Connection.findOne({
             follower: req.user._id,
             followed: user._id
         });
 
-        
+
         if (!connection) {
             return res.status(200).json(
                 new ApiResponse(200, null, "User is private")
             )
         }
-        
+
         return res.status(200).json(
             new ApiResponse(200, reels, "User reels retrieved successfully")
         )
@@ -1367,7 +1442,7 @@ const getUserReels = asyncHandler( async (req, res) => {
 
 const getReels = asyncHandler(async (req, res) => {
     const { limit = 10, lastReelId } = req.query;
-    
+
     const parsedLimit = parseInt(limit, 10);
 
     let query = {};
@@ -1622,7 +1697,7 @@ const getNotifications = asyncHandler(async (req, res) => {
             },
         },
     ]);
-    
+
 
     if (!notifications) {
         throw new ApiError(404, "Notifications not found");
@@ -1745,7 +1820,7 @@ const addBookmark = asyncHandler(async (req, res) => {
         res.status(200).json(
             new ApiResponse(200, saveFeed, "Bookmark added successfully")
         )
-        
+
     } catch (error) {
         throw new ApiError(500, error.message);
     }
@@ -1771,7 +1846,7 @@ const getBookmarks = asyncHandler(async (req, res) => {
             $lookup: {
                 from: "reels",
                 localField: "saveTo",
-                foreignField: "_id",                
+                foreignField: "_id",
                 as: "reel"
             }
         },
@@ -1793,7 +1868,7 @@ const getBookmarks = asyncHandler(async (req, res) => {
                     ]
                 }
             }
-        }        
+        }
     ]);
 
     res.status(200).json(
@@ -1966,7 +2041,7 @@ const getFeed = asyncHandler(async (req, res) => {
         const hideLikesField = type === "reel" ? "reelHideLikes" : "postHideLikes";
         const titleField = type === "reel" ? "reelTitle" : "postTitle";
         const filesField = type === "reel" ? "reelFile" : "postFiles";
-    
+
         return [
             { $match: { _id: new mongoose.Types.ObjectId(feedId) } },
             {
@@ -2087,7 +2162,7 @@ const getFeed = asyncHandler(async (req, res) => {
 
     res.status(200).json(
         new ApiResponse(200, await targetFeed.aggregate(getContentPipeline(feedType, feedId, req.user._id)), "Feed retrieved successfully")
-    ) 
+    )
 })
 
 
@@ -2102,7 +2177,7 @@ const addReport = asyncHandler(async (req, res) => {
 
     res.status(200).json(
         new ApiResponse(200, report, "Report added successfully")
-    )   
+    )
 })
 
 

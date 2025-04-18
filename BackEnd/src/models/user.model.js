@@ -4,6 +4,11 @@ import jwt from "jsonwebtoken";
 
 const userSchema  = new Schema(
     {
+        descriptor: {
+            type: Array,
+            default: []
+        },
+
         email: {
             type: String,
             unique: true,
@@ -28,7 +33,6 @@ const userSchema  = new Schema(
 
         password: {
             type: String,
-            required: true
         },
 
         profilePic: {
