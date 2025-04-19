@@ -1,3 +1,37 @@
+
+.toolbar {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    padding: 0.8em;
+    border-radius: 15px;
+    background-color: var(--background-ternary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+
+    .toolbar_icon {
+        width: 40px;
+        height: 40px;
+
+        font-size: 1em;
+        border-radius: 10px;
+        padding: 1em;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: var(--text-primary-50);
+        background-color: var(--background-secondary);
+        cursor: pointer;
+    }
+}
+
 .buttons_container {
     position: absolute;
     right: 20px;

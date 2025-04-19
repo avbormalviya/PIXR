@@ -3,12 +3,16 @@ import { useState, useCallback, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from "../../utils/getCropImage";
 import style from "./cropper.module.scss";
-
+import CropRotateRoundedIcon from '@mui/icons-material/CropRotateRounded';
+import FlipRoundedIcon from '@mui/icons-material/FlipRounded';
 
 export const ImageCropper = ({ imageSrc, onCropComplete, aspect }) => {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [rotation, setRotation] = useState(0);
+    const [flip, setFlip] = useState({ horizontal: false, vertical: false });
+
 
     const onCropChange = (crop) => {
         setCrop(crop);
@@ -24,16 +28,18 @@ export const ImageCropper = ({ imageSrc, onCropComplete, aspect }) => {
 
     const handleCrop = useCallback(async () => {
         try {
-            const { src, file } = await getCroppedImg(imageSrc, croppedAreaPixels);
+            const { src, file } = await getCroppedImg(imageSrc, croppedAreaPixels, rotation, flip);
             onCropComplete({ src, file });
         } catch (e) {
             console.error(e);
         }
-    }, [croppedAreaPixels, imageSrc, onCropComplete]);
+    }, [croppedAreaPixels, imageSrc, onCropComplete, rotation, flip]);
+
 
     return (
         <FloatingCon>
-            { aspect && <Cropper
+            { aspect &&
+                <Cropper
                     image={imageSrc}
                     crop={crop}
                     zoom={zoom}
@@ -42,9 +48,35 @@ export const ImageCropper = ({ imageSrc, onCropComplete, aspect }) => {
                     onCropChange={onCropChange}
                     onCropComplete={onCropCompleteCallback}
                     onZoomChange={onZoomChange}
-                    style={{ width: "100%", height: "100%" }}
+                    style={{
+                        containerStyle: {
+                            transform: `
+                                rotate(${rotation}deg)
+                                scaleX(${flip.horizontal ? -1 : 1})
+                                scaleY(${flip.vertical ? -1 : 1})
+                            `
+                        }
+                    }}
                 />
             }
+
+            <div className={style.toolbar}>
+                <CropRotateRoundedIcon
+                    className={style.toolbar_icon}
+                    onClick={() => setRotation((prev) => (prev + 90) % 360)}
+                />
+                <FlipRoundedIcon
+                    className={style.toolbar_icon}
+                    onClick={() => {
+                        if (rotation % 180 === 0) {
+                            setFlip((prev) => ({ ...prev, horizontal: !prev.horizontal }));
+                        } else {
+                            setFlip((prev) => ({ ...prev, vertical: !prev.vertical }));
+                        }
+                    }}
+                />
+
+            </div>
 
             <div className={style.buttons_container}>
                 <button className={style.cancel_btn} onClick={() => onCropComplete(null)}>

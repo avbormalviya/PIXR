@@ -13,8 +13,10 @@ import { ImageCropper } from '../cropper/Cropper'
 import { addReel } from '../../utils/addReel'
 import { createThumbnail } from '../../utils/createThumbnail'
 import { Img } from '../../components/img/Img'
+import { FILTER_PRESETS } from "./filterPresets";
 
-export const Create = () => {
+
+export const  Create = () => {
 
     const navigate = useNavigate();
 
@@ -23,6 +25,7 @@ export const Create = () => {
     const { content } = useParams();
 
     const inputRef = useRef(null);
+    const ref = useRef(null);
 
     const [index, setIndex] = useState(0);
     const [mediaIndex, setMediaIndex] = useState(0);
@@ -35,6 +38,71 @@ export const Create = () => {
     const [hideViews, setHideViews] = useState(false);
     const [disableComments, setDisableComments] = useState(false);
     const [aiLabel, setAILabel] = useState(false);
+
+    const [showFilters, setShowFilters] = useState(false);
+    const [showAdjustments, setShowAdjustments] = useState(false);
+
+    const [filter, setFilter] = useState('none');
+    const [brightness, setBrightness] = useState(100);
+    const [contrast, setContrast] = useState(100);
+    const [saturation, setSaturation] = useState(100);
+    const [blur, setBlur] = useState(0);
+    const [grayscale, setGrayscale] = useState(0);
+    const [sepia, setSepia] = useState(0);
+    const [hue, setHue] = useState(0);
+    const [invert, setInvert] = useState(0);
+    const [opacity, setOpacity] = useState(100);
+
+    const [isFocus, setIsFocus] = useState(false);
+
+    const getFilterString = (preset) => {
+        return `
+            brightness(${preset.brightness}%)
+            contrast(${preset.contrast}%)
+            saturate(${preset.saturation}%)
+            blur(${preset.blur}px)
+            grayscale(${preset.grayscale}%)
+            sepia(${preset.sepia}%)
+            hue-rotate(${preset.hue}deg)
+            invert(${preset.invert}%)
+            opacity(${preset.opacity}%)
+        `.trim();
+    };
+
+    const currentFilters = media[mediaIndex]?.filters;
+    const filterStyle = currentFilters ? {
+        filter: `
+    brightness(${currentFilters.brightness}%)
+    contrast(${currentFilters.contrast}%)
+    saturate(${currentFilters.saturation}%)
+    blur(${currentFilters.blur}px)
+    grayscale(${currentFilters.grayscale}%)
+    sepia(${currentFilters.sepia}%)
+    hue-rotate(${currentFilters.hue}deg)
+    invert(${currentFilters.invert}%)
+    opacity(${currentFilters.opacity}%)
+`
+
+    } : {};
+
+    const adjustmentGroups = [
+        [
+            { label: 'Brightness', min: 0, max: 200 },
+            { label: 'Contrast', min: 0, max: 200 },
+            { label: 'Saturation', min: 0, max: 200 },
+        ],
+        [
+            { label: 'Blur', min: 0, max: 10 },
+            { label: 'Grayscale', min: 0, max: 100 },
+            { label: 'Sepia', min: 0, max: 100 },
+        ],
+        [
+            { label: 'Hue', min: 0, max: 360 },
+            { label: 'Invert', min: 0, max: 100 },
+            { label: 'Opacity', min: 0, max: 100 },
+        ]
+    ];
+
 
     const buttons = [
         {
@@ -65,6 +133,18 @@ export const Create = () => {
 
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (ref.current && !ref.current.contains(event.target)) {
+                setShowFilters(false);
+                setShowAdjustments(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
         const index = buttons.findIndex(button => button.name.toLowerCase() === content);
 
         let newMedia = media;
@@ -78,18 +158,32 @@ export const Create = () => {
         };
 
         setMedia(newMedia);
-        
+
         if (index) setIndex(index);
     }, [content])
 
 
+    const updateFiltersForMedia = (preset) => {
+        const updatedMedia = [...media];
+        updatedMedia[mediaIndex] = {
+            ...updatedMedia[mediaIndex],
+            filters: { ...preset }
+        };
+        setMedia(updatedMedia);
+    };
+
+    const isCurrentFilter = (preset) => {
+        const current = media[mediaIndex]?.filters;
+        return Object.keys(preset).every(k => preset[k] == current[k]);
+    };
+
     const handleMediaAdd = async (e) => {
         let filesArray = Array.from(e.target.files);
-    
+
         if (media.length + filesArray.length > buttons[index].limit) {
             filesArray = filesArray.splice(0, buttons[index].limit - media.length);
         }
-    
+
         const updatedMedia = [
             ...media,
             ...await Promise.all(
@@ -97,30 +191,49 @@ export const Create = () => {
                     url: URL.createObjectURL(file),
                     thumbnail: file.type.startsWith('video/') ? await createThumbnail(file) : URL.createObjectURL(file),
                     type: file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'unknown',
-                    originalFile: file
+                    originalFile: file,
+                    filters: {
+                        brightness: 100,
+                        contrast: 100,
+                        saturation: 100,
+                        blur: 0,
+                        grayscale: 0,
+                        sepia: 0,
+                        hue: 0,
+                        invert: 0,
+                        opacity: 100
+                    }
                 }))
             )
         ];
-    
+
         setMedia(updatedMedia);
-    
+
         inputRef.current.value = '';
     };
 
-    
+    const updateFilterValue = (key, value) => {
+        const updatedMedia = [...media];
+        updatedMedia[mediaIndex].filters = {
+            ...updatedMedia[mediaIndex].filters,
+            [key]: value,
+        };
+        setMedia(updatedMedia);
+    };
+
 
     const handleMediaRemove = (e, index) => {
         e.preventDefault();
         e.stopPropagation();
 
         const newMedia = media.filter((_, i) => i !== index);
-        
+
         const newMediaIndex = (mediaIndex > 0 && mediaIndex === index) ? mediaIndex - 1 : mediaIndex;
-        
+
         setMediaIndex(newMediaIndex);
         setMedia(newMedia);
     }
-    
+
 
     const handleMediaClick = (index) => {
         setMediaIndex(index);
@@ -147,42 +260,42 @@ export const Create = () => {
     const handleUpload = async () => {
         navigate('/');
 
-        
         try {
             dispatch(setFeedUpload(true));
 
+            // Step 1: Apply filters to media before uploading
+            const processedMedia = await applyFiltersToMedia(media, media[0]?.filters);
+
             if (index === 0) {
                 const formData = new FormData();
-                media.forEach((media) => {
-                    formData.append('postFiles', media.originalFile);
+                processedMedia.forEach((mediaItem) => {
+                    formData.append('postFiles', mediaItem);
                 });
-    
+
                 formData.append('postTitle', caption);
                 formData.append('postHideLikes', hideLikes);
                 formData.append('postHideViews', hideViews);
                 formData.append('postCommentsDisabled', disableComments);
                 formData.append('postAiLabel', aiLabel);
-    
+
                 await addPost(formData);
-            }
-            else if (index === 1) {
+            } else if (index === 1) {
                 const formData = new FormData();
-                formData.append('reelFiles', media[0].originalFile);
-    
+                formData.append('reelFiles', processedMedia[0]);
+
                 formData.append('reelTitle', caption);
                 formData.append('reelHideLikes', hideLikes);
                 formData.append('reelHideViews', hideViews);
                 formData.append('reelCommentsDisabled', disableComments);
                 formData.append('reelAiLabel', aiLabel);
-    
+
                 await addReel(formData);
-            }
-            else if (index === 2) {
+            } else if (index === 2) {
                 const formData = new FormData();
-                media.forEach((media) => {
-                    formData.append('storyFiles', media.originalFile);
+                processedMedia.forEach((mediaItem) => {
+                    formData.append('storyFiles', mediaItem);
                 });
-                
+
                 dispatch(setMemoirLoading(true));
                 await addMemoir(formData);
                 dispatch(setMemoirLoading(false));
@@ -193,8 +306,120 @@ export const Create = () => {
         } finally {
             dispatch(setFeedUpload(false));
         }
-    }
-    
+    };
+
+    // Function to apply filters to video files
+    const applyFiltersToMedia = async (mediaArray, filterPreset) => {
+        const processedMedia = [];
+
+        for (const mediaItem of mediaArray) {
+            const file = mediaItem.originalFile;
+
+            if (file.type.startsWith("video")) {
+                // Process video files
+                const processedVideo = await applyFilterToVideo(file, filterPreset);
+                processedMedia.push(processedVideo);
+            } else {
+                // Process image files
+                const processedImage = await applyFilterToFile(file, filterPreset);
+                processedMedia.push(processedImage);
+            }
+        }
+
+        return processedMedia;
+    };
+
+    // Function to apply a filter to a video file
+    const applyFilterToVideo = (file, filterPreset) => {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            const objectURL = URL.createObjectURL(file);
+            video.src = objectURL;
+
+            video.onloadeddata = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const width = video.videoWidth;
+                const height = video.videoHeight;
+                canvas.width = width;
+                canvas.height = height;
+
+                // Set up a media stream to draw video frames
+                video.play();
+
+                // Apply the filter to each frame of the video
+                const applyFrameFilter = () => {
+                    if (!video.paused && !video.ended) {
+                        // Draw the current video frame to the canvas
+                        ctx.drawImage(video, 0, 0, width, height);
+
+                        // Apply the filter (e.g., brightness, contrast)
+                        const filterString = `brightness(${filterPreset.brightness}%) contrast(${filterPreset.contrast}%) saturate(${filterPreset.saturation}%) blur(${filterPreset.blur}px) grayscale(${filterPreset.grayscale}%) sepia(${filterPreset.sepia}%) hue-rotate(${filterPreset.hue}deg) invert(${filterPreset.invert}%) opacity(${filterPreset.opacity}%)`;
+                        ctx.filter = filterString;
+
+                        // Keep drawing the frames
+                        requestAnimationFrame(applyFrameFilter);
+                    } else {
+                        // Convert the final frame to a Blob
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, { type: file.type }));
+                        }, file.type);
+                    }
+                };
+
+                // Start applying filters to frames
+                applyFrameFilter();
+            };
+
+            video.onerror = (err) => {
+                reject(err);
+            };
+        });
+    };
+
+    const applyFilterToFile = (file, filterPreset) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                img.src = reader.result;
+            };
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+
+                // Construct the CSS-like filter string from preset
+                const filterString = `
+                    brightness(${filterPreset.brightness}%)
+                    contrast(${filterPreset.contrast}%)
+                    saturate(${filterPreset.saturation}%)
+                    blur(${filterPreset.blur}px)
+                    grayscale(${filterPreset.grayscale}%)
+                    sepia(${filterPreset.sepia}%)
+                    hue-rotate(${filterPreset.hue}deg)
+                    invert(${filterPreset.invert}%)
+                    opacity(${filterPreset.opacity}%)
+                `;
+
+                ctx.filter = filterString.trim();
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob((blob) => {
+                    if (!blob) return reject("Image processing failed");
+                    const newFile = new File([blob], file.name, { type: file.type });
+                    resolve(newFile);
+                }, file.type);
+            };
+
+            img.onerror = (err) => reject(err);
+            reader.readAsDataURL(file);
+        });
+    };
+
 
     const mediaVariants = {
         initial: {
@@ -239,27 +464,25 @@ export const Create = () => {
             <section className={style.create}>
                 <div className={style.create_container}>
                     <div className={style.fileWrapper}>
-                        
-                        { media?.length > 0 ?
-                            (
-                                media[mediaIndex]?.type === 'image' ? (
-                                    <Img className={style.overViewMedia} url={media[mediaIndex]?.url} alt="media" />
-                                ) : (
-                                    <video className={style.overViewMedia} src={media[mediaIndex]?.url} autoPlay loop />
-                                )
+
+                        { media?.length > 0 ? (
+                            media[mediaIndex]?.type === 'image' ? (
+                                <Img className={style.overViewMedia} url={media[mediaIndex]?.url} alt="media" style={filterStyle} />
                             ) : (
-                                <h1 className={style.warning_text}>No media added</h1>
+                                <video className={style.overViewMedia} src={media[mediaIndex]?.url} autoPlay loop style={filterStyle} />
                             )
-                        }
+                        ) : (
+                            <h1 className={style.warning_text}>No media added</h1>
+                        )}
 
                         { media?.length > 0 && media[mediaIndex].type === 'image' && (
                             <div className={style.toolbar}>
                                 <i onClick={() => setShowCrop(true)} className="material-symbols-rounded">crop</i>
-                                {/* <i onClick={() => setShowCrop(true)} className="material-symbols-rounded">tune</i>
-                                <i onClick={() => setShowCrop(true)} className="material-symbols-rounded">music_note</i> */}
+                                <i onClick={() => setShowFilters(!showFilters)} className="material-symbols-rounded">palette</i>
+                                <i onClick={() => setShowAdjustments(!showAdjustments)} className="material-symbols-rounded">tune</i>
                             </div>
                         )}
-                        
+
                         <AnimatePresence>
                             { showSettings && (
                                 <motion.section
@@ -274,9 +497,6 @@ export const Create = () => {
                                         exit={{ scale: 0 }}
                                         className={style.settings_wrapper}
                                     >
-                                        {
-                                            console.log(mediaIndex)
-                                        }
                                         { index == 0 || index == 1  ? (
                                             <>
                                                 <Input state={caption} setState={setCaption} icon="stylus" style_class={style.input} type="text" placeholder="Caption" />
@@ -315,6 +535,54 @@ export const Create = () => {
                                 </motion.section>
                             )}
                         </AnimatePresence>
+
+                        <div ref={ref}>
+                            {showFilters && (
+                                <div className={style.filterPanel}>
+                                    {FILTER_PRESETS.map((preset, filterIndex) => (
+                                        <div
+                                            key={filterIndex}
+                                            className={`${style.filterItem} ${isCurrentFilter(preset) ? style.activeFilter : ''}`}
+                                            onClick={() => updateFiltersForMedia(preset)}
+                                        >
+                                            <Img
+                                                url={media[mediaIndex]?.url}
+                                                alt={preset.name}
+                                                style={{ filter: getFilterString(preset) }}
+                                            />
+                                            <div className={style.filterName}>{preset.name}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+
+                            {showAdjustments && (
+                                <motion.div className={style.adjustmentPanel} animate={{ opacity: isFocus ? 0.2 : 1 }}>
+                                    {adjustmentGroups.map((group, groupIndex) => (
+                                        <div key={groupIndex} className={style.adjustmentContainer}>
+                                            {group.map(({ label, min, max }) => {
+                                                const key = label.toLowerCase();
+                                                return (
+                                                    <div key={label} className={style.adjustmentItem}>
+                                                        <label>{label}</label>
+                                                        <input
+                                                            type="range"
+                                                            min={min}
+                                                            max={max}
+                                                            value={media[mediaIndex]?.filters[key]}
+                                                            onChange={e => updateFilterValue(key, e.target.value)}
+                                                            onPointerDown={() => setIsFocus(true)}
+                                                            onPointerUp={() => setIsFocus(false)}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </div>
 
 
                         <AnimatePresence>
