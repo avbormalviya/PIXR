@@ -5,6 +5,8 @@ import { getCroppedImg } from "../../utils/getCropImage";
 import style from "./cropper.module.scss";
 import CropRotateRoundedIcon from '@mui/icons-material/CropRotateRounded';
 import FlipRoundedIcon from '@mui/icons-material/FlipRounded';
+import CropRoundedIcon from '@mui/icons-material/CropRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 export const ImageCropper = ({ imageSrc, onCropComplete, aspect }) => {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -61,32 +63,32 @@ export const ImageCropper = ({ imageSrc, onCropComplete, aspect }) => {
             }
 
             <div className={style.toolbar}>
-                <CropRotateRoundedIcon
-                    className={style.toolbar_icon}
-                    onClick={() => setRotation((prev) => (prev + 90) % 360)}
-                />
-                <FlipRoundedIcon
-                    className={style.toolbar_icon}
-                    onClick={() => {
-                        if (rotation % 180 === 0) {
-                            setFlip((prev) => ({ ...prev, horizontal: !prev.horizontal }));
-                        } else {
-                            setFlip((prev) => ({ ...prev, vertical: !prev.vertical }));
-                        }
-                    }}
-                />
-
-            </div>
-
-            <div className={style.buttons_container}>
-                <button className={style.cancel_btn} onClick={() => onCropComplete(null)}>
-                    <i className="material-symbols-rounded">close</i>
-                    Cancel
-                </button>
-                <button className={style.crop_btn} onClick={handleCrop}>
-                    <i className="material-symbols-rounded">crop</i>
-                    Crop
-                </button>
+                <div className={style.tools_wrapper}>
+                    <CropRotateRoundedIcon
+                        className={style.toolbar_icon}
+                        onClick={() => setRotation((prev) => (prev + 90) % 360)}
+                    />
+                    <FlipRoundedIcon
+                        className={style.toolbar_icon}
+                        onClick={() => {
+                            if (rotation % 180 === 0) {
+                                setFlip((prev) => ({ ...prev, horizontal: !prev.horizontal }));
+                            } else {
+                                setFlip((prev) => ({ ...prev, vertical: !prev.vertical }));
+                            }
+                        }}
+                    />
+                </div>
+                <div className={style.tools_wrapper}>
+                    <CloseRoundedIcon
+                        className={style.toolbar_icon}
+                        onClick={() => onCropComplete(null)}
+                    />
+                    <CropRoundedIcon
+                        className={style.toolbar_icon}
+                        onClick={handleCrop}
+                    />
+                </div>
             </div>
 
         </FloatingCon>

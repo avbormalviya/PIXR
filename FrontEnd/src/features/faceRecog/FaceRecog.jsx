@@ -120,7 +120,7 @@ export const FaceCapture = ({ setFaceCapture, setDescriptor }) => {
         <FloatingCon className={style.faceCapture}>
             <div className={style.faceCaptureWrapper}>
                 <div className={style.faceCaptureHeader}>
-                    <h2>Face Recognition</h2>
+                    <h2 className={style.faceCaptureTitle}>Face Recognition</h2>
                     <CloseFullscreenRoundedIcon className={style.closeIcon} onClick={() => {setFaceCapture(false)}} />
                 </div>
 

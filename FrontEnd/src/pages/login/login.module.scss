@@ -83,13 +83,13 @@ form {
             height: 1px;
 
             border: none;
-            background-color: var(--background-ternary);
+            background-color: rgba(245, 245, 245, 0.3);
         }
 
         span {
             padding: 0 1em;
             font-size: 1.5em;
-            color: var(--text-primary-50);
+            color: rgba(245, 245, 245, 0.3);
         }
     }
 
@@ -99,8 +99,8 @@ form {
         margin: 0;
         font-size: 1.6em;
         border-radius: 20px;
-        color: var(--text-primary-50);
-        background-color: var(--background-ternary);
+        color: rgba(245, 245, 245, 0.3);
+        background-color: #202020;
     }
 }
 

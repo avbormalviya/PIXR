@@ -26,6 +26,7 @@ export const  Create = () => {
 
     const inputRef = useRef(null);
     const ref = useRef(null);
+    const editorAdjustmentRef = useRef(null);
 
     const [index, setIndex] = useState(0);
     const [mediaIndex, setMediaIndex] = useState(0);
@@ -161,6 +162,27 @@ export const  Create = () => {
 
         if (index) setIndex(index);
     }, [content])
+
+
+    useEffect(() => {
+        const el = editorAdjustmentRef.current;
+        if (!el) return;
+
+        if (isFocus) {
+            el.style.overflow = 'hidden';
+            el.style.touchAction = 'none';
+        } else {
+            el.style.overflow = '';
+            el.style.touchAction = '';
+        }
+
+        return () => {
+            if (el) {
+                el.style.overflow = '';
+                el.style.touchAction = '';
+            }
+        };
+    }, [isFocus]);
 
 
     const updateFiltersForMedia = (preset) => {
@@ -558,7 +580,7 @@ export const  Create = () => {
 
 
                             {showAdjustments && (
-                                <motion.div className={style.adjustmentPanel} animate={{ opacity: isFocus ? 0.2 : 1 }}>
+                                <motion.div ref={editorAdjustmentRef} className={style.adjustmentPanel} animate={{ opacity: isFocus ? 0.2 : 1 }}>
                                     {adjustmentGroups.map((group, groupIndex) => (
                                         <div key={groupIndex} className={style.adjustmentContainer}>
                                             {group.map(({ label, min, max }) => {
@@ -574,6 +596,8 @@ export const  Create = () => {
                                                             onChange={e => updateFilterValue(key, e.target.value)}
                                                             onPointerDown={() => setIsFocus(true)}
                                                             onPointerUp={() => setIsFocus(false)}
+                                                            onTouchStart={() => setIsFocus(true)}
+                                                            onTouchEnd={() => setIsFocus(false)}
                                                         />
                                                     </div>
                                                 );
