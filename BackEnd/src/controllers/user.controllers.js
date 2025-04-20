@@ -17,6 +17,7 @@ import { View } from "../models/view.model.js";
 import { Save } from "../models/bookmark.model.js";
 import { Comment } from "../models/comment.model.js";
 import { Report } from "../models/report.model.js";
+import { Chat } from "../models/chat.model.js";
 
 
 function euclideanDistance(a, b) {
