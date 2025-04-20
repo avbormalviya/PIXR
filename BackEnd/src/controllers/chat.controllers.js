@@ -44,7 +44,8 @@ export const chatCommonAggregation = (currentUserId) => [
                     $project: {
                         fullName: 1,
                         userName: 1,
-                        profilePic: 1
+                        profilePic: 1,
+                        lastSeen: 1
                     }
                 }
             ]
@@ -218,9 +219,6 @@ const sendMessage = asyncHandler(async (req, res) => {
     ]);
 
     if (!fullMessage?.[0]) throw new ApiError(400, "Failed to fetch message");
-
-    // Emit the new message to all participants (including the sender)
-    emit(req.app.get("io"), chatId, "receiveMessage", fullMessage[0]);
 
     res.status(200).json(
         new ApiResponse(200, fullMessage[0], "Message sent successfully")

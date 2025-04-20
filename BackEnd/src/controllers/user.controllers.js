@@ -612,7 +612,6 @@ const getChatFollowings = asyncHandler(async (req, res) => {
             fullName: user.fullName,
             userName: user.userName,
             profilePic: user.profilePic,
-            lastSeen: user.lastSeen,
             chatId: existingChat?._id || null,
             lastMessage: existingChat?.lastMessage ? {
                 content: existingChat.lastMessage.content,

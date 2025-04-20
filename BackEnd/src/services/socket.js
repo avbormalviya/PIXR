@@ -35,13 +35,14 @@ const initSocket = (app) => {
         // Tell *everyone else* that this user is now online
         socket.broadcast.emit("userOnline", { userId });
 
-        // 👇 Tell *this socket* about the users who are already online
-        const currentlyOnline = Array.from(activeSockets.keys()).filter((id) => id !== userId);
-        socket.emit("onlineUsers", currentlyOnline);
+        socket.on("onlineUsers", () => {
+            const currentlyOnline = Array.from(activeSockets.keys()).filter((id) => id !== userId);
+            socket.emit("onlineUsers", currentlyOnline);
+        });
 
         console.log("New user connected:", userId, socket.id);
 
-        // Join Room
+
         socket.on("joinRoom", async (roomId) => {
             try {
                 const chat = await Chat.findById(roomId);
