@@ -127,6 +127,11 @@ const createOrGetOneOnOneChat = asyncHandler(async (req, res) => {
     ]);
 
     if (existingChat && existingChat.length > 0) {
+        // Reset unreadCount for current user
+        await Chat.findByIdAndUpdate(existingChat[0]._id, {
+            $set: { [`unreadCount.${req.user._id}`]: 0 }
+        });
+
         return res.status(200).json(
             new ApiResponse(200, existingChat[0], "Chat found")
         );
@@ -182,25 +187,15 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     if (!newMessage) throw new ApiError(400, "Failed to send message");
 
-    // Update the last message of the chat
-    await Chat.findByIdAndUpdate(chatId, { lastMessage: newMessage._id }, { new: true });
+    const updateUnreadCount = {};
+    participants.forEach(id => {
+        updateUnreadCount[`unreadCount.${id.toString()}`] = 1;
+    });
 
-    // Increment unreadCount for the recipient(s), not the sender
-    const participants = chat.participants.filter(
-        (participantId) => participantId.toString() !== req.user._id.toString()
-    );
-
-    for (const participantId of participants) {
-        const updatedChat = await Chat.findById(chatId);
-
-        // Ensure unreadCount exists
-        if (!updatedChat.unreadCount) updatedChat.unreadCount = {};
-
-        // Increment unreadCount for the recipient
-        updatedChat.unreadCount[participantId] = (updatedChat.unreadCount[participantId] || 0) + 1;
-
-        await updatedChat.save();
-    }
+    await Chat.findByIdAndUpdate(chatId, {
+        lastMessage: newMessage._id,
+        $inc: updateUnreadCount
+    });
 
     const fullMessage = await ChatMessage.aggregate([
         { $match: { _id: new mongoose.Types.ObjectId(newMessage._id) } },
