@@ -2,8 +2,18 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { verifyJWTSocket } from "../middlewares/verifyJWTSocket.js";
 import { Chat } from "../models/chat.model.js";
+import { User } from "../models/user.model.js";
 
 const activeSockets = new Map();
+
+
+const updateLastOnline = async (userId) => {
+    const user = await User.findById(userId);
+
+    // Set the current date and time as the last online time
+    user.lastSeen = new Date(); // Current timestamp
+    await user.save();
+};
 
 const initSocket = (app) => {
     const httpServer = createServer(app);
@@ -101,6 +111,20 @@ const initSocket = (app) => {
             }
         });
 
+        socket.on("toggleMicrophone", ({ to, enabled }) => {
+            const recipientSocketId = activeSockets.get(to);
+            if (recipientSocketId) {
+                socket.to(recipientSocketId).emit("toggleMicrophone", { enabled });
+            }
+        });
+
+        socket.on("receiveMessage", ({ to, message }) => {
+            const recipientSocketId = activeSockets.get(to);
+            if (recipientSocketId) {
+                socket.to(recipientSocketId).emit("receiveMessage", message); // send only message
+            }
+        });
+
         // Typing Indicators
         socket.on("typing", (roomId) => {
             socket.to(roomId).emit("typing", { userName: socket.user.userName });
@@ -118,8 +142,9 @@ const initSocket = (app) => {
         // Disconnect
         socket.on("disconnect", () => {
             console.log("User disconnected:", userId, socket.id);
-            socket.broadcast.emit("userOffline", { userId });
+            socket.broadcast.emit("userOffline", { userId })
             activeSockets.delete(userId);
+            ( async () => await updateLastOnline(userId))();
         });
     });
 
