@@ -32,7 +32,12 @@ const initSocket = (app) => {
         const userId = socket.user._id.toString();
         activeSockets.set(userId, socket.id);
 
+        // Tell *everyone else* that this user is now online
         socket.broadcast.emit("userOnline", { userId });
+
+        // 👇 Tell *this socket* about the users who are already online
+        const currentlyOnline = Array.from(activeSockets.keys()).filter((id) => id !== userId);
+        socket.emit("onlineUsers", currentlyOnline);
 
         console.log("New user connected:", userId, socket.id);
 
@@ -97,11 +102,11 @@ const initSocket = (app) => {
 
         // Typing Indicators
         socket.on("typing", (roomId) => {
-            socket.to(roomId).emit("typing", { userId: socket.user._id });
+            socket.to(roomId).emit("typing", { userName: socket.user.userName });
         });
 
         socket.on("stopTyping", (roomId) => {
-            socket.to(roomId).emit("stopTyping", { userId: socket.user._id });
+            socket.to(roomId).emit("stopTyping", { userName: socket.user.userName });
         });
 
         // Leave Room

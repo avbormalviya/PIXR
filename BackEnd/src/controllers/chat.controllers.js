@@ -181,7 +181,25 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     if (!newMessage) throw new ApiError(400, "Failed to send message");
 
+    // Update the last message of the chat
     await Chat.findByIdAndUpdate(chatId, { lastMessage: newMessage._id }, { new: true });
+
+    // Increment unreadCount for the recipient(s), not the sender
+    const participants = chat.participants.filter(
+        (participantId) => participantId.toString() !== req.user._id.toString()
+    );
+
+    for (const participantId of participants) {
+        const updatedChat = await Chat.findById(chatId);
+
+        // Ensure unreadCount exists
+        if (!updatedChat.unreadCount) updatedChat.unreadCount = {};
+
+        // Increment unreadCount for the recipient
+        updatedChat.unreadCount[participantId] = (updatedChat.unreadCount[participantId] || 0) + 1;
+
+        await updatedChat.save();
+    }
 
     const fullMessage = await ChatMessage.aggregate([
         { $match: { _id: new mongoose.Types.ObjectId(newMessage._id) } },
@@ -201,6 +219,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     if (!fullMessage?.[0]) throw new ApiError(400, "Failed to fetch message");
 
+    // Emit the new message to all participants (including the sender)
     emit(req.app.get("io"), chatId, "receiveMessage", fullMessage[0]);
 
     res.status(200).json(

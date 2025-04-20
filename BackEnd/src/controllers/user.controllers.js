@@ -594,10 +594,17 @@ const getChatFollowings = asyncHandler(async (req, res) => {
     for (const following of followings) {
         const user = following.followed;
 
+        // Step 2: Get the existing chat between the current user and the following user
         const existingChat = await Chat.findOne({
             participants: { $all: [currentUserId, user._id] }
         })
-            .populate("lastMessage")
+            .populate({
+                path: 'lastMessage',
+                populate: {
+                    path: 'sender', // Populate sender of the last message
+                    select: 'userName' // Select only the userName of the sender
+                }
+            })
             .lean();
 
         chatList.push({
@@ -605,8 +612,12 @@ const getChatFollowings = asyncHandler(async (req, res) => {
             fullName: user.fullName,
             userName: user.userName,
             profilePic: user.profilePic,
+            lastSeen: user.lastSeen,
             chatId: existingChat?._id || null,
-            lastMessage: existingChat?.lastMessage || null,
+            lastMessage: existingChat?.lastMessage ? {
+                content: existingChat.lastMessage.content,
+                sender: existingChat.lastMessage.sender.userName // Include sender's userName
+            } : null,
             unreadCount: existingChat?.unreadCount?.[currentUserId] || 0,
         });
     }
@@ -615,6 +626,7 @@ const getChatFollowings = asyncHandler(async (req, res) => {
         new ApiResponse(200, chatList, "Chat followings loaded")
     );
 });
+
 
 
 
