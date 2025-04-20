@@ -187,6 +187,8 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     if (!newMessage) throw new ApiError(400, "Failed to send message");
 
+    const participants = chat.participants.filter(id => id.toString() !== req.user._id.toString());
+
     const updateUnreadCount = {};
     participants.forEach(id => {
         updateUnreadCount[`unreadCount.${id.toString()}`] = 1;
