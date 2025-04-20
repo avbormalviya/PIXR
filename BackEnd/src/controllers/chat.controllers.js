@@ -11,7 +11,8 @@ import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 
 
-const chatCommonAggregation = [
+export const chatCommonAggregation = (currentUserId) => [
+    // Fetch all messages related to this chat
     {
         $lookup: {
             from: "chatmessages",
@@ -25,11 +26,54 @@ const chatCommonAggregation = [
                         sender: 1,
                         createdAt: 1
                     }
+                },
+                { $sort: { createdAt: -1 } }, // latest first
+                { $limit: 30 } // send recent 30 messages
+            ]
+        }
+    },
+    // Populate participants' details
+    {
+        $lookup: {
+            from: "users",
+            localField: "participants",
+            foreignField: "_id",
+            as: "participantDetails",
+            pipeline: [
+                {
+                    $project: {
+                        fullName: 1,
+                        userName: 1,
+                        profilePic: 1
+                    }
                 }
             ]
         }
     },
-]
+    // Exclude current user from participant list for frontend display
+    {
+        $addFields: {
+            otherParticipant: {
+                $first: {
+                    $filter: {
+                        input: "$participantDetails",
+                        as: "user",
+                        cond: { $ne: ["$$user._id", currentUserId] }
+                    }
+                }
+            },
+            lastMessage: { $first: "$messages" }
+        }
+    },
+    {
+        $project: {
+            messages: 1,
+            lastMessage: 1,
+            otherParticipant: 1
+        }
+    }
+];
+
 
 
 // const chatMessageCommonAggregation = [
@@ -78,37 +122,33 @@ const createOrGetOneOnOneChat = asyncHandler(async (req, res) => {
                 }
             }
         },
-        ...chatCommonAggregation
+        ...chatCommonAggregation(req.user._id)
     ]);
 
     if (existingChat && existingChat.length > 0) {
         return res.status(200).json(
-            new ApiResponse(
-                200,
-                existingChat[0],
-                "Chat found"
-            )
+            new ApiResponse(200, existingChat[0], "Chat found")
         );
     }
 
-    const participantsIds = [user._id, req.user._id];
-
+    // Create new chat if not found
     const newChat = await Chat.create({
-        participants: participantsIds,
+        participants: [user._id, req.user._id]
     });
-    
-    if (!newChat) {
-        throw new ApiError(400, "Failed to create chat");
-    }
+
+    // Return chat with populated data (run aggregation again)
+    const populatedNewChat = await Chat.aggregate([
+        {
+            $match: { _id: newChat._id }
+        },
+        ...chatCommonAggregation(req.user._id)
+    ]);
 
     res.status(200).json(
-        new ApiResponse(
-            200,
-            newChat,
-            "Chat created successfully"
-        )
+        new ApiResponse(200, populatedNewChat[0], "Chat created successfully")
     );
 });
+
 
 
 const createOrGetAGroupChat = asyncHandler(async (req, res) => {
@@ -119,27 +159,19 @@ const createOrGetAGroupChat = asyncHandler(async (req, res) => {
 const sendMessage = asyncHandler(async (req, res) => {
     const { chatId, message } = req.query;
 
-    if (!chatId) {
-        throw new ApiError(400, "chatId is required");
-    }
-
-    if (!message && !req.files?.length) {
-        throw new ApiError(400, "message is required");
-    }
+    if (!chatId) throw new ApiError(400, "chatId is required");
+    if (!message && !req.files?.length) throw new ApiError(400, "message is required");
 
     const chat = await Chat.findById(chatId);
+    if (!chat) throw new ApiError(400, "Chat not found");
 
-    if (!chat) {
-        throw new ApiError(400, "Chat not found");
-    }
-    
     const messageFiles = await Promise.all(
-        (req.files || [])?.map( async (file) => {
+        (req.files || []).map(async (file) => {
             const url = await uploadOnCloudinary(file);
             return url;
         })
     );
-    
+
     const newMessage = await ChatMessage.create({
         sender: req.user._id,
         content: message,
@@ -147,42 +179,35 @@ const sendMessage = asyncHandler(async (req, res) => {
         chat: chatId
     });
 
-    if (!newMessage) {
-        throw new ApiError(400, "Failed to send message");
-    }
+    if (!newMessage) throw new ApiError(400, "Failed to send message");
 
-    const updatedChat = await Chat.findByIdAndUpdate(chatId, {
-        lastMessage: newMessage._id
-    }, {
-        new: true
-    });
+    await Chat.findByIdAndUpdate(chatId, { lastMessage: newMessage._id }, { new: true });
 
-    if (!updatedChat) {
-        throw new ApiError(400, "Failed to update chat");
-    }
-
-    const receivedMessage = await ChatMessage.aggregate([
+    const fullMessage = await ChatMessage.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(newMessage._id) } },
         {
-            $match: {
-                _id: new mongoose.Types.ObjectId(newMessage._id)
+            $lookup: {
+                from: "users",
+                localField: "sender",
+                foreignField: "_id",
+                as: "sender",
+                pipeline: [
+                    { $project: { userName: 1, fullName: 1, profilePic: 1 } }
+                ]
             }
         },
+        { $unwind: "$sender" }
     ]);
 
-    if (!receivedMessage) {
-        throw new ApiError(400, "Failed to get message");
-    }
+    if (!fullMessage?.[0]) throw new ApiError(400, "Failed to fetch message");
 
-    emit(req.app.get("io"), chatId, "receiveMessage", receivedMessage[0]);
+    emit(req.app.get("io"), chatId, "receiveMessage", fullMessage[0]);
 
     res.status(200).json(
-        new ApiResponse(
-            200,
-            newMessage,
-            "Message sent successfully"
-        )
-    )
+        new ApiResponse(200, fullMessage[0], "Message sent successfully")
+    );
 });
+
 
 
 export {

@@ -32,6 +32,8 @@ const initSocket = (app) => {
         const userId = socket.user._id.toString();
         activeSockets.set(userId, socket.id);
 
+        socket.broadcast.emit("userOnline", { userId });
+
         console.log("New user connected:", userId, socket.id);
 
         // Join Room
@@ -110,6 +112,7 @@ const initSocket = (app) => {
         // Disconnect
         socket.on("disconnect", () => {
             console.log("User disconnected:", userId, socket.id);
+            socket.broadcast.emit("userOffline", { userId });
             activeSockets.delete(userId);
         });
     });

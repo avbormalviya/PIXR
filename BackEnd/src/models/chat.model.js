@@ -13,6 +13,12 @@ const chatSchema = new Schema(
                 ref: "User"
             }
         ],
+
+        unreadCount: {
+            type: Map,
+            of: Number,
+            default: {}
+        }
     },
     {
         timestamps: true

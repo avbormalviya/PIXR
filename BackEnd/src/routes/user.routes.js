@@ -21,6 +21,7 @@ import {
     getStories,
     getStoryViews,
     getStoryOnlyFollowers,
+    getChatFollowings,
     uploadPost,
     getUserPosts,
     getPosts,
@@ -95,6 +96,11 @@ router.route("/getUserFollowerAndFollowing/:username").get(
     getUserFollowerAndFollowing
 );
 
+router.route("/getChatFollowings").get(
+    verifyJWT,
+    getChatFollowings
+);
+
 router.route("/searchUser").get(
     verifyJWT,
     searchUser
@@ -155,7 +161,7 @@ router.route("/uploadReel").post(
 
 router.route("/getUserReels/:username").get(
     verifyJWT,
-    getUserReels    
+    getUserReels
 );
 
 router.route("/getReels").get(

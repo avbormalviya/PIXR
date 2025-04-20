@@ -313,7 +313,6 @@ const refreshAccessToken = asyncHandler( async (req, res) => {
         .json(
             new ApiResponse(200, user, "Refresh access token successful")
         )
-
 })
 
 
@@ -578,6 +577,44 @@ const getUserFollowerAndFollowing = asyncHandler( async (req, res) => {
         new ApiResponse(200, followersAndFollowing[0], "Followers and followings retrieved successfully")
     )
 })
+
+const getChatFollowings = asyncHandler(async (req, res) => {
+    const currentUserId = req.user._id;
+
+    // Step 1: Get followings of the current user
+    const followings = await Connection.find({ follower: currentUserId })
+        .populate({
+            path: "followed",
+            select: "fullName userName profilePic isOnline"
+        });
+
+    const chatList = [];
+
+    for (const following of followings) {
+        const user = following.followed;
+
+        const existingChat = await Chat.findOne({
+            participants: { $all: [currentUserId, user._id] }
+        })
+            .populate("lastMessage")
+            .lean();
+
+        chatList.push({
+            _id: user._id,
+            fullName: user.fullName,
+            userName: user.userName,
+            profilePic: user.profilePic,
+            chatId: existingChat?._id || null,
+            lastMessage: existingChat?.lastMessage || null,
+            unreadCount: existingChat?.unreadCount?.[currentUserId] || 0,
+        });
+    }
+
+    res.status(200).json(
+        new ApiResponse(200, chatList, "Chat followings loaded")
+    );
+});
+
 
 
 const searchUser = asyncHandler( async (req, res) => {
@@ -2155,6 +2192,7 @@ export {
     getUser,
     getUserProfile,
     getUserFollowerAndFollowing,
+    getChatFollowings,
     searchUser,
     followUser,
     getSuggestedUsers,

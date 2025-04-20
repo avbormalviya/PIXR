@@ -25,6 +25,11 @@ const chatMessageSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "Chat",
         },
+
+        seenBy: {
+            type: [Schema.Types.ObjectId], // users who have seen this message
+            default: []
+        }
     },
     {
         timestamps: true

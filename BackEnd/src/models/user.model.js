@@ -64,6 +64,11 @@ const userSchema  = new Schema(
             default: "PixrStar"
         },
 
+        lastSeen: {
+            type: Date,
+            default: Date.now
+        },
+
         verificationCode: {
             type: String
         },
