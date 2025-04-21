@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { createNotification } from "../events/notification.js";
+import { activeSockets } from "../services/socket.js";
 
 import { Chat } from "../models/chat.model.js";
 import { ChatMessage } from "../models/message.mdel.js";
@@ -197,6 +197,15 @@ const sendMessage = asyncHandler(async (req, res) => {
     await Chat.findByIdAndUpdate(chatId, {
         lastMessage: newMessage._id,
         $inc: updateUnreadCount
+    });
+
+    participants.forEach(id => {
+        // Send the updated unread count to the user via their socket (e.g., using user id)
+        req.app.get("io").to(activeSockets.get(id.toString())).emit("unreadCountUpdated", {
+            chatId,
+            senderId: req.user._id.toString(),
+            unreadCount: updateUnreadCount[`unreadCount.${id.toString()}`]
+        });
     });
 
     const fullMessage = await ChatMessage.aggregate([
