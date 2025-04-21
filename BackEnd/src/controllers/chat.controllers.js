@@ -23,6 +23,7 @@ export const chatCommonAggregation = (currentUserId) => [
                 {
                     $project: {
                         content: 1,
+                        attachments: 1,
                         sender: 1,
                         createdAt: 1
                     }
@@ -174,7 +175,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     const messageFiles = await Promise.all(
         (req.files || []).map(async (file) => {
             const url = await uploadOnCloudinary(file);
-            return url;
+            return url.secure_url;
         })
     );
 
@@ -194,7 +195,7 @@ const sendMessage = asyncHandler(async (req, res) => {
         updateUnreadCount[`unreadCount.${id.toString()}`] = 1;
     });
 
-    await Chat.findByIdAndUpdate(chatId, {
+    const updatedChat = await Chat.findByIdAndUpdate(chatId, {
         lastMessage: newMessage._id,
         $inc: updateUnreadCount
     }, { new: true });
