@@ -165,7 +165,7 @@ const createOrGetAGroupChat = asyncHandler(async (req, res) => {
 
 
 const sendMessage = asyncHandler(async (req, res) => {
-    const { chatId, message, messageType } = req.body;
+    const { chatId, message, messageType, tempId } = req.body;
 
     if (!chatId) throw new ApiError(400, "chatId is required");
     if (!message && !req.file) throw new ApiError(400, "message is required");
@@ -179,6 +179,13 @@ const sendMessage = asyncHandler(async (req, res) => {
         messageFiles = await uploadOnCloudinary(req.file.path);
 
         if (!messageFiles) throw new ApiError(400, "Failed to upload attachment");
+    }
+
+    if (messageFiles) {
+        req.app.get("io").to(chatId).emit("attachment", {
+            id: tempId,
+            url: messageFiles.url
+        })
     }
 
     const newMessage = await ChatMessage.create({
