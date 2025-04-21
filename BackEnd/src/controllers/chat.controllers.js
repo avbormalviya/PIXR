@@ -164,10 +164,11 @@ const createOrGetAGroupChat = asyncHandler(async (req, res) => {
 
 
 const sendMessage = asyncHandler(async (req, res) => {
-    const { chatId, message } = req.body;
+    const { chatId, message, messageType } = req.body;
 
     if (!chatId) throw new ApiError(400, "chatId is required");
     if (!message && !req.file) throw new ApiError(400, "message is required");
+    if (!messageType) throw new ApiError(400, "messageType is required");
 
     const chat = await Chat.findById(chatId);
     if (!chat) throw new ApiError(400, "Chat not found");
@@ -184,6 +185,7 @@ const sendMessage = asyncHandler(async (req, res) => {
         sender: req.user._id,
         content: message,
         attachments: messageFiles.url || null,
+        type: messageType,
         chat: chatId
     });
 
