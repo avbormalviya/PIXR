@@ -24,6 +24,7 @@ export const chatCommonAggregation = (currentUserId) => [
                     $project: {
                         content: 1,
                         attachments: 1,
+                        type: 1,
                         sender: 1,
                         createdAt: 1
                     }
