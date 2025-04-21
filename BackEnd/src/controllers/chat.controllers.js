@@ -197,14 +197,21 @@ const sendMessage = asyncHandler(async (req, res) => {
     await Chat.findByIdAndUpdate(chatId, {
         lastMessage: newMessage._id,
         $inc: updateUnreadCount
-    });
+    }, { new: true });
 
     participants.forEach(id => {
-        // Send the updated unread count to the user via their socket (e.g., using user id)
-        req.app.get("io").to(activeSockets.get(id.toString())).emit("unreadCountUpdated", {
+        const socketId = activeSockets.get(id.toString());
+        if (!socketId) return;  // they’re offline or not connected
+
+        // Make sure you’re using the same key type that your schema uses (Map vs Object)
+        const unreadTotal = updatedChat.unreadCount.get
+          ? updatedChat.unreadCount.get(id.toString())     // if you used a Map in Mongoose
+          : updatedChat.unreadCount[id.toString()];       // if you used a plain object
+
+        req.app.get("io").to(socketId).emit("unreadCountUpdated", {
             chatId,
             senderId: req.user._id.toString(),
-            unreadCount: updateUnreadCount[`unreadCount.${id.toString()}`]
+            unreadCount: unreadTotal || 0
         });
     });
 
