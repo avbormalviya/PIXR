@@ -167,23 +167,23 @@ const sendMessage = asyncHandler(async (req, res) => {
     const { chatId, message } = req.body;
 
     if (!chatId) throw new ApiError(400, "chatId is required");
-    if (!message && !req.files?.length) throw new ApiError(400, "message is required");
+    if (!message && !req.file) throw new ApiError(400, "message is required");
 
     const chat = await Chat.findById(chatId);
     if (!chat) throw new ApiError(400, "Chat not found");
 
-    const file = req.file;
+    let messageFiles = null;
+    console.log(req.file);
+    if (req.file) {
+        messageFiles = await uploadOnCloudinary(req.file);
 
-    if (file) {
-        const messageFiles = await uploadOnCloudinary(file);
-
-        if (!messageFiles) throw new ApiError(400, "Failed to send message");
+        if (!messageFiles) throw new ApiError(400, "Failed to upload attachment");
     }
 
     const newMessage = await ChatMessage.create({
         sender: req.user._id,
         content: message,
-        attachments: messageFiles.url,
+        attachments: messageFiles.url || null,
         chat: chatId
     });
 
