@@ -15,6 +15,11 @@ const chatMessageSchema = new Schema(
             type: String,
         },
 
+        type: {
+            type: String,
+            enum: ["TEXT", "IMAGE", "VIDEO"],
+        },
+
         chat: {
             type: Schema.Types.ObjectId,
             ref: "Chat",
