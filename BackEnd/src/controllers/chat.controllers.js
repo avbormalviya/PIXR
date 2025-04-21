@@ -173,9 +173,9 @@ const sendMessage = asyncHandler(async (req, res) => {
     if (!chat) throw new ApiError(400, "Chat not found");
 
     let messageFiles = null;
-    console.log(req.file);
+
     if (req.file) {
-        messageFiles = await uploadOnCloudinary(req.file);
+        messageFiles = await uploadOnCloudinary(req.file.path);
 
         if (!messageFiles) throw new ApiError(400, "Failed to upload attachment");
     }
