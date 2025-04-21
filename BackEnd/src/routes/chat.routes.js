@@ -24,7 +24,7 @@ router.route("/createOrGetAGroupChat/:receiver").post(
 
 router.route("/sendMessage").post(
     verifyJWT,
-    upload.array("messageFiles"),
+    upload.single("messageFile"),
     sendMessage
 );
 

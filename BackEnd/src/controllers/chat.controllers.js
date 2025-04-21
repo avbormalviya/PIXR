@@ -164,7 +164,7 @@ const createOrGetAGroupChat = asyncHandler(async (req, res) => {
 
 
 const sendMessage = asyncHandler(async (req, res) => {
-    const { chatId, message } = req.query;
+    const { chatId, message } = req.body;
 
     if (!chatId) throw new ApiError(400, "chatId is required");
     if (!message && !req.files?.length) throw new ApiError(400, "message is required");
@@ -172,17 +172,18 @@ const sendMessage = asyncHandler(async (req, res) => {
     const chat = await Chat.findById(chatId);
     if (!chat) throw new ApiError(400, "Chat not found");
 
-    const messageFiles = await Promise.all(
-        (req.files || []).map(async (file) => {
-            const url = await uploadOnCloudinary(file);
-            return url.secure_url;
-        })
-    );
+    const file = req.file;
+
+    if (file) {
+        const messageFiles = await uploadOnCloudinary(file);
+
+        if (!messageFiles) throw new ApiError(400, "Failed to send message");
+    }
 
     const newMessage = await ChatMessage.create({
         sender: req.user._id,
         content: message,
-        attachments: messageFiles,
+        attachments: messageFiles.url,
         chat: chatId
     });
 
