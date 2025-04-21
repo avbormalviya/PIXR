@@ -184,7 +184,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     const newMessage = await ChatMessage.create({
         sender: req.user._id,
         content: message,
-        attachments: messageFiles.url || null,
+        attachments: messageFiles?.url || null,
         type: messageType || 'TEXT',
         chat: chatId
     });
