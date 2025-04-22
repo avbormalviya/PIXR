@@ -266,7 +266,7 @@ export const Chat = () => {
     };
 
     const handleCallButton = () => {
-        initiateCall(chat._id, user._id);
+        initiateCall(chatUser._id, user._id);
 
         navigate(`/chat/call/${chat._id}`, { state: { user: chatUser, from: user._id } });
     }
