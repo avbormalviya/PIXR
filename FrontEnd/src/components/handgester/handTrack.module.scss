@@ -1,0 +1,21 @@
+.video {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
+    z-index: 9999;
+    transform: scaleX(-1);
+    filter: brightness(1.5);
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .video {
+        width: 100px;
+        height: 100px;
+        bottom: 70px;
+    }
+}

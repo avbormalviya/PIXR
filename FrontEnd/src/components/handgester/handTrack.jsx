@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import style from "./handTrack.module.scss";
 
 
 const HandMouseControl = ({ showDisplay }) => {
@@ -280,20 +281,8 @@ const getScrollableParent = (element) => {
           ref={videoRef}
           autoPlay
           playsInline
-          style={{
-            position: "absolute",
-            bottom: "10px",
-            right: "10px",
-            width: "200px",
-            height: "200px",
-            objectFit: "cover",
-            objectPosition: "center",
-            zIndex: 9999,
-            transform: "scaleX(-1)",
-            filter: "brightness(1.5)",
-            display: showDisplay ? "block" : "none",
-            borderRadius: "10px",
-          }}
+          style={{ display: showDisplay ? "block" : "none" }}
+          className={style.video}
       />
     </div>
   );
