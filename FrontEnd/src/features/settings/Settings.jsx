@@ -17,6 +17,7 @@ import { FeedDetails } from "../../components/feedDetailes/FeedDetails";
 import { Img } from "../../components/img/Img";
 import { addReport } from "../../utils/addReport";
 import HandGestureContext from "../../context/HandContext";
+import { requestCameraAndMicAccess } from "../../utils/getPermission";
 
 const themes = [
     "light",
@@ -56,10 +57,20 @@ export const Settings = () => {
     const [croppedImage, setCroppedImage] = useState(null);
     const [theme, setTheme] = useState(localStorage.getItem("theme"));
     const [report, setReport] = useState("");
+    const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
 
     const [isFeedOpen, setIsFeedOpen] = useState({})
 
     const { isHandGesture, setIsHandGesture, showDisplay, setShowDisplay } = useContext(HandGestureContext);
+
+
+    useEffect(() => {
+            ( async () => {
+                const result = await requestCameraAndMicAccess();
+                console.log(result);
+                setIsPermissionsGranted(result);
+            })();
+        }, []);
 
     useEffect(() => {
         document.body.classList.remove(...themes);
@@ -174,7 +185,7 @@ export const Settings = () => {
                                             { isHandGesture && (
                                                 <>
                                                     <h1 className={style.handGestureText}>Display</h1>
-                                                    <SwitchButton checked={showDisplay} setChecked={setShowDisplay} />
+                                                    <SwitchButton checked={showDisplay} setChecked={setShowDisplay} disabled={!isPermissionsGranted?.camera?.granted} />
                                                 </>
                                             )}
                                         </div>

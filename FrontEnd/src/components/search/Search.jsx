@@ -40,14 +40,14 @@ export const Search = () => {
                 setIsFocused(false);
             }
         };
-    
+
         document.addEventListener("mousedown", handleClickOutside);
-    
+
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
-    
+
 
     useEffect(() => {
         ( async () => {
@@ -71,11 +71,11 @@ export const Search = () => {
                 setSearchUsers(data);
                 return;
             }
-    
+
             const { data } = await getRecentProfileOpened();
             setRecentProfileOpened(data);
         })();
-    }, [searchText]);    
+    }, [searchText]);
 
     return (
         <section className={style.search_section}>
@@ -94,7 +94,7 @@ export const Search = () => {
                         ? searchUsers?.map((user, index) => (
                             <FollowUserCard
                                 key={index}
-                                fullName={user.isFollower ? "True" : "False"}
+                                fullName={user.fullName}
                                 userName={user.userName}
                                 profilePic={user.profilePic}
                                 isFollower={user.isFollower}
@@ -118,7 +118,7 @@ export const Search = () => {
             </motion.section>
 
             <section className={style.explore_section}>
-                
+
                 <ImageList variant="masonry" cols={3} gap={5}>
                     {[...feeds].reverse().map((item) => (
                         <ImageListItem key={item.img}>

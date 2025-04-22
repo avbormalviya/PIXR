@@ -108,6 +108,13 @@ export const userApi = createApi({
             }),
         }),
 
+        getChatFollowings: builder.query({
+            query: () => ({
+                url: "getChatFollowings",
+                method: "GET"
+            }),
+        }),
+
         followUser: builder.mutation({
             query: (data) => ({
                 url: "followUser",

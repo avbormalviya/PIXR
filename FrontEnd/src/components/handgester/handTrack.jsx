@@ -286,8 +286,11 @@ const getScrollableParent = (element) => {
             right: "10px",
             width: "200px",
             height: "200px",
+            objectFit: "cover",
+            objectPosition: "center",
             zIndex: 9999,
             transform: "scaleX(-1)",
+            filter: "brightness(1.5)",
             display: showDisplay ? "block" : "none",
             borderRadius: "10px",
           }}

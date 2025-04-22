@@ -1,403 +1,720 @@
-import style from "./chat.module.scss";
-import { NormalUserCard } from "../../components/userCard/UserCard";
-import { UserPPic } from "../../components/userPPic/UserPPic";
-import { AnimatePresence, motion } from "framer-motion";
-import { Reorder } from "framer-motion";
-import React, { useState, useEffect, useRef } from "react";
-
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { fetchAndUserFollowerAndFollowing } from "../../utils/getUserFollowerAndFollowing";
-import { Img } from "../../components/img/Img";
+import {
+    ChatContainer,
+    MessageList,
+    Message,
+    MessageInput,
+    TypingIndicator,
+    ConversationHeader,
+    Avatar,
+    VoiceCallButton,
+    VideoCallButton,
+    ConversationList,
+    Conversation,
+    MainContainer,
+    Sidebar,
+    Search,
+    MessageGroup,
+    MessageSeparator,
+    Loader,
+} from "@chatscope/chat-ui-kit-react";
+import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+
+import { useSocket } from "../../context/SocketContext"
+import { getChatFollowings } from "../../utils/getChatFollowings";
 import { sendMessage } from "../../utils/sendMessage";
 import { createOrGetOneOnOneChat } from "../../utils/createOrGetOneOnOneChat";
-import { useSocket } from "../../context/SocketContext"
-
+import { requestCameraAndMicAccess } from "../../utils/getPermission";
+import { Img } from "../../components/img/Img";
+import { usePeerContext } from "../../context/PeerContext";
 import { useNavigate } from "react-router-dom";
 
-import { usePeerContext } from "../../context/PeerContext";
+import {
+    format,
+    isToday,
+    isYesterday,
+    isThisYear,
+    formatDistanceToNow,
+    differenceInMinutes,
+} from "date-fns";
 
-import { useMediaQuery } from 'react-responsive';
+import chatsvg from "/svg/undraw_social-serenity_x9vq.svg"
+// import chatsvg from "/svg/undraw_connection_ts3f.svg"
 
-import Picker from "@emoji-mart/react";
-import data from "@emoji-mart/data";
+import style from "./Chat.module.scss";
 
-import { format, isToday, isYesterday } from 'date-fns';
 
 export const Chat = () => {
-    const navigate = useNavigate();
 
-    const { initiateCall } = usePeerContext();
+    const navigate = useNavigate();
 
     const { user } = useSelector((state) => state.user);
 
-    const { emit, on } = useSocket();
+    const { initiateCall } = usePeerContext();
 
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
+    const { emit, on, off } = useSocket();
 
-    const childRefs = useRef([React.createRef(), React.createRef(), React.createRef(), React.createRef()]);
+    const fileInputRef = useRef(null);
 
-    const [followings, setFollowings] = useState([]);
-    const [isHovered, setIsHovered] = useState(false);
-    const [isDragged, setIsDragged] = useState(false);
-    const [activeSection, setActiveSection] = useState(null);
-
-    const [inputMessage, setInputMessage] = useState("");
-
+    const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState([]);
+    const [chatId, setChatId] = useState(null);
+    const [followings, setFollowings] = useState([]);
+    const [chat, setChat] = useState(null);
     const [groupedMessages, setGroupedMessages] = useState({});
-
-    const [typing, setTyping] = useState({});
-
-    const [chat, setChat] = useState();
-    const [chatUser, setChatUser] = useState();
-
+    const [chatUser, setChatUser] = useState(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [typing, setTyping] = useState({ typing: false, user: null });
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    const [inputMessage, setInputMessage] = useState('');
+    const [attachments, setAttachments] = useState({type: null, file: null, url: null});
+    const [attachmentsDownloaded, setAttachmentsDownloaded] = useState([]);
+    const [isAttachmentsDownloading, setIsAttachmentsDownloading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
 
-    const [isEmojiOpen, setIsEmojiOpen] = useState(false);
-
-    const [sections, setSections] = useState([
-        // { id: 0, title: "Mood Songs" },
-        // { id: 1, title: "Ask AI" },
-        { id: 2, title: "Chats" },
-        // { id: 3, title: "Requests" },
-    ]);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     useEffect(() => {
-        on("receiveMessage", (data) => {
-            setGroupedMessages((prevGroupedMessages) => {
-                const newMessageDate = new Date(data.createdAt);
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener("resize", handleResize);
 
-                let dateKey;
-                if (isToday(newMessageDate)) {
-                    dateKey = "Today";
-                } else if (isYesterday(newMessageDate)) {
-                    dateKey = "Yesterday";
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+
+    useEffect(() => {
+        ( async () => {
+            const result = await getChatFollowings();
+            setFollowings(result.data);
+        })();
+
+        ( async () => {
+            const result = await requestCameraAndMicAccess();
+            setIsPermissionsGranted(result.mic.granted);
+        })();
+
+        emit("onlineUsers");
+    }, []);
+
+
+    useEffect(() => {
+        if (inputMessage.trim() === '') {
+            emit("stopTyping", chat?._id);
+            return;
+        }
+
+        // Emit 'typing' event
+        emit("typing", chat?._id);
+
+        // Set a timeout to emit 'stopTyping' after 3 seconds
+        const typingTimeout = setTimeout(() => {
+            emit("stopTyping", chat?._id);
+        }, 2000);
+
+        // Clean-up the timeout if inputMessage changes or component unmounts
+        return () => {
+            clearTimeout(typingTimeout);
+        };
+    }, [inputMessage]);
+
+
+    useEffect(() => {
+        const handleReceiveMessage = (message) => {
+            if (message.chat !== chat?._id) {
+                setFollowings(prev => {
+                    return prev.map(following => {
+                        if (following._id === message.chat) {
+                            following.lastMessage = message;
+                        }
+                        return following;
+                    });
+                })
+            };
+
+            const optimisticMessage = message;
+            setGroupedMessages(prev => {
+                const updated = { ...prev };
+
+                // Find the latest group (regardless of sender)
+                const latestEntry = Object.entries(updated)
+                    .sort(([, a], [, b]) => new Date(b.firstMessageTime) - new Date(a.firstMessageTime))[0];
+
+                const now = optimisticMessage.createdAt || new Date().toISOString();
+                const senderId = optimisticMessage.sender._id; // Assuming message has sender object with _id
+                const senderName = optimisticMessage.sender.fullName; // Assuming message has sender object with fullName
+                const isIncoming = senderId !== user._id; // Assuming `user` is available in scope
+
+                let groupKey;
+
+                if (latestEntry) {
+                    const [key, group] = latestEntry;
+                    const lastSenderId = group.senderId;
+                    const lastIsIncoming = lastSenderId !== user._id;
+
+                    const lastMsg = group.messages[group.messages.length - 1];
+                    const lastMsgTime = lastMsg?.createdAt || group.firstMessageTime;
+                    const gap = differenceInMinutes(new Date(now), new Date(lastMsgTime));
+
+                    // Decide if a new group should be created
+                    const shouldStartNew =
+                        isIncoming !== lastIsIncoming ||  // Direction change (incoming vs outgoing)
+                        senderId !== lastSenderId ||      // Different sender
+                        gap > 10;                         // Message gap too large (configurable threshold)
+
+                    if (!shouldStartNew) {
+                        groupKey = key;
+                        updated[groupKey] = {
+                            ...group,
+                            messages: [...group.messages, optimisticMessage]
+                        };
+                    } else {
+                        groupKey = `${now}_${senderId}`;
+                        updated[groupKey] = {
+                            senderId,
+                            senderName,
+                            firstMessageTime: now,
+                            messages: [optimisticMessage]
+                        };
+                    }
                 } else {
-                    dateKey = format(newMessageDate, 'dd MMM yyyy');
+                    // No previous group at all (first message)
+                    groupKey = `${now}_${senderId}`;
+                    updated[groupKey] = {
+                        senderId,
+                        senderName,
+                        firstMessageTime: now,
+                        messages: [optimisticMessage]
+                    };
                 }
 
-                const updatedGroupedMessages = { ...prevGroupedMessages };
-
-                if (!updatedGroupedMessages[dateKey]) {
-                    updatedGroupedMessages[dateKey] = [];
-                }
-
-                updatedGroupedMessages[dateKey].unshift(data);
-
-                const reversedGroupedMessages = {};
-                Object.keys(updatedGroupedMessages).forEach((key) => {
-                    reversedGroupedMessages[key] = updatedGroupedMessages[key];
-                });
-
-                return reversedGroupedMessages;
+                return updated;
             });
-        });
+        };
+
+        // Listen for the event
+        on("receiveMessage", handleReceiveMessage);
 
 
         on("typing", (data) => {
-            setTyping({ typing: true, user: data });
+            setTyping({ typing: true, userName: data.userName });
         })
 
         on("stopTyping", () => {
             setTyping({});
         })
-    }, [on]);
 
-    useEffect(() => {
-        ( async () => {
-            const result = await fetchAndUserFollowerAndFollowing(user.userName);
-            setFollowings(result.data.followings);
-        })();
-    }, [user]);
-
-    useEffect(() => {
-        const childrenLength = childRefs.current[activeSection]?.current?.children.length;
-        if (!childRefs.current[activeSection]) return;
-        childRefs.current[activeSection].current.style.maxHeight = childrenLength ? (childrenLength * 65) + ((childrenLength - 1) * 10) + 20 + "px" : "0";
-    }, [childRefs, activeSection]);
-
-
-    const handleSendMessage = async () => {
-        setIsEmojiOpen(false);
-        await sendMessage(chat._id, inputMessage);
-        setInputMessage("");
-    };
-
-    const handleChatOpen = async (chatUser) => {
-        setIsChatOpen(true);
-        setChatUser(chatUser);
-
-        chat?._id && emit("leaveRoom", chat?._id);
-
-        const result = await createOrGetOneOnOneChat(chatUser.userName);
-
-        setChat(result.data);
-
-        setGroupedMessages(groupMessagesByDate(result.data.messages));
-
-        emit("joinRoom", result.data._id);
-    };
-
-    const handleTyping = () => {
-        emit("typing", chat._id);
-    }
-
-    const handleStopTyping = () => {
-        emit("stopTyping", chat._id);
-    }
-
-    const handleCallButton = () => {
-        initiateCall(chatUser._id, user._id);
-
-        navigate(`/chat/call/${chatUser._id}`, { state: { user: chatUser, from: user._id } });
-    }
-
-    const groupMessagesByDate = (messages) => {
-        if (!messages.length) return {};
-        const grouped = messages.reduce((groups, message) => {
-            const messageDate = new Date(message.createdAt);
-
-            let dateKey;
-            if (isToday(messageDate)) {
-                dateKey = "Today";
-            } else if (isYesterday(messageDate)) {
-                dateKey = "Yesterday";
-            } else {
-                dateKey = format(messageDate, 'dd MMM yyyy');
-            }
-
-            if (!groups[dateKey]) {
-                groups[dateKey] = [];
-            }
-
-            groups[dateKey].push(message);
-            return groups;
-        }, {});
-
-        const reversedGrouped = {};
-        Object.keys(grouped).reverse().forEach((key) => {
-            reversedGrouped[key] = grouped[key].reverse();
+        on("onlineUsers", (users) => {
+            setOnlineUsers(users); // <-- or however you're managing online state
         });
 
-        return reversedGrouped;
+        on("userOnline", ({ userId }) => {
+            setOnlineUsers((prev) => [...prev, userId]);
+        });
+
+        on("userOffline", ({ userId }) => {
+            setOnlineUsers((prev) => prev.filter((id) => id !== userId));
+        });
+
+        on("unreadCountUpdated", (data) => {
+            setFollowings((prev) => {
+                return prev.map((following) => {
+                    if (following._id === data.senderId) {
+                        return { ...following, unreadCount: data.unreadCount };
+                    }
+                    return following;
+                });
+            })
+        })
+
+        on("attachment", (data) => {
+            console.log(data);
+            setAttachmentsDownloaded((prev) => [...prev, data]);
+        })
+
+        return () => {
+            off("receiveMessage", handleReceiveMessage);
+            off("typing");
+            off("stopTyping");
+            off("onlineUsers");
+            off("userOnline");
+            off("userOffline");
+        };
+    }, [on]);
+
+
+    const handleChatOpen = async (chatUser) => {
+        try {
+            setIsChatOpen(true);
+            setChatUser(chatUser);
+
+            if (chat?._id) {
+                emit("leaveRoom", chat._id);
+            }
+
+            const { data: chatData } = await createOrGetOneOnOneChat(chatUser.userName);
+            emit("joinRoom", chatData._id);
+            setChat(chatData);
+
+            const dict = groupMessagesDict(chatData.messages);
+            setGroupedMessages(dict);
+
+        } catch (err) {
+            console.error("Error opening chat:", err);
+        }
+    };
+
+    const handleCallButton = () => {
+        initiateCall(chat._id, user._id);
+
+        navigate(`/chat/call/${chat._id}`, { state: { user: chatUser, from: user._id } });
+    }
+
+    const handleSendMessage = async () => {
+        const trimmed = inputMessage.trim();
+        if (!trimmed) return;
+
+        const tempId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const now = new Date().toISOString();
+
+        const optimisticMessage = {
+            _id: tempId,
+            content: trimmed,
+            sender: {
+                _id: user._id,
+                fullName: user.fullName,
+                profilePic: user.profilePic,
+            },
+            createdAt: now,
+            chat: chat._id,
+            attachments: attachments.url,
+            type: attachments.type || 'TEXT'
+        };
+
+        setGroupedMessages(prev => {
+            const updated = { ...prev };
+
+            // Find latest group (regardless of sender)
+            const latestEntry = Object.entries(updated)
+                .sort(([, a], [, b]) => new Date(b.firstMessageTime) - new Date(a.firstMessageTime))[0];
+
+            const now = optimisticMessage.createdAt || new Date().toISOString();
+            const senderId = user._id;
+            const senderName = user.fullName;
+            const isIncoming = senderId !== user._id;
+
+            let groupKey;
+
+            if (latestEntry) {
+                const [key, group] = latestEntry;
+                const lastSenderId = group.senderId;
+                const lastIsIncoming = lastSenderId !== user._id;
+
+                const lastMsg = group.messages[group.messages.length - 1];
+                const lastMsgTime = lastMsg?.createdAt || group.firstMessageTime;
+                const gap = differenceInMinutes(new Date(now), new Date(lastMsgTime));
+
+                const shouldStartNew =
+                    isIncoming !== lastIsIncoming || // direction change
+                    senderId !== lastSenderId ||     // different sender
+                    gap > 10;                        // too much time gap
+
+                if (!shouldStartNew) {
+                    groupKey = key;
+                    updated[groupKey] = {
+                        ...group,
+                        messages: [...group.messages, optimisticMessage]
+                    };
+                } else {
+                    groupKey = `${now}_${senderId}`;
+                    updated[groupKey] = {
+                        senderId,
+                        senderName,
+                        firstMessageTime: now,
+                        messages: [optimisticMessage]
+                    };
+                }
+            } else {
+                // No previous group at all
+                groupKey = `${now}_${senderId}`;
+                updated[groupKey] = {
+                    senderId,
+                    senderName,
+                    firstMessageTime: now,
+                    messages: [optimisticMessage]
+                };
+            }
+
+            return updated;
+        });
+
+
+        emit("receiveMessage", {
+            to: chat.otherParticipant._id,
+            message: optimisticMessage
+        });
+
+        setInputMessage(""); // Clear input early
+        setAttachments({type: null, file: null, url: null});
+
+        try {
+            const formData = new FormData();
+            formData.append("message", trimmed);
+            formData.append("chatId", chat._id);
+            formData.append("messageFile", attachments.file);
+            formData.append("messageType", attachments.type || 'TEXT');
+            formData.append("tempId", tempId);
+            await sendMessage(formData);
+
+        } catch (err) {
+            console.error("Failed to send message:", err);
+
+            // Rollback optimistic message by finding and removing it
+            setGroupedMessages(prev => {
+                const updated = { ...prev };
+
+                for (const key in updated) {
+                    const group = updated[key];
+                    const index = group.messages.findIndex(msg => msg._id === tempId);
+                    if (index !== -1) {
+                        // Remove the message
+                        const newMessages = [...group.messages.slice(0, index), ...group.messages.slice(index + 1)];
+
+                        if (newMessages.length > 0) {
+                            updated[key].messages = newMessages;
+                        } else {
+                            delete updated[key]; // Remove entire group if empty
+                        }
+                        break; // Exit once we've handled the rollback
+                    }
+                }
+
+                return updated;
+            });
+        }
     };
 
 
-    const animations = {
-        hover: { cursor: "grab" },
-        drag_h1: {
-            cursor: "grabbing",
-            padding: "0.5em",
-            border: "2px solid var(--accent-border-color)",
-            borderRadius: "10px",
-            backgroundColor: "var(--background-secondary)",
-            zIndex: "5",
-        },
-        drag_div: {
-            maxHeight: "0",
-            padding: "0",
-        },
-        default: {},
+
+    const handleAttachClick = () => {
+        fileInputRef.current?.click();
     };
 
-    const messageVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: 20 }
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        setAttachments({
+            type: file.type.startsWith('image/') ? 'IMAGE' : file.type.startsWith('video/') ? 'VIDEO' : 'TEXT',
+            file,
+            url: URL.createObjectURL(file)
+        })
     };
+
+
+    function groupMessagesDict(messages, currentUserId) {
+        messages = messages
+            .slice()
+            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+        const groups = {};
+        let lastGroupKey = null;
+
+        for (const msg of messages) {
+            const senderId = msg.sender._id || msg.sender;
+            const senderName = msg.sender.fullName || msg.senderName || "Unknown";
+            const timestamp = msg.createdAt;
+            const isIncoming = senderId !== currentUserId;
+
+            if (!lastGroupKey) {
+                // First message starts a new group
+                lastGroupKey = `${timestamp}_${senderId}`;
+                groups[lastGroupKey] = {
+                    senderId,
+                    senderName,
+                    firstMessageTime: timestamp,
+                    messages: [msg]
+                };
+                continue;
+            }
+
+            const lastGroup = groups[lastGroupKey];
+            const lastSenderId = lastGroup.senderId;
+            const lastMessageTime = lastGroup.messages[lastGroup.messages.length - 1].createdAt;
+            const lastIsIncoming = lastSenderId !== currentUserId;
+
+            const gap = differenceInMinutes(new Date(timestamp), new Date(lastMessageTime));
+
+            const shouldStartNew =
+                isIncoming !== lastIsIncoming || // direction change
+                senderId !== lastSenderId ||     // different sender
+                gap > 10;                        // too much time gap
+
+            if (shouldStartNew) {
+                lastGroupKey = `${timestamp}_${senderId}`;
+                groups[lastGroupKey] = {
+                    senderId,
+                    senderName,
+                    firstMessageTime: timestamp,
+                    messages: [msg]
+                };
+            } else {
+                groups[lastGroupKey].messages.push(msg);
+            }
+        }
+
+        return groups;
+    }
+
+
+    const formatLastSeen = (timestamp) => {
+        const lastSeenDate = new Date(timestamp);
+        const now = new Date();
+        const diffInMinutes = differenceInMinutes(now, lastSeenDate);
+
+        if (diffInMinutes < 1) {
+            return "Last seen just now";
+        } else if (diffInMinutes < 60) {
+            return `Last seen ${formatDistanceToNow(lastSeenDate, { addSuffix: true })}`;
+        } else if (isToday(lastSeenDate)) {
+            return `Last seen today at ${format(lastSeenDate, "h:mm a")}`;
+        } else if (isYesterday(lastSeenDate)) {
+            return `Last seen yesterday at ${format(lastSeenDate, "h:mm a")}`;
+        } else if (isThisYear(lastSeenDate)) {
+            return `Last seen on ${format(lastSeenDate, "MMM d")} at ${format(lastSeenDate, "h:mm a")}`;
+        } else {
+            return `Last seen on ${format(lastSeenDate, "MMM d, yyyy")} at ${format(lastSeenDate, "h:mm a")}`;
+        }
+    };
+
+    const getDateOnly = (timestamp) => new Date(timestamp).toDateString();
+
+    const getReadableDate = (timestamp) => {
+        const date = new Date(timestamp);
+        if (isToday(date)) return "Today";
+        if (isYesterday(date)) return "Yesterday";
+        if (isThisYear(date)) return format(date, "d MMM");
+        return format(date, "d MMM yyyy");
+    };
+
+    const shouldStartNewGroup = (lastMessageTime, newMessageTime, senderId, currentSenderId) => {
+        const gap = differenceInMinutes(new Date(newMessageTime), new Date(lastMessageTime));
+
+        // Allow grouping within a 10-minute window if it's the same sender
+        return senderId !== currentSenderId || gap > 60;
+    };
+
 
     return (
         <section className={style.lobby}>
-            <div className={style.lobby_container}>
+            <MainContainer>
 
-                <motion.div
-                    animate={ isMobile ? isChatOpen ? { display: 'flex' } : { display: 'none' } : null } transition={{ duration: 0.3 } }
-                    className={style.lobby_room}
-                >
-
-                    {
-                        !chat && (
-                            <div className={style.lobby_illustration}>
-                                <img src="https://res.cloudinary.com/dr6gycjza/image/upload/v1743242136/screenshot-1743241846525__1_-removebg-preview_ydt2m9.png" alt="illustration" />
-                            </div>
-                        )
-                    }
-
-                    <NormalUserCard
-                        styles={style.chat_header}
-                        userName={chatUser?.userName}
-                        fullName={chatUser?.fullName}
-                        profilePic={chatUser?.profilePic}
-                        callButton={true}
-                        event={handleCallButton}
-                    />
+                {((windowWidth > 768) || (!chat && windowWidth <= 768)) && (
+                    <Sidebar position="right">
+                        <Search
+                            placeholder="Search..."
+                            onChange={setSearchQuery}
+                            onClearClick={() => setSearchQuery('')}
+                        />
 
 
-                    <section className={style.lobby_messages_wrapper}>
-
-                        {/* <AnimatePresence> */}
-                            {
-                                typing.typing && (
-                                    <motion.div
-                                        key={typing.user._id}
-                                        initial="hidden"
-                                        animate="visible"
-                                        exit="exit"
-                                        variants={messageVariants}
-                                        transition={{ duration: 0.3 }}
-                                        className={style.otherSide_chat}
-                                    >
-                                        <Img url={chatUser?.profilePic} />
-                                        <div className={style.chat_message} style={{ padding: "0.5em 1em 0 1em", display: "flex" }}>
-                                            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <style>
-                                                    {`
-                                                        .spinner_qM83 {
-                                                            animation: spinner_8HQG 1.05s infinite;
-                                                        }
-                                                        .spinner_oXPr {
-                                                            animation-delay: 0.1s;
-                                                        }
-                                                        .spinner_ZTLf {
-                                                            animation-delay: 0.2s;
-                                                        }
-                                                        @keyframes spinner_8HQG {
-                                                            0%, 57.14% {
-                                                                animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
-                                                                transform: translate(0);
-                                                            }
-                                                            28.57% {
-                                                                animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0.33);
-                                                                transform: translateY(-6px);
-                                                            }
-                                                            100% {
-                                                                transform: translate(0);
-                                                            }
-                                                        }
-                                                    `}
-                                                </style>
-                                                <circle className="spinner_qM83" cx="4" cy="12" r="3" fill="var(--primary-color)" />
-                                                <circle className="spinner_qM83 spinner_oXPr" cx="12" cy="12" r="3" fill="var(--primary-color)" />
-                                                <circle className="spinner_qM83 spinner_ZTLf" cx="20" cy="12" r="3" fill="var(--primary-color)" />
-                                            </svg>
-                                        </div>
-                                    </motion.div>
+                        <ConversationList>
+                            {followings
+                                ?.filter(following =>
+                                    following.userName.toLowerCase().includes(searchQuery.trim().toLowerCase())
                                 )
-                            }
-
-
-                            {
-                                Object.keys(groupedMessages).map((date, dateIndex) => (
-                                    <>
-                                        {groupedMessages[date].map((message, messageIndex) => {
-                                            const isMyMessage = message?.sender === user._id;
-
-                                            return (
-                                                <motion.div
-                                                    key={messageIndex}
-                                                    className={isMyMessage ? style.mySide_chat : style.otherSide_chat}
-                                                    initial="hidden"
-                                                    animate="visible"
-                                                    exit="exit"
-                                                    variants={messageVariants}
-                                                    transition={{
-                                                    duration: 0.3,
-                                                    layout: { type: "spring", stiffness: 300, damping: 30 },
-                                                }}
-                                                    layout
-                                                >
-                                                    {!isMyMessage && <Img url={chatUser?.profilePic} />}
-
-                                                    <div className={style.chat_message}>
-                                                        {message.content}
-                                                    </div>
-
-                                                    <div className={style.chat_time}>
-                                                        {format(new Date(message.createdAt), 'h:mm a')}
-                                                    </div>
-                                                </motion.div>
-                                            );
-                                        })}
-
-                                        <div className={style.date_divider}>{date}</div>
-                                    </>
+                                .map((following) => (
+                                    <Conversation
+                                        key={following._id}
+                                        info={
+                                            typing.typing && typing.userName === following.userName
+                                            ? "is typing"
+                                            : following?.lastMessage?.content
+                                        }
+                                        lastSenderName={
+                                            typing.typing && typing.userName === following.userName
+                                            ? typing.userName
+                                            : following?.lastMessage?.sender === user._id
+                                            ? "You"
+                                            : following?.lastMessage?.sender || "Let's chat"
+                                        }
+                                        name={following.fullName}
+                                        unreadCnt={following.unreadCount}
+                                        onClick={() => handleChatOpen(following)}
+                                    >
+                                        <Avatar
+                                            name={following.fullName}
+                                            src={following.profilePic}
+                                            status={onlineUsers.includes(following._id) ? "available" : "invisible"}
+                                        />
+                                    </Conversation>
                                 ))
                             }
 
-                        {/* </AnimatePresence> */}
-                    </section>
+                        </ConversationList>
+                    </Sidebar>
+                )}
 
+                { chat ? (
+                    <ChatContainer>
+                        <ConversationHeader>
+                            {windowWidth < 768 && <ConversationHeader.Back onClick={() => setChat(null)} />}
+                            <Avatar
+                                name={chatUser?.fullName}
+                                src={chatUser?.profilePic}
+                                status={onlineUsers.includes(chatUser?._id) ? "available" : "invisible"}
+                            />
+                            <ConversationHeader.Content
+                                info={
+                                    typing.typing
+                                        ? "is typing"
+                                        : onlineUsers.includes(chatUser?._id)
+                                        ? "Online"
+                                        : chat?.otherParticipant?.lastSeen
+                                        ? formatLastSeen(chat.otherParticipant.lastSeen)
+                                        : ""
+                                }
+                                userName={chatUser?.userName}
+                            />
+                            <ConversationHeader.Actions>
+                                <VoiceCallButton onClick={handleCallButton} disabled={!isPermissionsGranted} />
+                            </ConversationHeader.Actions>
+                        </ConversationHeader>
 
-
-                    <footer className={style.lobby_footer}>
-
-                        <AnimatePresence>
-                            {
-                                isEmojiOpen && (
-                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={style.emoji_wrapper}>
-                                        <Picker data={data} onEmojiSelect={(emoji) => setInputMessage(inputMessage + emoji.native)} previewPosition="none" theme={ localStorage.getItem("theme") === "dark" ? "dark" : "light" } />
-                                    </motion.div>
+                        <MessageList typingIndicator={typing.typing && <TypingIndicator content={`${typing.userName} is typing`} />}>
+                            {Object.entries(groupedMessages)
+                                .sort(([ , a ], [ , b ]) =>
+                                    new Date(a.firstMessageTime) - new Date(b.firstMessageTime)
                                 )
-                            }
-                        </AnimatePresence>
+                                .map(([key, group], idx, arr) => {
+                                    const currentGroupDate = getDateOnly(group.firstMessageTime);
+                                    const prevGroup = arr[idx - 1]?.[1];
+                                    const prevGroupDate = prevGroup ? getDateOnly(prevGroup.firstMessageTime) : null;
 
-                        {/* <span className="material-symbols-rounded">attach_file</span> */}
-                        <input
-                            onChange={(e) => setInputMessage(e.target.value)}
-                            onFocus={ handleTyping }
-                            onBlur={ handleStopTyping }
-                            value={inputMessage}
-                            type="text"
-                            placeholder="Type a message..."
-                        />
-                        <span onClick={ handleSendMessage } className="material-symbols-rounded">send</span>
-                        <span className="material-symbols-rounded" onClick={() => setIsEmojiOpen(!isEmojiOpen)}>mood</span>
-                    </footer>
-                </motion.div>
+                                    const showSeparator = currentGroupDate !== prevGroupDate;
+                                    const readableDate = getReadableDate(group.firstMessageTime);
 
-                <motion.div
-                    animate={ isMobile ? isChatOpen ? { display: 'none' } : { display: 'block' } : null } transition={{ duration: 0.3 } }
-                    className={style.chat_lobby}
-                >
-                    <div className={style.chats_wrapper}>
-                        <Reorder.Group axis="y" values={sections} onReorder={setSections}>
-                            {sections.map(section => (
-                                <Reorder.Item
-                                    key={section.id}
-                                    value={section}
-                                    onHoverStart={() => { setIsHovered(true); setActiveSection(section.id); }}
-                                    onHoverEnd={() => setIsHovered(false)}
-                                    onDragStart={() => { setIsDragged(true); setActiveSection(section.id); }}
-                                    onDragEnd={() => setIsDragged(false)}
-                                >
-                                    <motion.h1
-                                        animate={activeSection === section.id && isDragged ? animations.drag_h1 : isHovered ? animations.hover : animations.default}
-                                    >
-                                        {section.title}
-                                    </motion.h1>
+                                    return (
+                                        <React.Fragment key={key}>
+                                            {showSeparator && (
+                                                <MessageSeparator content={readableDate} />
+                                            )}
+                                            <MessageGroup
+                                                direction={group.senderId === user._id ? "outgoing" : "incoming"}
+                                                sender={group.senderName}
+                                                sentTime={formatDistanceToNow(
+                                                    new Date(group.firstMessageTime),
+                                                    { addSuffix: true }
+                                                )}
+                                            >
+                                                <Avatar
+                                                    size="sm"
+                                                    src={
+                                                        group.senderId === user._id
+                                                            ? user.profilePic
+                                                            : chatUser.profilePic
+                                                    }
+                                                    name={group.senderName}
+                                                />
+                                                <MessageGroup.Header>
+                                                    {formatDistanceToNow(
+                                                        new Date(group.firstMessageTime),
+                                                        { addSuffix: true }
+                                                    )}
+                                                </MessageGroup.Header>
+                                                <MessageGroup.Messages>
+                                                    {group.messages.map((msg) => {
+                                                        const isOutgoing = group.senderId === user._id;
 
-                                    <motion.div
-                                        ref={childRefs.current[section.id]}
-                                        className={section.id === 0 ? style.moods_wrapper : section.id === 1 ? style.ai_chat : section.id === 2 ? style.pinned_chats : style.all_chats}
-                                        animate={activeSection === section.id && isDragged ? animations.drag_div : animations.default}
-                                    >
-                                        {section.id === 0 && <UserPPic name="Khushi" profilePic="https://i.pinimg.com/originals/92/9a/48/929a488e6170e5423c394705a52de932.gif" />}
-                                        {section.id === 1 && <NormalUserCard styles={style.user_card} name="AI" userName="PIXR AI" profilePic="https://i.pinimg.com/originals/6d/3c/fd/6d3cfda6e7bae017c8b264fb3a821e12.gif" />}
-                                        {section.id !== 0 && section.id !== 1 &&
-                                            (
-                                                followings?.map((following, index) => (
-                                                        <NormalUserCard key={index} styles={style.user_card} fullName={following.fullName} userName={following.userName} profilePic={following.profilePic} event={() => handleChatOpen(following) } />
-                                                    )
-                                                )
-                                            )
+                                                        let attachmentUrl = msg.attachments
+
+                                                        attachmentsDownloaded.map((attachment) => {
+                                                            if (attachment?.id === msg._id) {
+                                                                attachmentUrl = attachment.url;
+                                                                return
+                                                            }
+                                                        })
+
+                                                        if (msg.attachments) {
+                                                            return (
+                                                                <Message
+                                                                    key={msg._id}
+                                                                    type="custom"
+                                                                    model={{
+                                                                        direction: isOutgoing ? "outgoing" : "incoming",
+                                                                        payload: <Message.CustomContent>
+                                                                            {msg.type === 'IMAGE' ? (
+                                                                                <img
+                                                                                    src={attachmentUrl}
+                                                                                    alt="attachment"
+                                                                                    className={style.message_image}
+                                                                                    onError={() => {
+                                                                                        setIsAttachmentsDownloading(true);
+                                                                                    }}
+                                                                                />
+                                                                            ) : (
+                                                                                <video src={attachmentUrl} controls />
+                                                                            )}
+                                                                            <p>{msg.content}</p>
+                                                                        </Message.CustomContent>
+                                                                    }}
+                                                                />
+                                                            );
+                                                        }
+
+                                                        return (
+                                                            <Message
+                                                                key={msg._id}
+                                                                model={{
+                                                                    message: msg.content,
+                                                                    sentTime: new Date(msg.createdAt).toLocaleTimeString(),
+                                                                    sender: group.senderName,
+                                                                    direction: isOutgoing ? "outgoing" : "incoming"
+                                                                }}
+                                                            />
+                                                        );
+                                                    })}
+                                                </MessageGroup.Messages>
+                                            </MessageGroup>
+                                        </React.Fragment>
+                                    );
+                                })}
+
+                                {attachments.url &&
+                                    <div className={style.attachments}>
+                                        {attachments.type === "IMAGE" ?
+                                            <img src={attachments.url} alt="attachment" className={style.attachment_img} />
+                                            :
+                                            <video src={attachments.url} controls autoPlay loop className={style.attachment_video} />
                                         }
-                                    </motion.div>
-                                </Reorder.Item>
-                            ))}
-                        </Reorder.Group>
+                                    </div>
+                                }
+
+                        </MessageList>
+
+                        <MessageInput
+                            placeholder="Type message here"
+                            value={inputMessage}
+                            onChange={setInputMessage}
+                            onSend={handleSendMessage}
+                            onAttachClick={handleAttachClick}
+                        />
+
+                    </ChatContainer>
+                ) : windowWidth >= 864 && (
+                    <div className={style.no_chat}>
+                        <img style={{ width: "80%" }} src={chatsvg} alt="Chat" />
                     </div>
-                </motion.div>
-            </div>
+                )}
+            </MainContainer>
+
+            <input
+                type="file"
+                ref={fileInputRef}
+                // style={{ display: "none" }}
+                accept="image/*, video/*"
+                onChange={handleFileChange}
+            />
         </section>
     );
-}
+};

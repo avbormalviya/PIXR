@@ -31,6 +31,15 @@ export const VideoCall = () => {
     const [isLocalCameraOn, setIsLocalCameraOn] = useState(false);
     const [isLocalMicOn, setIsLocalMicOn] = useState(true);
     const [chatUser, setChatUser] = useState({});
+    const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+
+
+    useEffect(() => {
+        ( async () => {
+            const result = await requestCameraAndMicAccess();
+            setIsPermissionsGranted(result);
+        })();
+    }, []);
 
     useEffect(() => {
         if (location.state?.user && !chatUser?._id) {
@@ -56,10 +65,6 @@ export const VideoCall = () => {
             remoteVideoRef.current.play().catch(err => console.error("❌ Remote video play error:", err));
         }
     }, [remoteStream]);
-
-    useEffect(() => {
-        console.log(isCallAccepted);
-    }, [isCallAccepted]);
 
     const toggleCamera = () => {
         if (!localStream) return;
@@ -127,10 +132,10 @@ export const VideoCall = () => {
                 {incomingCall && <i className="material-symbols-rounded" onClick={acceptCall}>call</i>}
                 {isCallAccepted && (
                     <>
-                        <i className="material-symbols-rounded" onClick={toggleCamera}>
+                        <i className="material-symbols-rounded" onClick={toggleCamera} disabled={!isPermissionsGranted.camera.granted}>
                             {isLocalCameraOn ? 'videocam' : 'videocam_off'}
                         </i>
-                        <i className="material-symbols-rounded" onClick={toggleMicrophone}>
+                        <i className="material-symbols-rounded" onClick={toggleMicrophone} disabled={!isPermissionsGranted.mic.granted}>
                             {isLocalMicOn ? 'mic' : 'mic_off'}
                         </i>
                     </>

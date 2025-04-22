@@ -79,14 +79,14 @@ const Post = ({ postObj }) => {
         const shareUrl = `http://localhost:5173/${postObj.postOwner.userName}/${postObj._id}`;
         const shareText = "Check out this amazing Post on PIXR!";
         const imageUrl = postObj.postFiles[0]; // URL of the image to share
-        
+
         if (navigator.share) {
             try {
                 // Fetch the image and convert it into a File object
                 const response = await fetch(imageUrl);
                 const blob = await response.blob();
                 const file = new File([blob], "post-image.jpg", { type: blob.type });
-    
+
                 await navigator.share({
                     title: "PIXR Post",
                     text: shareText,
@@ -100,7 +100,7 @@ const Post = ({ postObj }) => {
             alert("Your browser does not support sharing content.");
         }
     };
-    
+
 
 
     const drawer = {
@@ -137,11 +137,11 @@ const Post = ({ postObj }) => {
                     }}
 
                     style={{
-                        width: "100%",
+                        width: "98%",
                         aspectRatio: "1/1",
                         borderRadius: "20px",
-                        backgroundColor: "var(--background-primary)",
-                        filter: "drop-shadow(0px 0px 6px black)",
+                        // backgroundColor: "var(--background-primary)",
+                        filter: "drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.3))",
                     }}
                 >
                     {
@@ -184,9 +184,9 @@ const Post = ({ postObj }) => {
                             <ShareButton event={ handleShare } />
                         </div>
                     </div>
-                    
+
                     <BookmarkButton isBookmarked={ isBookmarked } event={ handleBookmark } style={{ justifySelf: "flex-end" }} />
-                    
+
                     <h1 className={style.post_title}>
                         <span
                             onClick={() => setIsExpanded(!isExpanded)}
@@ -195,11 +195,11 @@ const Post = ({ postObj }) => {
                             {postObj.postTitle}
                         </span>
                     </h1>
-                    
+
                     { postObj?.createdAt && ( <data className={style.post_date}>{ formatDistanceToNowStrict(new Date(postObj.createdAt), { addSuffix: true }) }</data> ) }
                 </section>
             </section>
-            
+
             <AnimatePresence>
                 { isCommentsOpen && (
                     <Comment feedId={ postObj._id } feedType="post" setIsCommentsOpen={ setIsCommentsOpen } thumbnail={ postObj.postFiles[0] } />
@@ -211,7 +211,7 @@ const Post = ({ postObj }) => {
 
 
 export const Posts = () => {
-    
+
     const [posts, setPosts] = useState([]);
     const [lastPostId, setLastPostId] = useState(null);
     const [hasMore, setHasMore] = useState(true);

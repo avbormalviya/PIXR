@@ -76,6 +76,10 @@ form {
         border-radius: 20px;
         color: var(--text-primary-50);
         background-color: var(--background-ternary);
+
+        &:disabled {
+            cursor: not-allowed;
+        }
     }
 }
 

@@ -41,6 +41,7 @@ const IOSSwitch = styled((props) => (<Switch focusVisibleClassName=".Mui-focusVi
             ...theme.applyStyles('dark', {
                 opacity: 0.3,
             }),
+            cursor: 'not-allowed',
         },
     },
     '& .MuiSwitch-thumb': {
@@ -61,7 +62,7 @@ const IOSSwitch = styled((props) => (<Switch focusVisibleClassName=".Mui-focusVi
     },
 }));
 
-export const SwitchButton = ({ checked, setChecked }) => {
+export const SwitchButton = ({ checked, setChecked, ...props }) => {
 
     const handleSwitchChange = (event) => {
         setChecked(event.target.checked);
@@ -71,6 +72,7 @@ export const SwitchButton = ({ checked, setChecked }) => {
         <FormControlLabel
             control={<IOSSwitch sx={{ m: 1 }} checked={checked} onChange={handleSwitchChange} />}
             sx={{ m: 0 }}
+            {...props}
         />
     )
 }

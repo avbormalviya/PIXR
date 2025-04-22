@@ -101,6 +101,11 @@ form {
         border-radius: 20px;
         color: rgba(245, 245, 245, 0.3);
         background-color: #202020;
+
+        &:disabled {
+            cursor: not-allowed;
+
+        }
     }
 }
 

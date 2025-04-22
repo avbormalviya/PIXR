@@ -12,6 +12,8 @@ import { useUserProfileMutation } from "../../api/userApi"
 import { useDispatch } from "react-redux"
 import { setUserData } from "../../features/user/useSlice"
 import { FaceCapture } from "../../features/faceRecog/FaceRecog";
+import { requestCameraAndMicAccess } from "../../utils/getPermission";
+import { Tooltip } from "@mui/material";
 
 
 export const UserDetails = () => {
@@ -26,6 +28,7 @@ export const UserDetails = () => {
     const [cropImage, setCropImage] = useState({});
     const [faceCapture, setFaceCapture] = useState(false);
     const [descriptor, setDescriptor] = useState([]);
+    const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
 
     const fetchImageAsFile = async () => {
         const response = await fetch(profilePic.src);
@@ -40,6 +43,13 @@ export const UserDetails = () => {
 
     useEffect(() => {
         fetchImageAsFile();
+    }, []);
+
+    useEffect(() => {
+        ( async () => {
+            const result = await requestCameraAndMicAccess();
+            setIsPermissionsGranted(result);
+        })();
     }, []);
 
     const handleSubmit = async (e) => {
@@ -76,14 +86,41 @@ export const UserDetails = () => {
                     <FileInput profilePic={ profilePic } setProfilePic={ setCropImage } />
                     <Input state={ fullName } setState={ setFullName } placeholder="Full Name" icon="id_card" />
                     <Input state={ birthDate } setState={ setBirthDate } placeholder="Birth Date" icon="calendar_month" />
-                    <button
-                        type="button"
-                        className={style.face_recognition}
-                        onClick={() => setFaceCapture(true)}
-                        style={{ boxShadow: descriptor.length ? "0 0 0 2px var(--primary-color), 0 0 0 6px #0094f624" : "none" }}
+
+                    <Tooltip
+                        title="Access to your camera is required"
+                        fontSize="large"
+                        arrow
+                        disableInteractive
+                        PopperProps={{
+                            modifiers: [
+                                    {
+                                        name: 'offset',
+                                        options: {
+                                        offset: [0, 10],
+                                        },
+                                    },
+                                ],
+                            }}
+                            componentsProps={{
+                                tooltip: {
+                                    sx: {
+                                        fontSize: '1.2rem', // Try '1.2rem' or '18px' if it's still too small
+                                        padding: '10px 14px',
+                                    },
+                                },
+                            }}
                     >
-                        Face Recognition
-                    </button>
+                        <button
+                            type="button"
+                            className={style.face_recognition}
+                            onClick={() => setFaceCapture(true)}
+                            style={{ boxShadow: descriptor.length ? "0 0 0 2px var(--primary-color), 0 0 0 6px #0094f624" : "none" }}
+                            disabled={!isPermissionsGranted?.camera?.granted}
+                        >
+                            Face Recognition
+                        </button>
+                    </Tooltip>
                 </div>
 
                 <button type="submit">Create</button>

@@ -8,6 +8,8 @@ import { useDispatch } from "react-redux"
 import { setUserData } from "../../features/user/useSlice"
 import { Loader } from "../../features/statusSlice/loader/Loader"
 
+import { requestCameraAndMicAccess } from "../../utils/getPermission"
+
 import { FaceCapture } from "../../features/faceRecog/FaceRecog"
 
 
@@ -25,10 +27,19 @@ export const Login = () => {
     const [inputType, setInputType] = useState('');
     const [faceCapture, setFaceCapture] = useState(false);
     const [descriptor, setDescriptor] = useState([]);
+    const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+
 
     useEffect(() => {
         setInputType(determineInputType(inputValue) || "mail");
     }, [inputValue])
+
+    useEffect(() => {
+        ( async () => {
+            const result = await requestCameraAndMicAccess();
+            setIsPermissionsGranted(result);
+        })();
+    }, []);
 
     const determineInputType = (value) => {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -71,11 +82,13 @@ export const Login = () => {
                         <span>OR</span>
                         <hr />
                     </div>
+
                     <button
                         type="button"
                         className={style.face_recognition}
                         style={{ boxShadow: descriptor.length ? "0 0 0 2px var(--primary-color), 0 0 0 6px #0094f624" : "none" }}
                         onClick={() => setFaceCapture(true)}
+                        disabled={ !isPermissionsGranted?.camera?.granted }
                     >
                         Face Recognition
                     </button>
