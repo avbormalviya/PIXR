@@ -5,6 +5,7 @@ import style from "./videoCall.module.scss";
 import { usePeerContext } from '../../context/PeerContext';
 import { Img } from "../../components/img/Img";
 import { useSelector } from "react-redux";
+import { requestCameraAndMicAccess } from "../../utils/getPermission";
 
 export const VideoCall = () => {
     const location = useLocation();
