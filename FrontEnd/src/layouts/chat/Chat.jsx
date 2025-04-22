@@ -42,7 +42,7 @@ import {
 import chatsvg from "/svg/undraw_social-serenity_x9vq.svg"
 // import chatsvg from "/svg/undraw_connection_ts3f.svg"
 
-import style from "./Chat.module.scss";
+import style from "./chat.module.scss";
 
 
 export const Chat = () => {
