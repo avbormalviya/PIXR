@@ -224,11 +224,11 @@ export const Music = () => {
                 <div className={style.music_section_footer}>
                     <iframe
                         className={style.iframe}
-                        src={`https://open.spotify.com/embed/track/${selectedSongId}?autoplay=1`}
+                        src={`https://open.spotify.com/embed/track/${selectedSongId}`}
                         width="100%"
                         height="80"
                         frameBorder="0"
-                        allow="autoplay; encrypted-media"
+                        allow="encrypted-media"
                     ></iframe>
                 </div>
             </div>

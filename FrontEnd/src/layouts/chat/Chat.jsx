@@ -711,7 +711,7 @@ export const Chat = () => {
             <input
                 type="file"
                 ref={fileInputRef}
-                // style={{ display: "none" }}
+                style={{ display: "none" }}
                 accept="image/*, video/*"
                 onChange={handleFileChange}
             />

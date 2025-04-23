@@ -19,7 +19,12 @@ function App() {
   const { isHandGesture, showDisplay } = useContext(HandGestureContext);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <Provider store={store}>
         <SocketProvider>
           <PeerProvider>
