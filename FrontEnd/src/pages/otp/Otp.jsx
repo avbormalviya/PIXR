@@ -23,7 +23,6 @@ export const Otp = () => {
 
     useEffect(() => {
         inputsRef.current[0].focus();
-        console.log(localStorage.getItem("verificationCode"));
         handleManualPaste(localStorage.getItem("verificationCode"));
     }, [])
 

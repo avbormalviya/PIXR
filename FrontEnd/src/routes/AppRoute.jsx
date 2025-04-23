@@ -24,9 +24,17 @@ import { Music } from "../layouts/music/Music";
 import { MusicHome } from "../features/music/MusicHome";
 import { MusicDetails } from "../features/music/MusicDetails";
 
+
+const ProtectedRoute = ({ children }) => {
+    const { user } = useSelector((state) => state.user);
+    if (!user) return <Navigate to="/auth/login" />;
+    if (!user.fullName) return <Navigate to="/auth/signup/userDetails" />;
+    return children;
+};
+
+
 export const AppRoute = () => {
     const dispatch = useDispatch();
-    const { user } = useSelector((state) => state.user);
 
     const [loading, setLoading] = useState(false);
 
@@ -37,8 +45,8 @@ export const AppRoute = () => {
             if (data?.data) {
                 dispatch(setUserData(data.data));
             }
-            setLoading(false);
         })();
+        setLoading(false);
     }, []);
 
     if (loading) {
@@ -47,53 +55,37 @@ export const AppRoute = () => {
                 <Route path="*" element={<InitialLoading />} />
             </Routes>
         );
-    }
+    };
 
     return (
         <Routes>
-            {user ? (
-                !user.fullName ? (
-                    <>
-                        <Route path="/auth" element={<Auth />}>
-                            <Route path="signup/userDetails" element={<UserDetails />} />
-                        </Route>
-                        <Route path="*" element={<Navigate to="/auth/signup/userDetails" replace />} />
-                    </>
-                ) : (
-                    <>
-                        <Route path="/" element={<Home />}>
-                            <Route index element={<FeedLayout />} />
-                            <Route path="memoir/:username" element={<Memoir />} />
-                            <Route path="search" element={<Search />} />
-                            <Route path="reels" element={<Reel />} />
-                            <Route path="create/:content" element={<Create />} />
-                            <Route path="user/:username" element={<Profile />} >
-                                <Route path=":type" element={<Profile />} />
-                            </Route>
-                            <Route path="chat" element={<Chat />} />
-                            <Route path="notifications" element={<Notification />} />
-                            <Route path="settings" element={<Settings />} >
-                                <Route path=":type" element={<Settings />} />
-                            </Route>
-                            <Route path="music" element={<Music />} >
-                                <Route index element={<MusicHome />} />
-                                <Route path=":type/:id" element={<MusicDetails />} />
-                            </Route>
-                        </Route>
-                        <Route path="chat/call/:user" element={<VideoCall />} />
-                    </>
-                )
-            ) : (
-                <>
-                    <Route path="/auth" element={<Auth />}>
-                        <Route path="login" element={<Login />} />
-                        <Route path="signup" element={<SignUp />} />
-                        <Route path="signup/verifyEmail" element={<Otp />} />
-                        <Route path="signup/userDetails" element={<UserDetails />} />
-                    </Route>
-                    <Route path="*" element={<Navigate to="/auth/login" replace />} />
-                </>
-            )}
+            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>}>
+                <Route index element={<FeedLayout />} />
+                <Route path="memoir/:username" element={<Memoir />} />
+                <Route path="search" element={<Search />} />
+                <Route path="reels" element={<Reel />} />
+                <Route path="create/:content" element={<Create />} />
+                <Route path="user/:username" element={<Profile />} >
+                    <Route path=":type" element={<Profile />} />
+                </Route>
+                <Route path="chat" element={<Chat />} />
+                <Route path="notifications" element={<Notification />} />
+                <Route path="settings" element={<Settings />} >
+                    <Route path=":type" element={<Settings />} />
+                </Route>
+                <Route path="music" element={<Music />} >
+                    <Route index element={<MusicHome />} />
+                    <Route path=":type/:id" element={<MusicDetails />} />
+                </Route>
+            </Route>
+            <Route path="chat/call/:user" element={<VideoCall />} />
+
+            <Route path="/auth" element={<Auth />}>
+                <Route path="login" element={<Login />} />
+                <Route path="signup" element={<SignUp />} />
+                <Route path="signup/verifyEmail" element={<Otp />} />
+                <Route path="signup/userDetails" element={<UserDetails />} />
+            </Route>
         </Routes>
     );
 };

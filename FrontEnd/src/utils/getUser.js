@@ -6,6 +6,7 @@ export const getUser = async () => {
         if (response?.status === 200) {
             return response.data;
         }
+        return null;
     } catch (err) {
         return null;
     }
