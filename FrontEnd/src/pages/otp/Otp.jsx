@@ -23,11 +23,12 @@ export const Otp = () => {
 
     useEffect(() => {
         inputsRef.current[0].focus();
+        console.log(localStorage.getItem("verificationCode"));
         handleManualPaste(localStorage.getItem("verificationCode"));
     }, [])
 
     useEffect(() => {
-        if (verificationCode && verificationCode.trim() !== "") {
+        if (verificationCode) {
             localStorage.setItem("verificationCode", verificationCode);
             handleManualPaste(verificationCode);
         }
@@ -46,7 +47,7 @@ export const Otp = () => {
     }
 
     const handleManualPaste = (data) => {
-        const pastedData = data.trim();
+        const pastedData = String(data).trim();
 
         if (/^\d+$/.test(pastedData)) {
             const pastedArray = pastedData.split('').slice(0, 6);
