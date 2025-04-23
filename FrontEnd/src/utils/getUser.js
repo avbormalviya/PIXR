@@ -10,8 +10,6 @@ export const getUser = async () => {
         withCredentials: true,  // Ensure cookies are sent if available
     };
 
-    console.log(config);
-
     try {
         const response = await axios.get("https://pixr-backend.onrender.com/api/v1/users/getUser", config);
         if (response?.status === 200) {

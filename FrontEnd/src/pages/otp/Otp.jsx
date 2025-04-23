@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { useVerifyEmailMutation } from "../../api/userApi"
 import { useSocket } from "../../context/SocketContext";
 
-import { areCookiesEnabled } from "../../utils/isCookieEnable";
+import { isAuthCookieWorking } from "../../utils/isCookieEnable";
 
 import { useSelector } from 'react-redux'
 
@@ -43,12 +43,16 @@ export const Otp = () => {
             const result = await verifyEmail({ verificationCode: otp.join("") }).unwrap();
 
             const { accessToken, refreshToken } = result.data;
-            
-            if (!areCookiesEnabled()) {
+
+            const isCookieWorking = await isAuthCookieWorking();
+
+            if (!isCookieWorking) {
                 localStorage.setItem("accessToken", accessToken);
                 localStorage.setItem("refreshToken", refreshToken);
             }
+
             navigate("/auth/signup/userDetails");
+
         } catch (err) {
             console.log(err)
         }

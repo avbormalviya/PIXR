@@ -7,7 +7,7 @@ import { useLoginUserMutation } from "../../api/userApi"
 import { useDispatch } from "react-redux"
 import { setUserData } from "../../features/user/useSlice"
 import { Loader } from "../../features/statusSlice/loader/Loader"
-import { areCookiesEnabled } from "../../utils/isCookieEnable"
+import { isAuthCookieWorking } from "../../utils/isCookieEnable"
 
 import { requestCameraAndMicAccess } from "../../utils/getPermission"
 
@@ -66,13 +66,14 @@ export const Login = () => {
 
         const { accessToken, refreshToken, user } = result.data;
 
-        if (!areCookiesEnabled()) {
+        const isCookieWorking = await isAuthCookieWorking();
+
+        if (!isCookieWorking) {
             localStorage.setItem("accessToken", accessToken);
             localStorage.setItem("refreshToken", refreshToken);
         }
 
         dispatch(setUserData(user));
-        navigate("/");
     }
 
     return (
