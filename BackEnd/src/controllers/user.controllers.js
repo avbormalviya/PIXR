@@ -582,7 +582,6 @@ const getUserFollowerAndFollowing = asyncHandler( async (req, res) => {
 const getChatFollowings = asyncHandler(async (req, res) => {
     try {
         const currentUserId = req.user._id;
-        console.log("currentUserId", req.user);
 
         // Step 1: Get followings of the current user
         const followings = await Connection.find({ follower: currentUserId })
@@ -594,12 +593,13 @@ const getChatFollowings = asyncHandler(async (req, res) => {
         const chatList = [];
 
         for (const following of followings) {
-            console.log("following", following);
             const user = following.followed;
+
+            if (!user) continue;
 
             // Step 2: Get the existing chat between the current user and the following user
             const existingChat = await Chat.findOne({
-                participants: { $all: [currentUserId, user?._id] }
+                participants: { $all: [currentUserId, user._id] }
             })
                 .populate({
                     path: 'lastMessage',
@@ -611,7 +611,7 @@ const getChatFollowings = asyncHandler(async (req, res) => {
                 .lean();
 
             chatList.push({
-                _id: user?._id,
+                _id: user._id,
                 fullName: user.fullName,
                 userName: user.userName,
                 profilePic: user.profilePic,
