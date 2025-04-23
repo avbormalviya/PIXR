@@ -10,9 +10,14 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
 
         if (!socketRef.current) {
+            const accessToken = localStorage.getItem("accessToken");
+
             socketRef.current = io("https://pixr-backend.onrender.com", {
-                withCredentials: true,
+                withCredentials: true, // To send cookies if available
                 transports: ["websocket"],
+                extraHeaders: accessToken
+                    ? { Authorization: `Bearer ${accessToken}` } // Fallback to Authorization header if no cookies
+                    : {},
             });
         }
 

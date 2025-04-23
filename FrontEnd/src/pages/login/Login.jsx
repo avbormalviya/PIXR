@@ -7,6 +7,7 @@ import { useLoginUserMutation } from "../../api/userApi"
 import { useDispatch } from "react-redux"
 import { setUserData } from "../../features/user/useSlice"
 import { Loader } from "../../features/statusSlice/loader/Loader"
+import { areCookiesEnabled } from "../../utils/isCookieEnable"
 
 import { requestCameraAndMicAccess } from "../../utils/getPermission"
 
@@ -61,9 +62,14 @@ export const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const result = await loginUser({ email, userName: username, password, descriptor }).unwrap();
+        const { user, accessToken, refreshToken } = await loginUser({ email, userName: username, password, descriptor }).unwrap();
 
-        dispatch(setUserData(result.data));
+        if (!areCookiesEnabled()) {
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+        }
+
+        dispatch(setUserData(user));
         navigate("/");
     }
 

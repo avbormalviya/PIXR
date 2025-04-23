@@ -167,7 +167,7 @@ const verifyEmail = asyncHandler( async (req, res) => {
         .cookie("accessToken", accessToken, cookieOptions.accessToken)
         .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
         .json(
-            new ApiResponse(200, user, "User verified successfully")
+            new ApiResponse(200, {accessToken, refreshToken}, "User verified successfully")
         )
 })
 
@@ -248,6 +248,11 @@ const loginUser = asyncHandler( async (req, res) => {
         throw new ApiError(400, `Incorrect ${type}`);
     }
 
+    let filteredUser = user.toObject();
+    delete filteredUser.password;
+    delete filteredUser.refreshToken;
+    delete filteredUser.descriptor;
+
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
 
     return res
@@ -255,8 +260,9 @@ const loginUser = asyncHandler( async (req, res) => {
         .cookie("accessToken", accessToken, cookieOptions.accessToken)
         .cookie("refreshToken", refreshToken, cookieOptions.refreshToken)
         .json(
-            new ApiResponse(200, user, "Login successful")
+            new ApiResponse(200, {user, accessToken, refreshToken}, "Login successful")
         )
+
 })
 
 

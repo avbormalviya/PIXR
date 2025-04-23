@@ -5,12 +5,24 @@ import { setLoading } from "../features/statusSlice/loader/loaderSlice";
 const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
     const baseQuery = fetchBaseQuery({
         baseUrl: "https://pixr-backend.onrender.com/api/v1/users/",
-        credentials: "include",
+        credentials: "include", // This still ensures cookies are sent when available
     });
 
     api.dispatch(setLoading(true));
 
-    const result = await baseQuery(args, api, extraOptions);
+    // Check if access token is in localStorage (fallback if cookies are blocked)
+    const accessToken = localStorage.getItem("accessToken");
+
+    const result = await baseQuery(
+        {
+            ...args,
+            headers: accessToken
+                ? { Authorization: `Bearer ${accessToken}` } // Add Authorization header if token exists in localStorage
+                : undefined,
+        },
+        api,
+        extraOptions
+    );
 
     api.dispatch(setLoading(false));
 
@@ -22,6 +34,7 @@ const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
 };
 
 export default baseQueryWithErrorHandling;
+
 
 
 export const userApi = createApi({
