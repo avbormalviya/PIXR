@@ -25,44 +25,6 @@
         const [isRemoteCameraOn, setIsRemoteCameraOn] = useState(false);
         const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
 
-        const switchCamera = async () => {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-                if (videoDevices.length < 2) {
-                    console.warn("Only one video device found.");
-                    return;
-                }
-
-                const currentTrack = localStream?.getVideoTracks()[0];
-                const currentDeviceId = currentTrack?.getSettings().deviceId;
-                const currentIndex = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
-                const nextIndex = (currentIndex + 1) % videoDevices.length;
-                const nextDeviceId = videoDevices[nextIndex].deviceId;
-
-                // Stop existing tracks
-                localStream?.getTracks().forEach(track => track.stop());
-
-                try {
-                    const newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { deviceId: { exact: nextDeviceId } },
-                        audio: true,
-                    });
-
-                    // Update state with the new stream
-                    setLocalStream(newStream);
-
-                    if (localVideoRef.current) {
-                        localVideoRef.current.srcObject = newStream;
-                    }
-
-                    // If you're using SimplePeer, you may need to replace the stream in the peer connection too
-                    peer?.replaceTrack(currentTrack, newStream.getVideoTracks()[0], localStream);
-                } catch (err) {
-                    console.error("Error switching camera:", err);
-                }
-            };
-
         // Play and stop audio functions for call notifications
         const playAudio = (ref, url) => {
             ref.current = new Audio(url);
@@ -255,8 +217,9 @@
         return (
             <PeerContext.Provider
                 value={{
-                    switchCamera,
+                    peer,
                     localStream,
+                    setLocalStream,
                     remoteStream,
                     calling,
                     incomingCall,
