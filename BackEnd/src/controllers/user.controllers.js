@@ -580,50 +580,54 @@ const getUserFollowerAndFollowing = asyncHandler( async (req, res) => {
 })
 
 const getChatFollowings = asyncHandler(async (req, res) => {
-    const currentUserId = req.user._id;
+    try {
+        const currentUserId = req.user._id;
 
-    // Step 1: Get followings of the current user
-    const followings = await Connection.find({ follower: currentUserId })
-        .populate({
-            path: "followed",
-            select: "fullName userName profilePic isOnline"
-        });
-
-    const chatList = [];
-
-    for (const following of followings) {
-        const user = following.followed;
-
-        // Step 2: Get the existing chat between the current user and the following user
-        const existingChat = await Chat.findOne({
-            participants: { $all: [currentUserId, user._id] }
-        })
+        // Step 1: Get followings of the current user
+        const followings = await Connection.find({ follower: currentUserId })
             .populate({
-                path: 'lastMessage',
-                populate: {
-                    path: 'sender', // Populate sender of the last message
-                    select: 'userName' // Select only the userName of the sender
-                }
+                path: "followed",
+                select: "fullName userName profilePic isOnline"
+            });
+
+        const chatList = [];
+
+        for (const following of followings) {
+            const user = following.followed;
+
+            // Step 2: Get the existing chat between the current user and the following user
+            const existingChat = await Chat.findOne({
+                participants: { $all: [currentUserId, user._id] }
             })
-            .lean();
+                .populate({
+                    path: 'lastMessage',
+                    populate: {
+                        path: 'sender', // Populate sender of the last message
+                        select: 'userName' // Select only the userName of the sender
+                    }
+                })
+                .lean();
 
-        chatList.push({
-            _id: user._id,
-            fullName: user.fullName,
-            userName: user.userName,
-            profilePic: user.profilePic,
-            chatId: existingChat?._id || null,
-            lastMessage: existingChat?.lastMessage ? {
-                content: existingChat.lastMessage.content,
-                sender: existingChat.lastMessage.sender.userName // Include sender's userName
-            } : null,
-            unreadCount: existingChat?.unreadCount?.[currentUserId] || 0,
-        });
+            chatList.push({
+                _id: user._id,
+                fullName: user.fullName,
+                userName: user.userName,
+                profilePic: user.profilePic,
+                chatId: existingChat?._id || null,
+                lastMessage: existingChat?.lastMessage ? {
+                    content: existingChat.lastMessage.content,
+                    sender: existingChat.lastMessage.sender.userName // Include sender's userName
+                } : null,
+                unreadCount: existingChat?.unreadCount?.[currentUserId] || 0,
+            });
+        }
+
+        res.status(200).json(
+            new ApiResponse(200, chatList, "Chat followings loaded")
+        );
+    } catch (error) {
+        throw new ApiError(500, error.message);
     }
-
-    res.status(200).json(
-        new ApiResponse(200, chatList, "Chat followings loaded")
-    );
 });
 
 
