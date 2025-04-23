@@ -40,7 +40,10 @@ export const Otp = () => {
         e.preventDefault();
 
         try {
-            const { accessToken, refreshToken } = await verifyEmail({ verificationCode: otp.join("") }).unwrap();
+            const result = await verifyEmail({ verificationCode: otp.join("") }).unwrap();
+
+            const { accessToken, refreshToken } = result.data;
+            
             if (!areCookiesEnabled()) {
                 localStorage.setItem("accessToken", accessToken);
                 localStorage.setItem("refreshToken", refreshToken);

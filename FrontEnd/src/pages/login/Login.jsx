@@ -62,7 +62,9 @@ export const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const { user, accessToken, refreshToken } = await loginUser({ email, userName: username, password, descriptor }).unwrap();
+        const result = await loginUser({ email, userName: username, password, descriptor }).unwrap();
+
+        const { accessToken, refreshToken, user } = result.data;
 
         if (!areCookiesEnabled()) {
             localStorage.setItem("accessToken", accessToken);
