@@ -582,7 +582,7 @@ const getUserFollowerAndFollowing = asyncHandler( async (req, res) => {
 const getChatFollowings = asyncHandler(async (req, res) => {
     try {
         const currentUserId = req.user._id;
-        print("currentUserId", req.user);
+        console.log("currentUserId", req.user);
 
         // Step 1: Get followings of the current user
         const followings = await Connection.find({ follower: currentUserId })
