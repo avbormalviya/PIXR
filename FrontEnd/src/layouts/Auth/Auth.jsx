@@ -3,6 +3,7 @@ import { Logo } from "../../components/logo/Logo"
 import style from "./auth.module.scss"
 
 export const Auth = () => {
+
     return (
         <section className={style.__container}>
             <div className={style.gradient_holder}></div>

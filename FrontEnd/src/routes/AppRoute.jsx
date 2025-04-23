@@ -17,7 +17,7 @@ import { Notification } from "../components/notifications/Notification";
 import { VideoCall } from "../features/videoCall/VideoCall";
 import { Settings } from "../features/settings/Settings";
 import { useEffect, useState } from "react";
-import { useGetUser } from "../utils/getUser";
+import { getUser } from "../utils/getUser";
 import { InitialLoading } from "../pages/initialLoading/InitialLoading";
 import { setUserData } from "../features/user/useSlice";
 import { Music } from "../layouts/music/Music";
@@ -25,26 +25,21 @@ import { MusicHome } from "../features/music/MusicHome";
 import { MusicDetails } from "../features/music/MusicDetails";
 
 export const AppRoute = () => {
-
     const dispatch = useDispatch();
-    const { fetchUser, data, loading } = useGetUser();
-
-    const [path, setPath] = useState(window.location.pathname);
-
-    const [musicMainWindow, setMusicMainWindow] = useState(false);
-
-
-    useEffect(() => {
-        fetchUser();
-    }, [])
-
-    useEffect(() => {
-        if (data) {
-            dispatch(setUserData(data.data));
-        }
-    }, [data])
-
     const { user } = useSelector((state) => state.user);
+
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        (async () => {
+            const data = await getUser();
+            if (data?.data) {
+                dispatch(setUserData(data.data));
+            }
+            setLoading(false);
+        })();
+    }, []);
 
     if (loading) {
         return (
@@ -55,43 +50,50 @@ export const AppRoute = () => {
     }
 
     return (
-        <>
-            <Routes>
-                {user ? (
+        <Routes>
+            {user ? (
+                !user.fullName ? (
+                    <>
+                        <Route path="/auth" element={<Auth />}>
+                            <Route path="signup/userDetails" element={<UserDetails />} />
+                        </Route>
+                        <Route path="*" element={<Navigate to="/auth/signup/userDetails" replace />} />
+                    </>
+                ) : (
                     <>
                         <Route path="/" element={<Home />}>
                             <Route index element={<FeedLayout />} />
-                            <Route path="/memoir/:username" element={<Memoir />} />
+                            <Route path="memoir/:username" element={<Memoir />} />
                             <Route path="search" element={<Search />} />
                             <Route path="reels" element={<Reel />} />
                             <Route path="create/:content" element={<Create />} />
-                            <Route path="user/:username" element={<Profile />}>
+                            <Route path="user/:username" element={<Profile />} >
                                 <Route path=":type" element={<Profile />} />
                             </Route>
                             <Route path="chat" element={<Chat />} />
                             <Route path="notifications" element={<Notification />} />
-                            <Route path="settings" element={<Settings />}>
+                            <Route path="settings" element={<Settings />} >
                                 <Route path=":type" element={<Settings />} />
                             </Route>
                             <Route path="music" element={<Music />} >
                                 <Route index element={<MusicHome />} />
-                                <Route path=":type/:id" element={<MusicDetails/>} />
+                                <Route path=":type/:id" element={<MusicDetails />} />
                             </Route>
                         </Route>
-
                         <Route path="chat/call/:user" element={<VideoCall />} />
                     </>
-                ) : (
-                    <Route path="*" element={<Navigate to="/auth/login" />} />
-                )}
-
-                <Route path="/auth" element={<Auth />} >
-                    <Route path="login" element={user ? <Navigate to={path.includes("login") ? "/" : path} /> : <Login />} />
-                    <Route path="signup" element={user ? <Navigate to="/" /> : <SignUp />} />
-                    <Route path="signup/verifyEmail" element={<Otp />} />
-                    <Route path="signup/userDetails" element={<UserDetails />} />
-                </Route>
-            </Routes>
-        </>
+                )
+            ) : (
+                <>
+                    <Route path="/auth" element={<Auth />}>
+                        <Route path="login" element={<Login />} />
+                        <Route path="signup" element={<SignUp />} />
+                        <Route path="signup/verifyEmail" element={<Otp />} />
+                        <Route path="signup/userDetails" element={<UserDetails />} />
+                    </Route>
+                    <Route path="*" element={<Navigate to="/auth/login" replace />} />
+                </>
+            )}
+        </Routes>
     );
 };
