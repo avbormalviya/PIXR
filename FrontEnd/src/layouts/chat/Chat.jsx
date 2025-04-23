@@ -92,7 +92,8 @@ export const Chat = () => {
 
         ( async () => {
             const result = await requestCameraAndMicAccess();
-            setIsPermissionsGranted(result.mic.granted);
+            console.log(result);
+            setIsPermissionsGranted(result.camera.granted);
         })();
 
         emit("onlineUsers");
