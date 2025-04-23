@@ -6,6 +6,7 @@ import { usePeerContext } from '../../context/PeerContext';
 import { Img } from "../../components/img/Img";
 import { useSelector } from "react-redux";
 import { requestCameraAndMicAccess } from "../../utils/getPermission";
+import CameraswitchRoundedIcon from '@mui/icons-material/CameraswitchRounded';
 
 export const VideoCall = () => {
     const location = useLocation();
@@ -80,6 +81,48 @@ export const VideoCall = () => {
         }
     };
 
+    let currentDeviceId = null;
+
+    const switchCamera = async (videoElement) => {
+        // Get list of all video input devices
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+        if (videoDevices.length < 2) {
+            console.warn("Only one video device found.");
+            return;
+        }
+
+        // Determine the next camera to use
+        const currentIndex = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
+        const nextIndex = (currentIndex + 1) % videoDevices.length;
+        const nextDeviceId = videoDevices[nextIndex].deviceId;
+
+        // Stop current stream
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+
+        // Get new stream with the selected camera
+        try {
+            const newStream = await navigator.mediaDevices.getUserMedia({
+                video: { deviceId: { exact: nextDeviceId } },
+                audio: true, // or false, based on your app
+            });
+
+            localStream = newStream;
+            currentDeviceId = nextDeviceId;
+
+            // Attach to video element
+            if (videoElement) {
+                videoElement.srcObject = newStream;
+            }
+        } catch (err) {
+            console.error("Error switching camera:", err);
+        }
+    };
+
+
     const toggleMicrophone = () => {
         if (!localStream) return;
 
@@ -133,10 +176,14 @@ export const VideoCall = () => {
                 {incomingCall && <i className="material-symbols-rounded" onClick={acceptCall}>call</i>}
                 {isCallAccepted && (
                     <>
-                        <i className="material-symbols-rounded" onClick={toggleCamera} disabled={!isPermissionsGranted.camera.granted}>
+                        {/* <CameraswitchRoundedIcon className={style.switch_camera} onClick={switchCamera} disabled={!isPermissionsGranted?.camera?.granted} /> */}
+                        <i className="material-symbols-rounded" onClick={switchCamera} disabled={!isPermissionsGranted?.camera?.granted}>
+                            {isLocalCameraOn ? 'camera_front' : 'camera_rear'}
+                        </i>
+                        <i className="material-symbols-rounded" onClick={toggleCamera} disabled={!isPermissionsGranted?.camera?.granted}>
                             {isLocalCameraOn ? 'videocam' : 'videocam_off'}
                         </i>
-                        <i className="material-symbols-rounded" onClick={toggleMicrophone} disabled={!isPermissionsGranted.mic.granted}>
+                        <i className="material-symbols-rounded" onClick={toggleMicrophone} disabled={!isPermissionsGranted?.mic?.granted}>
                             {isLocalMicOn ? 'mic' : 'mic_off'}
                         </i>
                     </>

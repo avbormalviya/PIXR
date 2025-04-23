@@ -33,19 +33,19 @@
             height: 100%;
 
             background-color: var(--background-ternary);
-            
+
             .local_video {
                 width: 100%;
                 height: 100%;
-    
-                object-fit: contain;
+
+                object-fit: cover;
             }
-    
+
             .local_video_overlay {
                 position: absolute;
                 top: 0;
                 left: 0;
-    
+
                 width: 100%;
                 height: 100%;
 
@@ -54,19 +54,19 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                
+
                 img {
                     width: 60%;
                     height: 60%;
-                    
+
                     object-fit: cover;
                     object-position: center;
-        
+
                     border-radius: 50%;
                 }
             }
         }
-        
+
     }
 
     .remote_video_wrapper {
@@ -86,7 +86,7 @@
             height: 100%;
 
             object-fit: contain;
-    
+
             border-radius: 10px;
         }
 
@@ -105,13 +105,13 @@
             justify-content: center;
             flex-direction: column;
             gap: 2em;
-            
+
             img {
                 width: 30vmin;
                 aspect-ratio: 1/1;
 
                 border-radius: 50%;
-    
+
                 object-fit: cover;
             }
 
