@@ -18,6 +18,7 @@ export const VideoCall = () => {
     const remoteVideoRef = useRef();
 
     const {
+        switchCamera,
         localStream,
         remoteStream,
         calling,
@@ -80,48 +81,6 @@ export const VideoCall = () => {
             }
         }
     };
-
-    let currentDeviceId = null;
-
-    const switchCamera = async (videoElement) => {
-        // Get list of all video input devices
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-        if (videoDevices.length < 2) {
-            console.warn("Only one video device found.");
-            return;
-        }
-
-        // Determine the next camera to use
-        const currentIndex = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
-        const nextIndex = (currentIndex + 1) % videoDevices.length;
-        const nextDeviceId = videoDevices[nextIndex].deviceId;
-
-        // Stop current stream
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-        }
-
-        // Get new stream with the selected camera
-        try {
-            const newStream = await navigator.mediaDevices.getUserMedia({
-                video: { deviceId: { exact: nextDeviceId } },
-                audio: true, // or false, based on your app
-            });
-
-            localStream = newStream;
-            currentDeviceId = nextDeviceId;
-
-            // Attach to video element
-            if (videoElement) {
-                videoElement.srcObject = newStream;
-            }
-        } catch (err) {
-            console.error("Error switching camera:", err);
-        }
-    };
-
 
     const toggleMicrophone = () => {
         if (!localStream) return;
