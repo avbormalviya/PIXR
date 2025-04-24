@@ -221,7 +221,7 @@ export const Chat = () => {
         on("unreadCountUpdated", (data) => {
             setFollowings((prev) => {
                 return prev.map((following) => {
-                    if (following._id === data.senderId) {
+                    if (data?.chatId != chat?._id && following._id === data.senderId) {
                         return { ...following, unreadCount: data.unreadCount };
                     }
                     return following;
