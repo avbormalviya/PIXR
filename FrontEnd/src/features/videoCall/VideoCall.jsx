@@ -175,10 +175,6 @@ export const VideoCall = () => {
                 {incomingCall && <i className="material-symbols-rounded" onClick={acceptCall}>call</i>}
                 {isCallAccepted && (
                     <>
-                        {/* <CameraswitchRoundedIcon className={style.switch_camera} onClick={switchCamera} disabled={!isPermissionsGranted?.camera?.granted} /> */}
-                        <i className="material-symbols-rounded" onClick={switchCamera} disabled={!isPermissionsGranted?.camera?.granted}>
-                            {isLocalCameraOn ? 'camera_front' : 'camera_rear'}
-                        </i>
                         <i className="material-symbols-rounded" onClick={toggleCamera} disabled={!isPermissionsGranted?.camera?.granted}>
                             {isLocalCameraOn ? 'videocam' : 'videocam_off'}
                         </i>
