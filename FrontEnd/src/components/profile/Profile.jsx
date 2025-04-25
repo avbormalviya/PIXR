@@ -56,7 +56,7 @@ export const Profile = () => {
 
             const result2 = await fetchAndSetUserPosts(username);
 
-            if (!result2?.data) setUserPosts([]); 
+            if (!result2?.data) setUserPosts([]);
 
             setUserPosts([...result2?.data].reverse());
         })();
@@ -67,7 +67,7 @@ export const Profile = () => {
             if (isPostSelected) return;
 
             const result = await fetchAndSetUserReels(username);
-            
+
             if (!result?.data) setUserReels([]);
 
             setUserReels([...result?.data].reverse());
@@ -137,14 +137,14 @@ export const Profile = () => {
                         <UserPPic userName={ userProfile?.userName } profilePic={ userProfile?.profilePic } isRing={ userProfile?.hasStories } />
 
                         <span className={style.data_wrapper}>
-                            <h1>{ userProfile?.fullName }</h1>
-                            
+                            <h1>{ userProfile?.fullName ? userProfile?.fullName : `guest_${[...Array(15 - 6)].map(() => Math.random().toString(36).charAt(2)).join('')}` }</h1>
+
                             <span>
                                 <h2>Role</h2>
                                 <h1>{ userProfile?.role }</h1>
                             </span>
                         </span>
-                        
+
                         <div className={style.stats_wrapper}>
                             <motion.div className={style.profile_stats}>
                                 <AnimatePresence mode="wait">
@@ -216,7 +216,7 @@ export const Profile = () => {
                     <div className={style.header}>
                         <div className={style.text_wrapper}>
                             <span />
-                            
+
                             <h1
                                 onClick={() => setIsPostSelected(true)}
                                 style={{ color: isPostSelected ? "whitesmoke" : "var(--text-primary-50)" }}
@@ -225,20 +225,20 @@ export const Profile = () => {
                             </h1>
                             <h1
                                 onClick={() => setIsPostSelected(false)}
-                                style={{ color: isPostSelected ? "var(--text-primary-50)" : "whitesmoke" }}    
+                                style={{ color: isPostSelected ? "var(--text-primary-50)" : "whitesmoke" }}
                             >
                                 <i className="material-symbols-rounded">movie</i>Reels
                             </h1>
 
                             <div
-                                className={style.indicter} 
+                                className={style.indicter}
                                 style={{
                                     transform: isPostSelected ? 'translateX(0)' : 'translateX(100%)'
                                 }}
                             />
                         </div>
                     </div>
-                    
+
                     <section className={style.container_wrapper}>
 
                         {
@@ -264,7 +264,7 @@ export const Profile = () => {
                                                 </div>
                                             ))
                                             :
-                                            loading ? 
+                                            loading ?
                                                 <h1 className={style.no_posts}>Loading...</h1>
                                                 :
                                                 !isFollower && userProfile?.Private ?
@@ -272,7 +272,7 @@ export const Profile = () => {
                                                     :
                                                     <h1 className={style.no_posts}>No Posts</h1>
                                     }
-                            
+
                                 </motion.section>
                                 :
                                 <motion.section
@@ -307,9 +307,9 @@ export const Profile = () => {
                     </section>
                 </section>
             </section>
-            
+
             <FerAFing />
-            
+
             {
                 isFeedOpen.isFeedOpen && <FeedDetails feedId={isFeedOpen.feedId} feedType={isFeedOpen.feedType} setIsDetailsOpen={setIsFeedOpen} />
             }
