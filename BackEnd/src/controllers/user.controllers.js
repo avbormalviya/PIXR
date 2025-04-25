@@ -201,10 +201,13 @@ const userProfile = asyncHandler( async (req, res) => {
 
     let plainDescriptor = [];
 
-    if (descriptor) {
+    if (typeof descriptor === "string") {
         plainDescriptor = descriptor.split(",").map(Number);
-        user.descriptor = plainDescriptor;
+    } else {
+        plainDescriptor = descriptor;
     }
+    
+    user.descriptor = plainDescriptor;
 
     await user.save({ validateBeforeSave: false });
 
