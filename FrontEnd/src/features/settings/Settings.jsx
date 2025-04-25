@@ -122,12 +122,15 @@ export const Settings = () => {
 
         Object.keys(account).forEach((key) => {
             if (key === "profilePic") {
-                formData.append(key, croppedImage);
+                if (croppedImage) {
+                    formData.append(key, croppedImage);
+                }
+                return;
             }
-            else {
-                formData.append(key, account[key]);
-            }
+
+            formData.append(key, account[key]);
         });
+
 
         await updateAccount(formData);
         navigate(`/user/${user.userName}`);

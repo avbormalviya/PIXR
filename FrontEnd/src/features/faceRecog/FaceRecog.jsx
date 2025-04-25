@@ -103,8 +103,6 @@ export const FaceCapture = ({ setFaceCapture, setDescriptor }) => {
 
             const descriptor = Array.from(detection.descriptor); // Convert to plain array
 
-            console.log(descriptor);
-
             if (descriptor) {
                 setDescriptor(descriptor);
                 setStatus("Face captured!");
