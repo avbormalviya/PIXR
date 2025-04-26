@@ -15,7 +15,7 @@ export const Error = () => {
 
     useEffect(() => {
         if (error && error.data?.message) {
-            // navigate(-1);
+            navigate(-1);
             setIsError(true);
             console.log(error);
 
