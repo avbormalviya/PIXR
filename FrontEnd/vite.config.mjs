@@ -1,10 +1,36 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const sass = await import('sass'); // ✅ Use dynamic import in ESM
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [
+        react(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            manifest: {
+                name: 'Pixr',
+                short_name: 'Pixr',
+                start_url: '/',
+                display: 'standalone',
+                background_color: '#ffffff',
+                theme_color: '#000000',
+                icons: [
+                    {
+                        src: '/icon_400.png',
+                        sizes: '400x400',
+                        type: 'image/png'
+                    },
+                    {
+                        src: '/icon_1600.png',
+                        sizes: '1600x1600',
+                        type: 'image/png'
+                    }
+                ]
+            }
+        })
+    ],
     css: {
         preprocessorOptions: {
             scss: {
@@ -23,5 +49,5 @@ export default defineConfig({
             '/api': 'http://localhost:5000',
         },
     },
-    
+
 });
