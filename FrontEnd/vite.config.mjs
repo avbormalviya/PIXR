@@ -10,12 +10,12 @@ export default defineConfig({
         VitePWA({
             registerType: 'autoUpdate',
             manifest: {
-                name: 'Pixr',
-                short_name: 'Pixr',
+                name: 'PIXR',
+                short_name: 'PIXR',
                 start_url: '/',
                 display: 'standalone',
-                background_color: '#ffffff',
-                theme_color: '#000000',
+                background_color: 'var(--background-primary)',
+                theme_color: 'var(--background-primary)',
                 icons: [
                     {
                         src: '/icon_400.png',
