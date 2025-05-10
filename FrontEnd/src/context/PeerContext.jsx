@@ -113,10 +113,6 @@
                     }
                 });
 
-                if (signalData) {
-                    newPeer.signal(signalData);
-                }
-
                 newPeer.on("iceStateChange", (state) => {
                     console.log("🧊 ICE state changed:", state);
                 });
