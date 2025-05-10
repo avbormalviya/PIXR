@@ -101,6 +101,16 @@
                     initiator,
                     trickle: true, // Enable trickle ICE instead of waiting for full SDP
                     stream,
+                    config: {
+                    iceServers: [
+                            { urls: "stun:stun.l.google.com:19302" },
+                            {
+                                urls:   "turn:numb.viagenie.ca:3478",
+                                username:"webrtc@live.com",
+                                credential:"muazkh"
+                            }
+                        ]
+                    }
                 });
 
                 newPeer.on("iceStateChange", (state) => {
@@ -187,6 +197,7 @@
             };
 
             const handleCallAccepted = () => {
+                setInitiator(false);
                 setIsCallAccepted(true);
                 startPeerConnection(calleeId);
                 setCalling(false);
