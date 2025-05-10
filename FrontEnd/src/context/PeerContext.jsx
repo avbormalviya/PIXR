@@ -21,6 +21,8 @@
         const [calleeId, setCalleeId] = useState(null);
         const [isCallAccepted, setIsCallAccepted] = useState(false);
         const [initiator, setInitiator] = useState(false);
+        const [incomingSignal, setIncomingSignal] = useState(null);
+
 
         const [isRemoteCameraOn, setIsRemoteCameraOn] = useState(false);
         const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
@@ -45,9 +47,11 @@
             setCallerId(InitUserId);
             setCalling(true);
             setInitiator(true);
+            startPeerConnection(chatUserId); // ✅ ADD THIS
             emit("call-request", { to: chatUserId });
             playAudio(outgoingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374513/duo_ringtone_tehbgk.mp3");
         };
+
 
         const acceptCall = () => {
             setIncomingCall(false);
@@ -102,6 +106,11 @@
                     trickle: true, // Enable trickle ICE instead of waiting for full SDP
                     stream,
                 });
+
+                if (incomingSignal) {
+                    newPeer.signal(incomingSignal);
+                    setIncomingSignal(null); // Clear after use
+                }
 
                 newPeer.on("iceStateChange", (state) => {
                     console.log("🧊 ICE state changed:", state);
@@ -174,17 +183,20 @@
             };
 
             const handleSignal = ({ data }) => {
-                console.log("📡 Received signal data:", data);
                 if (!peer || peer.destroyed) {
-                    console.error("❌ Peer is null or destroyed");
+                    console.warn("Peer not ready, storing signal...");
+                    setIncomingSignal(data);
                     return;
                 }
+
                 try {
                     peer.signal(data);
                 } catch (error) {
                     console.error("❌ Error handling signal:", error);
                 }
             };
+
+
 
             const handleCallAccepted = () => {
                 setIsCallAccepted(true);
