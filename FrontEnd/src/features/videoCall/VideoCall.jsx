@@ -57,10 +57,6 @@ export const VideoCall = () => {
         }
     }, [remoteStream]);
 
-    useEffect(() => {
-        console.log(isCallAccepted);
-    }, [isCallAccepted]);
-
     const toggleCamera = () => {
         if (!localStream) return;
 
@@ -81,6 +77,9 @@ export const VideoCall = () => {
         if (audioTrack) {
             audioTrack.enabled = !audioTrack.enabled;
             setIsLocalMicOn(audioTrack.enabled);
+            if (chatUser?._id) {
+                emit("toggleMicrophone", { to: chatUser._id, enabled: audioTrack.enabled });
+            }
         }
     };
 

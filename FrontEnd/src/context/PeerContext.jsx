@@ -99,6 +99,12 @@ export const PeerProvider = ({ children }) => {
                 initiator: isInitiator,
                 trickle: true,
                 stream,
+                config: {
+                    iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
+                    // { urls: "turn:your.turn.server", username: "...", credential: "..." }
+                    ]
+                }
             });
 
             // If it's the callee (not the initiator), wait for the signal from the initiator
@@ -170,6 +176,7 @@ export const PeerProvider = ({ children }) => {
 
     useEffect(() => {
         const handleSignal = ({ data }) => {
+            console.log("📡 Received signal:", data);
             if (!peer || peer.destroyed) {
                 console.warn("Peer not ready, storing signal...");
                 setIncomingSignal(data);
