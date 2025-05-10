@@ -52,7 +52,7 @@
         const acceptCall = () => {
             setIncomingCall(false);
             setIsCallAccepted(true);
-            startPeerConnection(callerId);
+            startPeerConnection(callerId, true);
             emit("call-accepted", { from: callerId });
             stopAudio(incomingCallRef);
         };
@@ -89,7 +89,7 @@
             navigate("/");
         };
 
-        const startPeerConnection = async (user) => {
+        const startPeerConnection = async (user, initiator) => {
             try {
                 const stream = await requestPermissions();
                 if (!stream) return;
@@ -112,6 +112,10 @@
                         ]
                     }
                 });
+
+                if (signalData) {
+                    newPeer.signal(signalData);
+                }
 
                 newPeer.on("iceStateChange", (state) => {
                     console.log("🧊 ICE state changed:", state);
@@ -196,13 +200,14 @@
                 }
             };
 
-            const handleCallAccepted = () => {
+            const handleCallAccepted = ({ data }) => {
                 setInitiator(false);
                 setIsCallAccepted(true);
-                startPeerConnection(calleeId);
+                startPeerConnection(calleeId, false);
                 setCalling(false);
                 stopAudio(incomingCallRef);
                 stopAudio(outgoingCallRef);
+                peer.signal(data);
             };
 
             const handleCallRejected = () => {
