@@ -110,7 +110,7 @@ export const Settings = () => {
         setShowButton(true);
     }, [account]);
 
-    const items = ["Account", "Saved", "Theme", "Hand Gesture", "Help", "Private Policy", "Report", "Logout", "Delete Account"]
+    const items = ["Account", "Saved", "Theme", "Hand Gesture", "Help", "Private Policy", "Report", "Logout"]
 
     const handleSettingsOpen = (item) => {
         if (["Theme", "Hand Gesture", "Logout", "Delete Account"].includes(item)) return;

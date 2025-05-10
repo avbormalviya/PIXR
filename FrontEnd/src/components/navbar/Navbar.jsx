@@ -116,6 +116,7 @@ export const Navbar = () => {
                                 ? { y: -10 }
                                 : { y: 0 }
                         }
+                        whileHover={ index === activeIndex ? {} : { scale: 1.1 } }
                     >
                         <NavLink
                             to={item.to}
@@ -143,8 +144,9 @@ export const Navbar = () => {
                     layoutId="indicator"
                     initial={false}
                     animate={{
-                        left: !isVertical ? 'unset' : `${menuRefs.current[activeIndex]?.offsetLeft}px`,
+                        left: !isVertical ? 'unset' : `${menuRefs.current[activeIndex]?.offsetLeft - 15}px`,
                         top: !isVertical ? `${activeIndex * 60}px` : 0,
+                        width: !isVertical ? '90%' : `${menuRefs.current[activeIndex]?.offsetWidth + 30}px`
                     }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />

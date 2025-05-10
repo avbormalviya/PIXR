@@ -7,7 +7,7 @@ export const Logo = ({ styles }) => {
 
     return (
         <h1
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className={`${style.logo} ${styles}`}
         >
             PIXR

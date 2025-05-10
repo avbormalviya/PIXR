@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import { Img } from '../../components/img/Img';
+import { Logo } from '../../components/logo/Logo';
 
 
 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -215,7 +216,7 @@ export const Music = () => {
                         className={style.spotify_btn}
                         style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}
                     >
-                        PIXR Music<span style={{ fontSize: "0.9rem", fontStyle: "italic", color: "var(--text-primary-50)" }}>By Spotify</span>
+                        <Logo styles={style.logo} /> Music<span style={{ fontSize: "0.9rem", fontStyle: "italic", color: "var(--text-primary-50)" }}>By Spotify</span>
                     </button>
                 </div>
                 <div className={style.music_section_body}>
