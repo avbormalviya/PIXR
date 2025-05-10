@@ -101,7 +101,8 @@ export const PeerProvider = ({ children }) => {
                 stream,
             });
 
-            if (incomingSignal) {
+            // If it's the callee (not the initiator), wait for the signal from the initiator
+            if (!isInitiator && incomingSignal) {
                 newPeer.signal(incomingSignal);
                 setIncomingSignal(null); // Clear after use
             }
@@ -120,6 +121,7 @@ export const PeerProvider = ({ children }) => {
 
             newPeer.on("signal", (data) => {
                 console.log("📡 Sending signal:", data);
+                // The initiator sends an offer; the callee sends an answer
                 emit("signal", { to: user, data });
             });
 
@@ -136,6 +138,7 @@ export const PeerProvider = ({ children }) => {
             resetCallState();
         }
     };
+
 
     const requestPermissions = async () => {
         const constraints = {};
@@ -166,13 +169,6 @@ export const PeerProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        const handleCallRequest = ({ from }) => {
-            setIncomingCall(true);
-            setCallerId(from._id);
-            navigate(`/chat/call/${from._id}`, { state: { user: from } });
-            playAudio(incomingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374515/google_duo_sj9euw.mp3");
-        };
-
         const handleSignal = ({ data }) => {
             if (!peer || peer.destroyed) {
                 console.warn("Peer not ready, storing signal...");
@@ -190,7 +186,7 @@ export const PeerProvider = ({ children }) => {
         const handleCallAccepted = () => {
             setInitiator(false);
             setIsCallAccepted(true);
-            startPeerConnection(calleeId, false);
+            startPeerConnection(calleeId, false); // Start as callee
             setCalling(false);
             stopAudio(incomingCallRef);
             stopAudio(outgoingCallRef);
@@ -200,20 +196,24 @@ export const PeerProvider = ({ children }) => {
             resetCallState();
         };
 
-        on("call-request", handleCallRequest);
+        on("call-request", ({ from }) => {
+            setIncomingCall(true);
+            setCallerId(from._id);
+            navigate(`/chat/call/${from._id}`, { state: { user: from } });
+            playAudio(incomingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374515/google_duo_sj9euw.mp3");
+        });
+
         on("signal", handleSignal);
         on("call-accepted", handleCallAccepted);
         on("call-rejected", handleCallRejected);
 
         return () => {
-            off("call-request", handleCallRequest);
             off("signal", handleSignal);
             off("call-accepted", handleCallAccepted);
             off("call-rejected", handleCallRejected);
-            peer?.destroy();
-            localStream?.getTracks().forEach((track) => track.stop());
         };
-    }, [peer, on, off, navigate, callerId, calleeId, localStream]);
+    }, [peer, on, off, navigate, callerId, calleeId]);
+
 
     return (
         <PeerContext.Provider
