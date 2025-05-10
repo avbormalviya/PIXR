@@ -206,6 +206,9 @@ export const PeerProvider = ({ children }) => {
         on("signal", handleSignal);
         on("call-accepted", handleCallAccepted);
         on("call-rejected", handleCallRejected);
+        on("toggleCamera", ({ enabled }) => setIsRemoteCameraOn(enabled));
+        on("toggleMicrophone", ({ enabled }) => setIsRemoteMicOn(enabled));
+
 
         return () => {
             off("signal", handleSignal);
