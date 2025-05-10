@@ -214,6 +214,8 @@ export const PeerProvider = ({ children }) => {
             off("signal", handleSignal);
             off("call-accepted", handleCallAccepted);
             off("call-rejected", handleCallRejected);
+            off("toggleCamera", ({ enabled }) => setIsRemoteCameraOn(enabled));
+            off("toggleMicrophone", ({ enabled }) => setIsRemoteMicOn(enabled));
         };
     }, [peer, on, off, navigate, callerId, calleeId]);
 
