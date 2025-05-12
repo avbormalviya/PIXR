@@ -180,41 +180,19 @@ export const Settings = () => {
         }
     }, [isCameraEnabled]);
 
-    // useEffect(() => {
-    //     const notification_request = async () => {
-    //         if (Notification.permission === "granted") {
-    //             setIsNotificationsEnabled(true);
-    //         } else {
-    //             await Notification.requestPermission();
-    //         }
-    //     }
-
-    //     if (isNotificationsEnabled) {
-    //         notification_request();
-    //     }
-    // }, [isNotificationsEnabled]);
-
     useEffect(() => {
-        // Ask for notification permission and get token
-        const getPermissionAndToken = async () => {
-            try {
-                // Request permission from user to send notifications
-                const permission = await Notification.requestPermission();
-                if (permission === "granted") {
-                // Get the FCM token
-                    const token = await getToken(messaging, {
-                        vapidKey: "BKOL_IzPBcUxCN0FHFFduAKu5jdHizB-GvGsUMQVcJivyYrMAcjEJJFc5mvokAzSI1CHsr7gN1FlZRQipIdpGrc", // Use your VAPID key here
-                    });
-                    console.log("FCM Token:", token);
-                    // Send the token to your backend for storing
-                }
-            } catch (error) {
-                console.error("Error getting FCM token:", error);
+        const notification_request = async () => {
+            if (Notification.permission === "granted") {
+                setIsNotificationsEnabled(true);
+            } else {
+                await Notification.requestPermission();
             }
-        };
+        }
 
-        getPermissionAndToken();
-    }, [messaging]);
+        if (isNotificationsEnabled) {
+            notification_request();
+        }
+    }, [isNotificationsEnabled]);
 
     const items = ["Account", "Saved", "Theme", "Hand Gesture", "Permissions", "Help", "Private Policy", "Report", "Logout"]
 

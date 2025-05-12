@@ -1,12 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import ViteEnvCompatible from 'vite-plugin-env-compatible';
 
 const sass = await import('sass'); // ✅ Use dynamic import in ESM
 
 export default defineConfig({
     plugins: [
         react(),
+        ViteEnvCompatible(),
         VitePWA({
             registerType: 'autoUpdate',
             manifest: {
@@ -48,6 +50,5 @@ export default defineConfig({
         proxy: {
             '/api': 'http://localhost:5000',
         },
-    },
-
+    }
 });

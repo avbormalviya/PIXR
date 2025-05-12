@@ -3,13 +3,13 @@ import { initializeApp } from 'firebase/app';
 import { getMessaging } from 'firebase/messaging';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAkqZORD82uxBenXf9clePAT_MLy4v3oZY",
-    authDomain: "pixr-54fa4.firebaseapp.com",
-    projectId: "pixr-54fa4",
-    storageBucket: "pixr-54fa4.firebasestorage.app",
-    messagingSenderId: "892809315757",
-    appId: "1:892809315757:web:7db1750233733c6bbacd24",
-    measurementId: "G-90JRQJCYME"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const FirebaseContext = createContext();

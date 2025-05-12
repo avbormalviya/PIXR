@@ -13,12 +13,30 @@ import HandMouseControl from "./components/handgester/handTrack"
 import HandGestureContext from "./context/HandContext"
 
 import { FirebaseProvider } from "./context/FireBaseContext"
+import { sendFCMToken } from "./utils/sendFCMToken"
 
 const savedTheme = localStorage.getItem('theme') || 'light-theme';
 document.body.classList.add(savedTheme);
 
 function App() {
   const { isHandGesture, showDisplay } = useContext(HandGestureContext);
+
+
+  useEffect(() => {
+    const checkTokenChange = async () => {
+      const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPID_KEY });
+      const oldToken = localStorage.getItem("fcmToken");
+
+      if (newToken && newToken !== oldToken) {
+        await sendFCMToken(newToken); // Update on server
+        localStorage.setItem("fcmToken", newToken); // Update locally
+      }
+    };
+
+    const interval = setInterval(checkTokenChange, 1000 * 60 * 60 * 6); // Check every 6 hours
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <BrowserRouter
