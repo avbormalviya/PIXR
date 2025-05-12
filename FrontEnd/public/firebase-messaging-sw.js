@@ -12,12 +12,16 @@ firebase.initializeApp({
 });
 
 self.addEventListener('push', function(event) {
-  const payload = event.data.json();
-  const { title, ...options } = payload.notification;
+    const data = event.data.json();
+    const options = {
+        body: data.body,
+        icon: '/icon_1600.png',     // shown in notification panel
+        badge: '/icon_400.png',    // shown in status bar (top bar)
+    };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+    );
 });
 
 const messaging = firebase.messaging();
