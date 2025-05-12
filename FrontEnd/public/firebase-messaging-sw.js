@@ -11,4 +11,13 @@ firebase.initializeApp({
     appId: "1:892809315757:web:7db1750233733c6bbacd24",
 });
 
+self.addEventListener('push', function(event) {
+  const payload = event.data.json();
+  const { title, ...options } = payload.notification;
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
 const messaging = firebase.messaging();

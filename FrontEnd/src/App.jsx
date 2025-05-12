@@ -12,13 +12,14 @@ import { useContext, useEffect, useState } from "react"
 import HandMouseControl from "./components/handgester/handTrack"
 import HandGestureContext from "./context/HandContext"
 
-
 import { sendFCMToken } from "./utils/sendFCMToken"
 import { getToken } from "firebase/messaging"
 import { useFirebase } from "./context/FireBaseContext"
+import { onMessage } from "firebase/messaging";
 
 const savedTheme = localStorage.getItem('theme') || 'light-theme';
 document.body.classList.add(savedTheme);
+
 
 function App() {
   const { isHandGesture, showDisplay } = useContext(HandGestureContext);
@@ -27,7 +28,7 @@ function App() {
 
   useEffect(() => {
     const checkTokenChange = async () => {
-      const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPI_KEY });
+      const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPID_KEY });
       const oldToken = localStorage.getItem("fcmToken");
       if (newToken === oldToken) {
         console.log("Token is the same");
@@ -42,6 +43,21 @@ function App() {
     checkTokenChange(); // Initial check
     // return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+  const unsubscribe = onMessage(messaging, (payload) => {
+    console.log("Foreground message received:", payload);
+    // Optional: show a notification manually
+    if (Notification.permission === "granted") {
+      new Notification(payload.notification.title, {
+        body: payload.notification.body,
+        icon: payload.notification.icon
+      });
+    }
+  });
+
+  return () => unsubscribe(); // Clean up on unmount
+}, [messaging]);
 
   return (
     <BrowserRouter
