@@ -16,9 +16,9 @@ self.addEventListener('push', function(event) {
     console.log('Push event received:', data);
     const options = {
         body: data.body,
-        icon: '/icon_1600.png',
-        badge: '/icon_400.png',
-        image: '/banner.png', // Large image below the notification body
+        icon: '/icon_400.png',
+        badge: '/icon_100.png', 
+        image: '/icon_1600.png', // Large image below the notification body
         actions: [            // Custom action buttons
             {
                 action: 'open_app',

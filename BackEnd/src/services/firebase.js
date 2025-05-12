@@ -33,6 +33,8 @@ export const sendNotification = async ({ token, title, body, image, data = {} })
         }
     };
 
+    console.log('Sending message:', message);
+
     try {
         const response = await admin.messaging().send(message);
         console.log('Successfully sent message:', response);
