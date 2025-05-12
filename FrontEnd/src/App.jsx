@@ -27,7 +27,7 @@ function App() {
 
   useEffect(() => {
     const checkTokenChange = async () => {
-      const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPID_KEY });
+      const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPI_KEY });
       const oldToken = localStorage.getItem("fcmToken");
       if (newToken === oldToken) {
         console.log("Token is the same");
