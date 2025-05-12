@@ -52,6 +52,7 @@ const IOSSwitch = styled((props) => (<Switch focusVisibleClassName=".Mui-focusVi
     '& .MuiSwitch-track': {
         borderRadius: 26 / 2,
         backgroundColor: 'var(--background-ternary)',
+        boxShadow: "inset 0px 0px 10px 0px var(--background-secondary)",
         opacity: 1,
         transition: theme.transitions.create(['background-color'], {
             duration: 500,

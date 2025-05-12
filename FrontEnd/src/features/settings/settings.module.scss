@@ -20,8 +20,17 @@
             font-size: 2em;
             color: var(--text-primary-50);
 
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+
 
             span {
+                width: min-content;
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+
                 transition: all 1s;
 
                 &:hover {
@@ -274,6 +283,87 @@
         gap: 1em;
     }
 }
+
+
+.drawer {
+    width: 100%;
+    height: 100%;
+    padding: 1.5em 2em;
+    background-color: var(--background-secondary);
+
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+
+    overflow: hidden;
+
+    .drawer_heading {
+        font-size: 2em;
+        color: var(--text-primary);
+    }
+
+    .drawer_outer {
+        border-radius: 15px;
+        border: 1px solid var(--accent-border-color);
+        overflow-y: auto;
+
+        .drawer_item {
+            width: 100%;
+            height: 60px;
+            padding: 1em 2em;
+            border-bottom: 1px solid var(--accent-border-color);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            transition: all 0.5s;
+
+            .drawer_item_title {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1em;
+
+                font-size: 1.5em;
+                color: var(--text-primary-50);
+
+                transition: all 0.5s;
+            }
+
+            &:first-child {
+                border-radius: 15px 15px 0 0;
+            }
+
+            &:last-child {
+                border-radius: 0 0 15px 15px;
+            }
+
+            &:hover {
+                background-color: var(--background-ternary);
+                cursor: pointer;
+
+                .drawer_item_title {
+                    color: var(--text-primary-70);
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
+
+    .alert_wrapper {
+        position: relative;
+        width: 100%;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .drawer_info {
+        position: relative;
+        width: 100%;
+    }
+}
+
 
 @media (min-width: 485px) {
     .settings {

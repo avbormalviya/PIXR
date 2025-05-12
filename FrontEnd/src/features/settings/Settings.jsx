@@ -8,7 +8,7 @@ import { SwitchButton } from "../../components/switch/Switch";
 import { logout } from "../../utils/logout";
 import { useSelector, useDispatch } from "react-redux";
 import { deleteUserData } from "../../features/user/useSlice";
-import { ImageList, ImageListItem } from "@mui/material";
+import { Box, Drawer, ImageList, ImageListItem } from "@mui/material";
 import { getBookmarks } from "../../utils/getBookmarks";
 import { createThumbnail } from "../../utils/createThumbnail";
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
@@ -17,7 +17,15 @@ import { FeedDetails } from "../../components/feedDetailes/FeedDetails";
 import { Img } from "../../components/img/Img";
 import { addReport } from "../../utils/addReport";
 import HandGestureContext from "../../context/HandContext";
-import { requestCameraAndMicAccess } from "../../utils/getPermission";
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import CameraAltRoundedIcon from '@mui/icons-material/CameraAltRounded';
+import MicRoundedIcon from '@mui/icons-material/MicRounded';
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
+import { Alert } from "../../components/alert/Alert";
+import { getToken } from 'firebase/messaging';
+import { useFirebase } from '../../context/FireBaseContext';
+
 
 const themes = [
     "light",
@@ -48,6 +56,8 @@ export const Settings = () => {
     const { user } = useSelector((state) => state.user);
     const dispatch = useDispatch();
 
+    const { messaging } = useFirebase();
+
     const [account, setAccount] = useState("");
     const [savedFeeds, setSavedFeeds] = useState([]);
     const [firstTime, setFirstTime] = useState(true);
@@ -57,20 +67,21 @@ export const Settings = () => {
     const [croppedImage, setCroppedImage] = useState(null);
     const [theme, setTheme] = useState(localStorage.getItem("theme"));
     const [report, setReport] = useState("");
-    const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const [isCameraEnabled, setIsCameraEnabled] = useState(false);
+    const [isMicEnabled, setIsMicEnabled] = useState(false);
+    const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
+
+    const [alerts, setAlerts] = useState([]);
+    const [alertsDrawer, setAlertsDrawer] = useState([{ id: Date.now(), type: "info", message: "We request access to your microphone, camera, and notifications to enable calling, face recognition, and timely alerts. Microphone and camera access help us support real-time interaction and identity verification, while notification access ensures you don’t miss important updates or activity. Your data stays on your device and is used only to make these features work properly." }]);
 
     const [isFeedOpen, setIsFeedOpen] = useState({})
 
     const { isHandGesture, setIsHandGesture, showDisplay, setShowDisplay } = useContext(HandGestureContext);
 
+    const isMobile = useMediaQuery('(max-width: 760px)');
 
-    useEffect(() => {
-            ( async () => {
-                const result = await requestCameraAndMicAccess();
-                console.log(result);
-                setIsPermissionsGranted(result);
-            })();
-        }, []);
 
     useEffect(() => {
         document.body.classList.remove(...themes);
@@ -110,12 +121,155 @@ export const Settings = () => {
         setShowButton(true);
     }, [account]);
 
-    const items = ["Account", "Saved", "Theme", "Hand Gesture", "Help", "Private Policy", "Report", "Logout"]
+
+    const notify = () => {
+        if (Notification.permission === "granted") {
+            setIsNotificationsEnabled(true);
+            showAlert("success", "Notifications enabled");
+        } else {
+            setIsNotificationsEnabled(false);
+            showAlert("error", "Notifications access denied");
+        }
+    };
+
+    useEffect(() => {
+        // Microphone
+        navigator.permissions?.query({ name: 'microphone' })
+        .then(result => {
+            setIsMicEnabled(result.state === 'granted');
+        });
+
+        // Camera
+        navigator.permissions?.query({ name: 'camera' })
+        .then(result => {
+            setIsCameraEnabled(result.state === 'granted');
+        });
+
+        // Notifications
+        notify();
+
+        window.addEventListener("focus", notify);
+        return () => window.removeEventListener("focus", notify);
+    }, []);
+
+    useEffect(() => {
+        if (isMicEnabled) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    stream.getTracks().forEach(track => track.stop());
+                    showAlert("success", "Microphone access granted");
+                })
+                .catch(() => {
+                    setIsMicEnabled(false);
+                    showAlert("error", "Microphone access denied");
+                });
+        }
+    }, [isMicEnabled]);
+
+    useEffect(() => {
+        if (isCameraEnabled) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    stream.getTracks().forEach(track => track.stop());
+                    showAlert("success", "Camera access granted");
+                })
+                .catch(() => {
+                    setIsCameraEnabled(false);
+                    showAlert("error", "Camera access denied");
+                });
+        }
+    }, [isCameraEnabled]);
+
+    // useEffect(() => {
+    //     const notification_request = async () => {
+    //         if (Notification.permission === "granted") {
+    //             setIsNotificationsEnabled(true);
+    //         } else {
+    //             await Notification.requestPermission();
+    //         }
+    //     }
+
+    //     if (isNotificationsEnabled) {
+    //         notification_request();
+    //     }
+    // }, [isNotificationsEnabled]);
+
+    useEffect(() => {
+        // Ask for notification permission and get token
+        const getPermissionAndToken = async () => {
+            try {
+                // Request permission from user to send notifications
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                // Get the FCM token
+                    const token = await getToken(messaging, {
+                        vapidKey: "BKOL_IzPBcUxCN0FHFFduAKu5jdHizB-GvGsUMQVcJivyYrMAcjEJJFc5mvokAzSI1CHsr7gN1FlZRQipIdpGrc", // Use your VAPID key here
+                    });
+                    console.log("FCM Token:", token);
+                    // Send the token to your backend for storing
+                }
+            } catch (error) {
+                console.error("Error getting FCM token:", error);
+            }
+        };
+
+        getPermissionAndToken();
+    }, [messaging]);
+
+    const items = ["Account", "Saved", "Theme", "Hand Gesture", "Permissions", "Help", "Private Policy", "Report", "Logout"]
 
     const handleSettingsOpen = (item) => {
         if (["Theme", "Hand Gesture", "Logout", "Delete Account"].includes(item)) return;
+        if (item === "Permissions") {
+            toggleDrawer(true)();
+            return;
+        }
         navigate(`/settings/${item.toLowerCase()}`);
     }
+
+    const showAlert = (type, message) => {
+        const id = Date.now();
+        const newAlert = { id, type, message };
+        setAlerts(prev => [...prev, newAlert]);
+
+        setTimeout(() => {
+            setAlerts(prev => prev.filter(alert => alert.id !== id));
+        }, 5000); // dismiss after 4 seconds
+    };
+
+
+    const toggleDrawer = (newOpen) => () => {
+        setDrawerOpen(newOpen);
+    };
+
+    const DrawerList = (
+        <section className={style.drawer}>
+            <h1 className={style.drawer_heading}>Permissions</h1>
+
+            <div className={style.drawer_outer}>
+                <div className={style.drawer_item}>
+                    <span className={style.drawer_item_title}> <MicRoundedIcon fontSize="large" /> Microphone</span>
+                    <SwitchButton checked={isMicEnabled} setChecked={setIsMicEnabled} />
+                </div>
+                <div className={style.drawer_item}>
+                    <span className={style.drawer_item_title}> <CameraAltRoundedIcon fontSize="large" /> Camera</span>
+                    <SwitchButton checked={isCameraEnabled} setChecked={setIsCameraEnabled} />
+                </div>
+                <div className={style.drawer_item}>
+                    <span className={style.drawer_item_title}> <NotificationsRoundedIcon fontSize="large" /> Notification</span>
+                    <SwitchButton checked={isNotificationsEnabled} setChecked={setIsNotificationsEnabled} />
+                </div>
+            </div>
+
+            <div className={style.alert_wrapper}>
+                <Alert alerts={alerts} setAlerts={setAlerts} />
+            </div>
+
+            <div className={style.drawer_info}>
+                <Alert alerts={alertsDrawer} setAlerts={setAlertsDrawer} />
+            </div>
+        </section>
+    );
 
     const handleAccountUpdate = async () => {
         const formData = new FormData();
@@ -164,7 +318,7 @@ export const Settings = () => {
         <section className={style.settings}>
             <section className={style.settings_section}>
                 <h1 className={style.settings_heading}>
-                    <span onClick={ () => navigate(-1) }>Settings</span> { type && `/ ${type.charAt(0).toUpperCase() + type.slice(1)}` }
+                    <span onClick={ () => navigate(-1) }> <ArrowBackRoundedIcon fontSize="large" />Settings</span> { type && `/ ${type.charAt(0).toUpperCase() + type.slice(1)}` }
                 </h1>
 
                 {
@@ -518,6 +672,23 @@ export const Settings = () => {
             {
                 isFeedOpen.isFeedOpen && <FeedDetails feedId={isFeedOpen.feedId} feedType={isFeedOpen.feedType} setIsDetailsOpen={setIsFeedOpen} />
             }
+
+            <Drawer
+                anchor={isMobile ? 'bottom' : 'right'}
+                open={drawerOpen}
+                onClose={toggleDrawer(false)}
+                PaperProps={{
+                    sx: {
+                        width: isMobile ? '100%' : "500px",
+                        height: isMobile ? 'auto' : '100%',
+                        borderRadius: isMobile ? '2em 2em 0 0' : '2em 0 0 2em',
+                        backgroundColor: "var(--background-secondary)",
+                        overflow: 'hidden',
+                    },
+                }}
+            >
+                {DrawerList}
+            </Drawer>
 
         </section>
     )

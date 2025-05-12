@@ -12,6 +12,8 @@ import { useContext, useEffect, useState } from "react"
 import HandMouseControl from "./components/handgester/handTrack"
 import HandGestureContext from "./context/HandContext"
 
+import { FirebaseProvider } from "./context/FireBaseContext"
+
 const savedTheme = localStorage.getItem('theme') || 'light-theme';
 document.body.classList.add(savedTheme);
 
@@ -28,14 +30,15 @@ function App() {
       <Provider store={store}>
         <SocketProvider>
           <PeerProvider>
-              {isHandGesture && (
-                <HandMouseControl showDisplay={showDisplay} />
-              )}
+            <FirebaseProvider>
+                {isHandGesture && (
+                  <HandMouseControl showDisplay={showDisplay} />
+                )}
 
-              <AppRoute />
-              <Error />
-              <Loader />
-
+                <AppRoute />
+                <Error />
+                <Loader />
+            </FirebaseProvider>
           </PeerProvider>
         </SocketProvider>
       </Provider>
