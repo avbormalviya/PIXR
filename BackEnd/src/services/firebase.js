@@ -21,7 +21,7 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
 });
 
-const sendNotification = async ({ token, title, body, image, data = {} }) => {
+export const sendNotification = async ({ token, title, body, image, data = {} }) => {
     const message = {
         notification: {
             title,

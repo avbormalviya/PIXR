@@ -419,7 +419,7 @@ const getUser = asyncHandler( async (req, res) => {
     if (!user.length) {
         throw new ApiError(400, "User not found");
     }
-    
+
     sendNotification({
         token: user[0].fcmToken,
         title: "Welcome to Pixr",
