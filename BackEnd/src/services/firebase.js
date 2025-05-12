@@ -12,17 +12,27 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
 });
 
+
 export const sendNotification = async ({ token, title, body, image, data = {} }) => {
     const message = {
+        token,
         notification: {
             title,
             body,
-            ...(image && { image }), // Only add image if provided
+            ...(image && { image }),
         },
-        token,
         data: {
-            ...data, // Send custom key-values like type: 'call', postId, etc.
+            ...data,
         },
+        webpush: {
+            notification: {
+                title,
+                body,
+                ...(image && { image }),
+                icon: '/icon.png', // optional
+                click_action: 'https://yourdomain.com', // optional
+            }
+        }
     };
 
     try {
