@@ -411,7 +411,8 @@ const getUser = asyncHandler( async (req, res) => {
                 userName: 1,
                 profilePic: 1,
                 Private: 1,
-                stories: 1
+                stories: 1,
+                fcmToken: 1
             }
         }
     ])
