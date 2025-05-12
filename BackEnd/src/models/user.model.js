@@ -85,6 +85,11 @@ const userSchema  = new Schema(
 
         refreshToken: {
             type: String
+        },
+
+        fcmToken: {
+            type: String,
+            default: null
         }
     },
     {

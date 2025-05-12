@@ -18,6 +18,7 @@ import { Save } from "../models/bookmark.model.js";
 import { Comment } from "../models/comment.model.js";
 import { Report } from "../models/report.model.js";
 import { Chat } from "../models/chat.model.js";
+import { sendNotification } from "../services/firebase.js";
 
 
 function euclideanDistance(a, b) {
@@ -206,10 +207,20 @@ const userProfile = asyncHandler( async (req, res) => {
     } else {
         plainDescriptor = descriptor;
     }
-    
+
     user.descriptor = plainDescriptor;
 
     await user.save({ validateBeforeSave: false });
+
+    sendNotification({
+        token: user.fcmToken,
+        title: "Welcome to Pixr",
+        body: "Your profile has been created successfully",
+        image: profilePicCloudPath.secure_url,
+        data: {
+            type: "image"
+        }
+    })
 
     res.status(200).json(
         new ApiResponse(200, user, "User profile created successfully")
@@ -354,6 +365,31 @@ const changePassword = asyncHandler( async (req, res) => {
 })
 
 
+const saveFCMToken = asyncHandler( async (req, res) => {
+    const { fcmToken } = req.body;
+
+    if (!fcmToken?.trim()) {
+        throw new ApiError(400, "FCM token is required");
+    }
+
+    await User.findOneAndUpdate(
+        { _id: req.user._id },
+        {
+            $set: {
+                fcmToken
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    res.status(200).json(
+        new ApiResponse(200, null, "FCM token saved successfully")
+    )
+})
+
+
 const getUser = asyncHandler( async (req, res) => {
     const user = await User.aggregate([
         {
@@ -379,6 +415,20 @@ const getUser = asyncHandler( async (req, res) => {
             }
         }
     ])
+
+    if (!user.length) {
+        throw new ApiError(400, "User not found");
+    }
+    
+    sendNotification({
+        token: user[0].fcmToken,
+        title: "Welcome to Pixr",
+        body: "Your profile has been created successfully",
+        image: user[0].profilePic,
+        data: {
+            type: "image"
+        }
+    })
 
 
     res.status(200).json(
@@ -2216,6 +2266,7 @@ export {
     logoutUser,
     refreshAccessToken,
     changePassword,
+    saveFCMToken,
     getUser,
     getUserProfile,
     getUserFollowerAndFollowing,

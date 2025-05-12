@@ -11,6 +11,7 @@ import {
     logoutUser,
     refreshAccessToken,
     changePassword,
+    saveFCMToken,
     getUser,
     getUserProfile,
     getUserFollowerAndFollowing,
@@ -79,6 +80,11 @@ router.route("/refreshToken").post(
 router.route("/changePassword").post(
     verifyJWT,
     changePassword
+);
+
+router.route("/saveFCMToken").post(
+    verifyJWT,
+    saveFCMToken
 );
 
 router.route("/getUser").get(
