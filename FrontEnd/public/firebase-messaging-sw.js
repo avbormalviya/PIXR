@@ -13,15 +13,44 @@ firebase.initializeApp({
 
 self.addEventListener('push', function(event) {
     const data = event.data.json();
+    console.log('Push event received:', data);
     const options = {
         body: data.body,
-        icon: '/icon_1600.png',     // shown in notification panel
-        badge: '/icon_400.png',    // shown in status bar (top bar)
+        icon: '/icon_1600.png',
+        badge: '/icon_400.png',
+        image: '/banner.png', // Large image below the notification body
+        actions: [            // Custom action buttons
+            {
+                action: 'open_app',
+                title: 'Open App',
+                icon: '/open-icon.png'
+            },
+            {
+                action: 'dismiss',
+                title: 'Dismiss',
+                icon: '/dismiss-icon.png'
+            }
+        ],
+        data: {
+            url: data.url || '/' // Custom data (e.g., URL to open on click)
+        },
+        requireInteraction: true, // Keeps the notification until the user interacts
+        vibrate: [200, 100, 200], // Vibration pattern
+        tag: 'message-group-1'    // Groups/updates notifications with the same tag
     };
 
-    event.waitUntil(
-        self.registration.showNotification(data.title, options)
-    );
-});
+
+      event.waitUntil(
+          self.registration.showNotification(data.notification.title, options)
+      );
+  });
+
+  self.addEventListener('notificationclick', function(event) {
+      event.notification.close();
+      const targetUrl = event.notification.data?.url || '/';
+      event.waitUntil(
+          clients.openWindow(targetUrl)
+      );
+  });
 
 const messaging = firebase.messaging();

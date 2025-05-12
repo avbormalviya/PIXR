@@ -38,26 +38,14 @@ function App() {
         localStorage.setItem("fcmToken", newToken); // Update locally
       }
     };
-
+    checkTokenChange();
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("Message received. ", payload);
+    });
+    return unsubscribe;
     // const interval = setInterval(checkTokenChange, 1000 * 60 * 60 * 6); // Check every 6 hours
-    checkTokenChange(); // Initial check
     // return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-  const unsubscribe = onMessage(messaging, (payload) => {
-    console.log("Foreground message received:", payload);
-    // Optional: show a notification manually
-    if (Notification.permission === "granted") {
-      new Notification(payload.notification.title, {
-        body: payload.notification.body,
-        icon: payload.notification.icon
-      });
-    }
-  });
-
-  return () => unsubscribe(); // Clean up on unmount
-}, [messaging]);
 
   return (
     <BrowserRouter

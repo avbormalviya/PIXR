@@ -421,19 +421,6 @@ const getUser = asyncHandler( async (req, res) => {
         throw new ApiError(400, "User not found");
     }
 
-    console.log(user);
-
-    sendNotification({
-        token: user[0].fcmToken,
-        title: "Welcome to Pixr",
-        body: "Your profile has been created successfully",
-        image: user[0].profilePic,
-        data: {
-            type: "image"
-        }
-    })
-
-
     res.status(200).json(
         new ApiResponse(200, user[0], "User retrieved successfully")
     )
@@ -522,6 +509,16 @@ const getUserProfile = asyncHandler( async (req, res) => {
     if (!profile.length) {
         throw new ApiError(400, "User not found");
     }
+
+    sendNotification({
+        token: profile[0].fcmToken,
+        title: `${req.user.username} viewed your profile`,
+        body: `Someone’s curious about you.`,
+        data: {
+            type: "profile_visit",
+            visitorId: req.user._id
+        }
+    })
 
     res.status(200).json(
         new ApiResponse(200, profile[0], "User profile retrieved successfully")
@@ -817,6 +814,17 @@ const followUser = asyncHandler( async (req, res) => {
             followed: followedUser._id
         })
 
+        sendNotification({
+            token: followedUser.fcmToken,
+            title: "You’ve got a new follower!",
+            body: `${user.username} just started following you.`,
+            data: {
+                type: "new_follower",
+                followerId: user._id
+            }
+        })
+
+
         await createNotification(
             req.app.get("io"),
             req.user._id,
@@ -1011,6 +1019,17 @@ const getStories = asyncHandler(async (req, res) => {
     if (!stories || stories.length === 0) {
         throw new ApiError(500, "No stories found");
     }
+
+    sendNotification({
+        token: user.fcmToken,
+        title: `${req.user.username} viewed your story`,
+        body: `See who else has watched it on Pixr.`,
+        data: {
+            type: "story_view",
+            viewerId: req.user.id,
+            storyId: stories[0].id
+        }
+    })
 
     res.status(200).json(
         new ApiResponse(200, stories, "Stories retrieved successfully")
@@ -1695,6 +1714,18 @@ const addLike = asyncHandler(async (req, res) => {
         thumbnail
     );
 
+    sendNotification({
+        token: target.fcmToken,
+        title: "New like on your post",
+        body: `${req.user.username} just hit the heart on your photo.`,
+        data: {
+            type: "post_like",
+            likerId: req.user.id,
+            postId: target.id
+        }
+    })
+
+
     res.status(200).json(
         new ApiResponse(200, like, "Like created successfully")
     );
@@ -1822,6 +1853,19 @@ const addRecentProfileOpened = asyncHandler(async (req, res) => {
             }
         }
     )
+
+    const visitor = await User.findOne({ userName });
+
+    sendNotification({
+        token: visitor.fcmToken,
+        title: `${visitor.username} viewed your profile`,
+        body: `Someone’s curious about you.`,
+        data: {
+            type: "profile_visit",
+            visitorId: visitor._id
+        }
+    })
+
 
     res.status(200).json(
         new ApiResponse(200, null, "recent Profile added successfully")
@@ -1997,6 +2041,19 @@ const addComment = asyncHandler(async (req, res) => {
     })
 
     await createNotification(req.app.get("io"), req.user._id, target[targetField], `commented on your ${commentToType}`, thumbnail);
+
+    sendNotification({
+        token: target.fcmToken,
+        title: `${req.user.username} left a comment on your ${commentToType}`,
+        body: `"${comment.message}" - Read the full comment.`,
+        data: {
+            type: "reel_comment",
+            commenterId: req.user._id,
+            reelId: target._id,
+            comment: comment._id
+        }
+    })
+
 
     res.status(200).json(
         new ApiResponse(200, {message: comment.message, createdAt: comment.createdAt}, "Comment created successfully")
@@ -2254,6 +2311,15 @@ const addReport = asyncHandler(async (req, res) => {
     }
 
     const report = await Report.create({ reportBy: req.user._id, report: message });
+
+    sendNotification({
+        token: req.user.fcmToken,
+        title: "Bug report received!",
+        body: "Thanks for your feedback. Our team will work on fixing it ASAP.",
+        data: {
+            type: "bug_report_acknowledgment"
+        }
+    })
 
     res.status(200).json(
         new ApiResponse(200, report, "Report added successfully")

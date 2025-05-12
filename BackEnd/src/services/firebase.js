@@ -29,8 +29,6 @@ export const sendNotification = async ({ token, title, body, image, data = {} })
                 title,
                 body,
                 ...(image && { image }),
-                icon: '/icon.png', // optional
-                click_action: 'https://yourdomain.com', // optional
             }
         }
     };
