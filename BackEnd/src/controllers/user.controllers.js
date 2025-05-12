@@ -510,13 +510,15 @@ const getUserProfile = asyncHandler( async (req, res) => {
         throw new ApiError(400, "User not found");
     }
 
+    const visitedUser = await User.findById(req.user._id);
+
     sendNotification({
         token: profile[0].fcmToken,
-        title: `${req.user.username} viewed your profile`,
+        title: `${visitedUser.userName} viewed your profile`,
         body: `Someone’s curious about you.`,
         data: {
             type: "profile_visit",
-            visitorId: req.user._id
+            visitorUsername: visitedUser.userName,
         }
     })
 
@@ -817,10 +819,10 @@ const followUser = asyncHandler( async (req, res) => {
         sendNotification({
             token: followedUser.fcmToken,
             title: "You’ve got a new follower!",
-            body: `${user.username} just started following you.`,
+            body: `${user.userName} just started following you.`,
             data: {
                 type: "new_follower",
-                followerId: user._id
+                followerUsername: user.userName
             }
         })
 
@@ -1020,14 +1022,17 @@ const getStories = asyncHandler(async (req, res) => {
         throw new ApiError(500, "No stories found");
     }
 
+    const viewer = await View.findOne({
+        _id: req.user._id,
+    });
+
     sendNotification({
         token: user.fcmToken,
-        title: `${req.user.username} viewed your story`,
+        title: `${viewer.userName} viewed your story`,
         body: `See who else has watched it on Pixr.`,
         data: {
             type: "story_view",
-            viewerId: req.user.id,
-            storyId: stories[0].id
+            viewerUsername: viewer.userName
         }
     })
 
@@ -1714,14 +1719,16 @@ const addLike = asyncHandler(async (req, res) => {
         thumbnail
     );
 
+    const liker = await User.findById(req.user._id);
+    const targetUser = await User.findById(target[targetField]);
+
     sendNotification({
-        token: target.fcmToken,
+        token: targetUser.fcmToken,
         title: "New like on your post",
-        body: `${req.user.username} just hit the heart on your photo.`,
+        body: `${liker.userName} just hit the heart on your photo.`,
         data: {
             type: "post_like",
-            likerId: req.user.id,
-            postId: target.id
+            likerUsername: liker.userName,
         }
     })
 
@@ -1854,15 +1861,16 @@ const addRecentProfileOpened = asyncHandler(async (req, res) => {
         }
     )
 
-    const visitor = await User.findOne({ userName });
+    const visit = await User.findOne({ userName });
+    const visitor = await User.findById(req.user._id);
 
     sendNotification({
-        token: visitor.fcmToken,
-        title: `${visitor.username} viewed your profile`,
+        token: visit.fcmToken,
+        title: `${visitor.userName} viewed your profile`,
         body: `Someone’s curious about you.`,
         data: {
             type: "profile_visit",
-            visitorId: visitor._id
+            visitorUsername: visitor.userName
         }
     })
 
@@ -2042,15 +2050,16 @@ const addComment = asyncHandler(async (req, res) => {
 
     await createNotification(req.app.get("io"), req.user._id, target[targetField], `commented on your ${commentToType}`, thumbnail);
 
+    const commenter = await User.findById(req.user._id);
+    const targetUser = await User.findById(target[targetField]);
+
     sendNotification({
-        token: target.fcmToken,
-        title: `${req.user.username} left a comment on your ${commentToType}`,
-        body: `"${comment.message}" - Read the full comment.`,
+        token: targetUser.fcmToken,
+        title: `${commenter.userName} left a comment on your ${commentToType}`,
+        body: `"${message}" - Read the full comment.`,
         data: {
             type: "reel_comment",
-            commenterId: req.user._id,
-            reelId: target._id,
-            comment: comment._id
+            commenterUsername: commenter.userName,
         }
     })
 
@@ -2312,8 +2321,10 @@ const addReport = asyncHandler(async (req, res) => {
 
     const report = await Report.create({ reportBy: req.user._id, report: message });
 
+    const user = await User.findById(req.user._id);
+
     sendNotification({
-        token: req.user.fcmToken,
+        token: user.fcmToken,
         title: "Bug report received!",
         body: "Thanks for your feedback. Our team will work on fixing it ASAP.",
         data: {
