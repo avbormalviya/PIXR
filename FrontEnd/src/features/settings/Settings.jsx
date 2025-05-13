@@ -320,7 +320,7 @@ export const Settings = () => {
                                             { isHandGesture && (
                                                 <>
                                                     <h1 className={style.handGestureText}>Display</h1>
-                                                    <SwitchButton checked={showDisplay} setChecked={setShowDisplay} disabled={!isPermissionsGranted?.camera?.granted} />
+                                                    <SwitchButton checked={showDisplay} setChecked={setShowDisplay}  />
                                                 </>
                                             )}
                                         </div>
