@@ -10,6 +10,8 @@ import { emit } from "../events/emit.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 
+import { sendNotification } from "../services/firebase.js";
+
 
 export const chatCommonAggregation = (currentUserId) => [
     // Fetch all messages related to this chat

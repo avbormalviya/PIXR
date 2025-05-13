@@ -190,7 +190,7 @@
                     return;
                 }
                 try {
-                    peer.signal(data);
+                    peer?.signal(data);
                 } catch (error) {
                     console.error("❌ Error handling signal:", error);
                 }
@@ -203,7 +203,7 @@
                 setCalling(false);
                 stopAudio(incomingCallRef);
                 stopAudio(outgoingCallRef);
-                peer.signal(data);
+                peer?.signal(data);
             };
 
             const handleCallRejected = () => {
