@@ -246,17 +246,16 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     if (!fullMessage?.[0]) throw new ApiError(400, "Failed to fetch message");
 
-    sendNotification({
-        token: updatedChat.participants.find(id => id.toString() !== req.user._id.toString()).fcmToken,
-        title: "New message from ${fullMessage[0].sender.username}",
-        body: `"${message}" - Open Pixr to reply.`,
-        image: sender.profilePic,
-        data: {
-            type: "new_message",
-            senderId: sender.id,
-            messageId: newMessage._id
-        }
-    })
+    // sendNotification({
+    //     token: updatedChat.participants.find(id => id.toString() !== req.user._id.toString()).fcmToken,
+    //     title: "New message from ${fullMessage[0].sender.username}",
+    //     body: `"${message}" - Open Pixr to reply.`,
+    //     data: {
+    //         type: "new_message",
+    //         senderId: fullMessage[0].sender.id,
+    //         messageId: newMessage._id
+    //     }
+    // })
 
 
 
