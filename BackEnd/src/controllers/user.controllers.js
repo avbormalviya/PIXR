@@ -2178,11 +2178,15 @@ const updateAccount = asyncHandler(async (req, res) => {
         const profilePic = req.files["profilePic"]?.[0];
         const faceId = req.files["faceId"]?.[0];
 
-        const profilePicUrl = await uploadOnCloudinary(req.files["profilePic"]?.[0].path);
-        const faceUrl = await uploadOnCloudinary(req.files["faceId"]?.[0].path);
+        if (profilePic) {
+            const profilePicUrl = await uploadOnCloudinary(req.files["profilePic"]?.[0].path);
+            req.body.profilePic = profilePicUrl.secure_url;
+        }
 
-        req.body.profilePic = profilePicUrl.secure_url;
-        req.body.faceId = faceUrl.secure_url;
+        if (faceId) {
+            const faceUrl = await uploadOnCloudinary(req.files["faceId"]?.[0].path);
+            req.body.faceId = faceUrl.secure_url;
+        }
     }
 
     let plainDescriptor = [];
