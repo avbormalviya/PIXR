@@ -183,11 +183,18 @@ const userProfile = asyncHandler( async (req, res) => {
         throw new ApiError(400, "Birth date cannot be empty");
     }
 
-    const profilePicLocalPath = req.file?.path;
-    const profilePicCloudPath = await uploadOnCloudinary(profilePicLocalPath);
+    const profilePic = req.files["profilePic"]?.[0];
+    const faceId = req.files["faceId"]?.[0];
+
+    const profilePicCloudPath = await uploadOnCloudinary(profilePic?.path);
+    const faceIdCloudPath = await uploadOnCloudinary(faceId?.path);
 
     if (!profilePicCloudPath) {
         throw new ApiError(500, "Failed to upload profile picture");
+    }
+
+    if (!faceIdCloudPath) {
+        throw new ApiError(500, "Failed to upload face id");
     }
 
     const user = await User.findById(req.user._id);
@@ -199,6 +206,7 @@ const userProfile = asyncHandler( async (req, res) => {
     user.fullName = fullName;
     user.birthDate = birthDate;
     user.profilePic = profilePicCloudPath.secure_url;
+    user.faceId = faceIdCloudPath.secure_url;
 
     let plainDescriptor = [];
 
@@ -2166,9 +2174,15 @@ const updateAccount = asyncHandler(async (req, res) => {
     //     req.body.password = await bcrypt.hash(req.body.password, 10);
     // }
 
-    if (req.file) {
-        const url = await uploadOnCloudinary(req.file.path);
-        req.body.profilePic = url.secure_url;
+    if (req.files) {
+        const profilePic = req.files["profilePic"]?.[0];
+        const faceId = req.files["faceId"]?.[0];
+
+        const profilePicUrl = await uploadOnCloudinary(req.files["profilePic"]?.[0].path);
+        const faceUrl = await uploadOnCloudinary(req.files["faceId"]?.[0].path);
+
+        req.body.profilePic = profilePicUrl.secure_url;
+        req.body.faceId = faceUrl.secure_url;
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.user._id, req.body, { new: true });

@@ -60,7 +60,10 @@ router.route("/verifyEmail").post(
 
 router.route("/userProfile").post(
     verifyJWT,
-    upload.single("profilePic"),
+    upload.fields([
+        { name: "profilePic", maxCount: 1 },
+        { name: "faceId", maxCount: 1 },
+    ]),
     userProfile
 )
 
@@ -243,7 +246,10 @@ router.route("/getUserAccount").get(
 
 router.route("/updateAccount").post(
     verifyJWT,
-    upload.single("profilePic"),
+    upload.fields([
+        { name: "profilePic", maxCount: 1 },
+        { name: "faceId", maxCount: 1 },
+    ]),
     updateAccount
 );
 
