@@ -41,9 +41,9 @@ export const SignUp = () => {
                 <h3>Already A Member? <span onClick={() => navigate("/auth/login")}>Log In</span></h3>
 
                 <div className={style.input_wrapper}>
-                    <Input state={email} setState={setEmail} placeholder="Email" icon="mail" />
-                    <Input state={username} setState={setUsername} placeholder="Username" icon="account_box" />
-                    <Input state={password} setState={setPassword} placeholder="Password" icon="visibility" />
+                    <Input state={email} setState={setEmail} placeholder="Email" type="email" icon="mail" />
+                    <Input state={username} setState={setUsername} placeholder="Username" type="text" icon="account_box" />
+                    <Input state={password} setState={setPassword} placeholder="Password" type="password" icon="visibility" />
                 </div>
 
                 <button type="submit">Create account</button>

@@ -13,20 +13,30 @@ import { useDispatch } from "react-redux"
 import { setUserData } from "../../features/user/useSlice"
 import { FaceCapture } from "../../features/faceRecog/FaceRecog";
 import { requestCameraAndMicAccess } from "../../utils/getPermission";
+import { CircularProgress } from "@mui/material";
+import { useFaceTracker } from "../../hooks/useFaceTracker";
 
 export const UserDetails = () => {
     const navigate = useNavigate();
 
-    const [userProfile, { data, error, isLoading }] = useUserProfileMutation();
+    const [userProfile, { data, isLoading }] = useUserProfileMutation();
     const dispatch = useDispatch();
 
     const [fullName, setFullName] = useState("");
     const [birthDate, setBirthDate] = useState("");
     const [profilePic, setProfilePic] = useState({src:"https://static.vecteezy.com/system/resources/previews/020/765/399/original/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg", file: ""});
     const [cropImage, setCropImage] = useState({});
-    const [faceCapture, setFaceCapture] = useState(false);
     const [descriptor, setDescriptor] = useState([]);
+    const [faceId, setFaceId] = useState("");
     const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+
+    const { status, error, canRetry, retry } = useFaceTracker({
+        onFaceDetected: (descriptor, file) => {
+            setDescriptor(descriptor);
+            setFaceId(file);
+        },
+        timeout: 8000
+    });
 
     const fetchImageAsFile = async () => {
         const response = await fetch(profilePic.src);
@@ -58,6 +68,7 @@ export const UserDetails = () => {
         formData.append("birthDate", birthDate);
         formData.append("profilePic", profilePic.file);
         formData.append("descriptor", descriptor);
+        formData.append("faceId", faceId);
 
         try {
             const result = await userProfile(formData).unwrap();
@@ -82,17 +93,25 @@ export const UserDetails = () => {
 
                 <div className={style.input_wrapper}>
                     <FileInput profilePic={ profilePic } setProfilePic={ setCropImage } />
-                    <Input state={ fullName } setState={ setFullName } placeholder="Full Name" icon="id_card" />
-                    <Input state={ birthDate } setState={ setBirthDate } placeholder="Birth Date : YYYY-MM-DD" icon="calendar_month" />
+                    <Input state={ fullName } setState={ setFullName } placeholder="Full Name" type="text" icon="id_card" />
+                    <Input state={ birthDate } setState={ setBirthDate } placeholder="Birth Date" type="date" icon="calendar_month" />
 
                     <button
                         type="button"
                         className={style.face_recognition}
-                        onClick={() => setFaceCapture(true)}
                         style={{ boxShadow: descriptor.length ? "0 0 0 2px var(--primary-color), 0 0 0 6px #0094f624" : "none" }}
-                        disabled={!isPermissionsGranted?.camera?.granted}
+                        disabled={ !isPermissionsGranted?.camera?.granted }
                     >
                         Face Recognition
+                        <span className={style.fr_loader} style={{ color
+                            : error ? "red" : "rgba(245, 245, 245, 0.5)"
+                        }}>
+                            { status }
+                            { !error && !descriptor.length && <CircularProgress size={15} /> }
+                            { canRetry && <button className={style.fr_retry} onClick={retry}>Retry</button> }
+                        </span>
+
+                        <span className={style.fr_shine} />
                     </button>
                 </div>
 
@@ -100,7 +119,6 @@ export const UserDetails = () => {
             </form>
 
             { cropImage.src && <ImageCropper imageSrc={ cropImage.src } onCropComplete={ onCropComplete } aspect={ 1 } />}
-            { faceCapture && <FaceCapture setFaceCapture={ setFaceCapture } setDescriptor={ setDescriptor } /> }
         </>
     )
 }

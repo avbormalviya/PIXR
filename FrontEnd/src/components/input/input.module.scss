@@ -27,14 +27,14 @@
             input {
                 width: 100%;
                 height: 20px;
-                
+
                 border: none;
-    
+
                 font-size: 1.8em;
                 font-weight: 700;
-    
+
                 color: whitesmoke;
-    
+
                 background-color: transparent !important;
             }
         }
@@ -51,4 +51,12 @@
 input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0px 1000px #202020 inset; /* Your desired background color */
     -webkit-text-fill-color: whitesmoke; /* Your desired text color */
+}
+
+input[type="password"]::-ms-reveal {
+    display: none;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
 }

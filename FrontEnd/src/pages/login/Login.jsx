@@ -12,6 +12,8 @@ import { isAuthCookieWorking } from "../../utils/isCookieEnable"
 import { requestCameraAndMicAccess } from "../../utils/getPermission"
 
 import { FaceCapture } from "../../features/faceRecog/FaceRecog"
+import { CircularProgress } from "@mui/material"
+import { useFaceTracker } from "../../hooks/useFaceTracker"
 
 
 export const Login = () => {
@@ -26,9 +28,15 @@ export const Login = () => {
     const [password, setPassword] = useState('');
     const [inputValue, setInputValue] = useState('');
     const [inputType, setInputType] = useState('');
-    const [faceCapture, setFaceCapture] = useState(false);
     const [descriptor, setDescriptor] = useState([]);
     const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+
+    const { status, error, canRetry, retry } = useFaceTracker({
+        onFaceDetected: (descriptor) => {
+            setDescriptor(descriptor);
+        },
+        timeout: 8000
+    });
 
 
     useEffect(() => {
@@ -77,36 +85,40 @@ export const Login = () => {
     }
 
     return (
-        <>
-            <form onSubmit={handleSubmit} method="post">
-                <h2>Please enter Your details</h2>
-                <h1>Welcome Back<span /></h1>
-                <h3>Don&apos;t have an account? <span onClick={() => navigate("/auth/signup")}>Sign Up</span></h3>
+        <form onSubmit={handleSubmit} method="post">
+            <h2>Please enter Your details</h2>
+            <h1>Welcome Back<span /></h1>
+            <h3>Don&apos;t have an account? <span onClick={() => navigate("/auth/signup")}>Sign Up</span></h3>
 
-                <div className={style.input_wrapper}>
-                    <Input state={ inputValue }  setState={ setInputValue } placeholder="Username or Email" icon={ inputType } />
-                    <Input state={ password } setState={ setPassword } placeholder="Password" icon="visibility" />
-                    <div className={style.divider}>
-                        <hr />
-                        <span>OR</span>
-                        <hr />
-                    </div>
-
-                    <button
-                        type="button"
-                        className={style.face_recognition}
-                        style={{ boxShadow: descriptor.length ? "0 0 0 2px var(--primary-color), 0 0 0 6px #0094f624" : "none" }}
-                        onClick={() => setFaceCapture(true)}
-                        disabled={ !isPermissionsGranted?.camera?.granted }
-                    >
-                        Face Recognition
-                    </button>
+            <div className={style.input_wrapper}>
+                <Input state={ inputValue }  setState={ setInputValue } placeholder="Username or Email" type="text" icon={ inputType } />
+                <Input state={ password } setState={ setPassword } placeholder="Password" type="password" icon="visibility" />
+                <div className={style.divider}>
+                    <hr />
+                    <span>OR</span>
+                    <hr />
                 </div>
 
-                <button type="submit">Login</button>
-            </form>
+                <button
+                    type="button"
+                    className={style.face_recognition}
+                    style={{ boxShadow: descriptor.length ? "0 0 0 2px var(--primary-color), 0 0 0 6px #0094f624" : "none" }}
+                    disabled={ !isPermissionsGranted?.camera?.granted }
+                >
+                    Face Recognition
+                    <span className={style.fr_loader} style={{ color
+                        : error ? "red" : "rgba(245, 245, 245, 0.5)"
+                    }}>
+                        { status }
+                        { !error && !descriptor.length && <CircularProgress size={15} /> }
+                        { canRetry && <div className={style.fr_retry} onClick={retry}>Retry</div> }
+                    </span>
 
-            { faceCapture && <FaceCapture setFaceCapture={ setFaceCapture } setDescriptor={ setDescriptor } /> }
-        </>
+                    <span className={style.fr_shine} />
+                </button>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
     )
 }

@@ -94,6 +94,7 @@ form {
     }
 
     .face_recognition {
+        position: relative;
         width: 100%;
         height: 60px;
         margin: 0;
@@ -101,14 +102,54 @@ form {
         border-radius: 20px;
         color: rgba(245, 245, 245, 0.3);
         background-color: #202020;
+        overflow: hidden;
 
         &:disabled {
             cursor: not-allowed;
+        }
 
+        .fr_loader {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            font-size: 0.8em;
+
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+
+            .fr_retry {
+                padding: 2px 6px;
+                border-radius: 10px;
+                color: var(--text-primary-70);
+                background-color: var(--primary-color);
+                font-size: 0.9em;
+                cursor: pointer;
+                z-index: 2;
+            }
+        }
+
+        .fr_shine {
+            position: absolute;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            background: linear-gradient(1200deg, transparent, var(--background-soft), transparent);
+            animation: shine 2s infinite ease-in-out;
         }
     }
 }
 
+@keyframes shine {
+    from {
+        opacity: 0.4;
+        left: -100%;
+    }
+    to {
+        opacity: 0.4;
+        left: 100%;
+    }
+}
 
 @media (min-width: 485px) {
     form {
