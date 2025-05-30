@@ -2185,6 +2185,16 @@ const updateAccount = asyncHandler(async (req, res) => {
         req.body.faceId = faceUrl.secure_url;
     }
 
+    let plainDescriptor = [];
+
+    if (typeof req.body.descriptor === "string") {
+        plainDescriptor = req.body.descriptor.split(",").map(Number);
+    } else {
+        plainDescriptor = req.body.descriptor;
+    }
+
+    req.body.descriptor = plainDescriptor;
+
     const updatedUser = await User.findByIdAndUpdate(req.user._id, req.body, { new: true });
 
     res.status(200).json(
