@@ -9,6 +9,10 @@ const userSchema  = new Schema(
             default: []
         },
 
+        faceId: {
+            type: String
+        },
+
         email: {
             type: String,
             unique: true,
