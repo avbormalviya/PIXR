@@ -26,7 +26,7 @@ import { Alert } from "../../components/alert/Alert";
 import { getToken } from 'firebase/messaging';
 import { useFirebase } from '../../context/FireBaseContext';
 import { useFileInput } from "../../hooks/useFileInput";
-
+import { useFaceTracker } from "../../hooks/useFaceTracker";
 
 const themes = [
     "light",
@@ -69,7 +69,7 @@ export const Settings = () => {
     const [theme, setTheme] = useState(localStorage.getItem("theme"));
     const [report, setReport] = useState("");
     const [drawerOpen, setDrawerOpen] = useState(false);
-
+    const [faceIdPreview, setFaceIdPreview] = useState(null);
     const [isCameraEnabled, setIsCameraEnabled] = useState(false);
     const [isMicEnabled, setIsMicEnabled] = useState(false);
     const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
@@ -93,6 +93,15 @@ export const Settings = () => {
                 setShowCrop(true);
             }
         },
+    });
+
+    const { status, error, canRetry, retry } = useFaceTracker({
+        onFaceDetected: (descriptor, file, url) => {
+            setAccount({ ...account, descriptor: descriptor, faceId: file });
+            setFaceIdPreview(url);
+        },
+        timeout: 8000,
+        runOnMount: false
     });
 
 
@@ -471,91 +480,110 @@ export const Settings = () => {
                     type === "account" && (
                         <section className={style.container} style={{ gap: "1rem" }}>
                             <div className={style.account_item}>
-                                <h1>Profile Picture</h1>
-                                <input {...inputProps} />
-                                <Img onClick={trigger} className={style.profile_pic} url={previews.length > 0 ? previews[0] : account.profilePic} alt="Profile Picture" />
+                                <div className={style.input_group}>
+                                    <h1>Profile Picture</h1>
+                                    <input {...inputProps} />
+                                    <Img onClick={trigger} className={style.profile_pic} url={previews.length > 0 ? previews[0] : account.profilePic} alt="Profile Picture" />
+                                </div>
 
                                 {
                                     showCrop && <ImageCropper imageSrc={previews[0]} onCropComplete={handleCropperComplete} aspect={1} />
                                 }
 
-                                <h1>Face ID</h1>
-                                <Img onClick={trigger} className={style.profile_pic} url={account.faceID} alt="Profile Picture" />
+                                <div className={style.input_group}>
+                                    <h1>Face ID</h1>
+                                    <Img onClick={retry} className={style.face_id} url={faceIdPreview || account.faceId} alt="Profile Picture" />
+                                    <span>{status}</span>
+                                </div>
 
-                                <h1>Email</h1>
-                                <input type="text" value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
+                                <div className={style.input_group}>
+                                    <h1>Email</h1>
+                                    <input type="text" value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
+                                </div>
 
-                                <h1>Username</h1>
-                                <input type="text" value={account.userName} onChange={(e) => setAccount({ ...account, userName: e.target.value })} />
+                                <div className={style.input_group}>
+                                    <h1>Username</h1>
+                                    <input type="text" value={account.userName} onChange={(e) => setAccount({ ...account, userName: e.target.value })} />
+                                </div>
 
-                                {/* <h1>Password</h1>
-                                <input type="text" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} /> */}
+                                {/* <div className={style.input_group}>
+                                    <h1>Password</h1>
+                                    <input type="text" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
+                                </div> */}
 
-                                <h1>Birth Date</h1>
-                                <input type="date" value={account.birthDate && format(new Date(account.birthDate), "yyyy-MM-dd")} onChange={(e) => setAccount({ ...account, birthDate: e.target.value })} />
+                                <div className={style.input_group}>
+                                    <h1>Birth Date</h1>
+                                    <input type="date" value={account.birthDate && format(new Date(account.birthDate), "yyyy-MM-dd")} onChange={(e) => setAccount({ ...account, birthDate: e.target.value })} />
+                                </div>
 
-                                <h1>Full Name</h1>
-                                <input type="text" value={account.fullName} onChange={(e) => setAccount({ ...account, fullName: e.target.value })} />
+                                <div className={style.input_group}>
+                                    <h1>Full Name</h1>
+                                    <input type="text" value={account.fullName} onChange={(e) => setAccount({ ...account, fullName: e.target.value })} />
+                                </div>
 
+                                <div className={style.input_group}>
+                                    <h1>Bio</h1>
+                                    <textarea type="text" value={account.bio} onChange={(e) => setAccount({ ...account, bio: e.target.value })} />
+                                </div>
 
+                                <div className={style.input_group}>
+                                    <h1>Private</h1>
+                                    <select value={account.Private} onChange={() => setAccount({ ...account, Private: !account.Private })}>
+                                        <option value="true">True</option>
+                                        <option value="false">False</option>
+                                    </select>
+                                </div>
 
-                                <h1>Bio</h1>
-                                <textarea type="text" value={account.bio} onChange={(e) => setAccount({ ...account, bio: e.target.value })} />
-
-                                <h1>Private</h1>
-                                <select value={account.Private} onChange={() => setAccount({ ...account, Private: !account.Private })}>
-                                    <option value="true">True</option>
-                                    <option value="false">False</option>
-                                </select>
-
-                                <h1>Role</h1>
-                                <select value={account.role} onChange={(e) => setAccount({ ...account, role: e.target.value })}>
-                                    {
-                                        [
-                                            "Animal Lover",
-                                            "Animator",
-                                            "Artist",
-                                            "Blogger",
-                                            "Chef",
-                                            "Content Creator",
-                                            "Designer",
-                                            "Digital Artist",
-                                            "DIY Expert",
-                                            "Editor",
-                                            "Entrepreneur",
-                                            "Environmentalist",
-                                            "Fitness Enthusiast",
-                                            "Fitness Trainer",
-                                            "Gamer",
-                                            "Gamer Girl",
-                                            "Graphic Designer",
-                                            "Influencer",
-                                            "Investor",
-                                            "Journalist",
-                                            "Motivational Speaker",
-                                            "Musician",
-                                            "Photographer",
-                                            "Podcaster",
-                                            "Programmer",
-                                            "Reviewer",
-                                            "Student",
-                                            "Streamer",
-                                            "Teacher",
-                                            "Tech Enthusiast",
-                                            "Traveler",
-                                            "Vlogger",
-                                            "Writer",
-                                            "Developer",
-                                            "Designer",
-                                            "Movie Buff",
-                                            "Influencer",
-                                            "YouTuber",
-                                            "Photographer",
-                                            "PixrStar",
-                                            "Programmer"
-                                        ].map((role, index) => (<option key={index} value={role}>{role}</option>))
-                                    }
-                                </select>
+                                <div className={style.input_group}>
+                                    <h1>Role</h1>
+                                    <select value={account.role} onChange={(e) => setAccount({ ...account, role: e.target.value })}>
+                                        {
+                                            [
+                                                "Animal Lover",
+                                                "Animator",
+                                                "Artist",
+                                                "Blogger",
+                                                "Chef",
+                                                "Content Creator",
+                                                "Designer",
+                                                "Digital Artist",
+                                                "DIY Expert",
+                                                "Editor",
+                                                "Entrepreneur",
+                                                "Environmentalist",
+                                                "Fitness Enthusiast",
+                                                "Fitness Trainer",
+                                                "Gamer",
+                                                "Gamer Girl",
+                                                "Graphic Designer",
+                                                "Influencer",
+                                                "Investor",
+                                                "Journalist",
+                                                "Motivational Speaker",
+                                                "Musician",
+                                                "Photographer",
+                                                "Podcaster",
+                                                "Programmer",
+                                                "Reviewer",
+                                                "Student",
+                                                "Streamer",
+                                                "Teacher",
+                                                "Tech Enthusiast",
+                                                "Traveler",
+                                                "Vlogger",
+                                                "Writer",
+                                                "Developer",
+                                                "Designer",
+                                                "Movie Buff",
+                                                "Influencer",
+                                                "YouTuber",
+                                                "Photographer",
+                                                "PixrStar",
+                                                "Programmer"
+                                            ].map((role, index) => (<option key={index} value={role}>{role}</option>))
+                                        }
+                                    </select>
+                                </div>
 
                                 <div className={style.accountCreation}>
                                     <ul>
