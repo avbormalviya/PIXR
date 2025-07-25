@@ -13,4 +13,23 @@
         font-size: 1.5em;
         color: var(--text-primary-50);
     }
+
+    .suggested_user_loading_skeleton {
+        width: 100%;
+        height: 60px;
+        border-radius: 8px;
+        padding: 1em;
+        background-color: var(--background-secondary);
+        display: grid;
+        grid-template-columns: 60px 1fr;
+        grid-template-rows: auto auto;
+        // gap: 0.5em;
+
+        & > :first-child {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            grid-row: 1 / span 2;
+        }
+    }
 }
