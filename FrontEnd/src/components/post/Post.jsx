@@ -20,6 +20,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 
 import { Comment } from '../../features/comment/Comment';
 import { AnimatePresence } from 'framer-motion';
+import Skeleton from '@mui/material/Skeleton';
 
 import { useSelector } from 'react-redux';
 
@@ -138,7 +139,8 @@ const Post = ({ postObj }) => {
 
                     style={{
                         width: "98%",
-                        aspectRatio: "1/1",
+                        maxWidth: "600px",
+                        height: "auto",
                         borderRadius: "20px",
                         // backgroundColor: "var(--background-primary)",
                         filter: "drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.3))",
@@ -215,8 +217,10 @@ export const Posts = () => {
     const [posts, setPosts] = useState([]);
     const [lastPostId, setLastPostId] = useState(null);
     const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     const fetchMorePosts = async () => {
+        setLoading(true);
         try {
             const result = await fetchAndSetPosts(lastPostId, 2);
             const data = result.data;
@@ -230,6 +234,7 @@ export const Posts = () => {
         } catch (error) {
             console.error('Error fetching posts:', error);
         }
+        setLoading(false);
     };
 
     const { lastElementRef, isFetching } = useInfiniteScroll(fetchMorePosts, hasMore);
@@ -242,6 +247,16 @@ export const Posts = () => {
 
     return (
         <>
+            {
+                loading && !posts.length &&
+                    <div className={style.post_loading_skeleton}>
+                        <Skeleton variant="circular" width={60} height={60} sx={{ bgcolor: "var(--background-ternary)" }} />
+                        <Skeleton variant="rounded" width="100%" height={300} sx={{ bgcolor: "var(--background-ternary)", margin: "1em 0" }} />
+                        <Skeleton variant="text" width="80%" height={30} sx={{ bgcolor: "var(--background-ternary)" }} />
+                        <Skeleton variant="text" width="60%" height={30} sx={{ bgcolor: "var(--background-ternary)" }} />
+                    </div>
+            }
+
             {
                 posts?.map((post, index) => (
                     <Post key={index} postObj={post} />

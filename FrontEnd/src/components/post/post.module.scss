@@ -96,6 +96,16 @@
     }
 }
 
+.post_loading_skeleton {
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-secondary);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5em !important;
+    margin-top: 2em;
+}
+
 
 @media (min-width: 485px) {
     .post_section {
@@ -118,6 +128,12 @@
             }
         }
     }
+
+    .post_loading_skeleton {
+        width: 480px;
+        padding: 0 0.5em 0.5em 0.5em;
+        border-radius: 20px;
+    }
 }
 
 
@@ -127,10 +143,10 @@
     }
 
 }
+
 @media (min-width: 1024px) {
 
 }
-
 
 p {
     color: var(--text-primary);
