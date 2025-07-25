@@ -981,8 +981,6 @@ const getStories = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({userName});
 
-    console.log(user);
-
     if (!user) {
         throw new ApiError(400, "User not found");
     }
@@ -1033,10 +1031,8 @@ const getStories = asyncHandler(async (req, res) => {
     }
 
     const viewer = await View.findOne({
-        _id: req.user._id,
+        req.user._id,
     });
-
-    console.log(viewer);
 
     sendNotification({
         token: user.fcmToken,
