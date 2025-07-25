@@ -1036,6 +1036,8 @@ const getStories = asyncHandler(async (req, res) => {
         _id: req.user._id,
     });
 
+    console.log(viewer);
+
     sendNotification({
         token: user.fcmToken,
         title: `${viewer.userName} viewed your story`,
