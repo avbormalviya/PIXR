@@ -240,11 +240,7 @@
     height: 100%;
     background-color: var(--background-secondary);
     border-radius: 1.5em;
-
-    img {
-        // filter: drop-shadow(0px 0px 10px hsla(186, 100%, 69%, 0.5));
-        filter: drop-shadow(0px 0px 10px rgba(0, 149, 246, 0.5));
-    }
+    overflow: hidden;
 }
 
 .attachments {
@@ -275,6 +271,225 @@
     }
 }
 
+.floatingImg {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+.startChatBtn {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-top: 0.5rem;
+  font-family: inherit;
+  &:hover {
+    background: var(--secondary-color);
+    color: var(--text-primary);
+  }
+}
+
+.mascotArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: var(--background-secondary);
+  border-radius: 18px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.04);
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+}
+
+.mascotEmoji {
+  font-size: 3.5rem;
+  margin-bottom: 0.5rem;
+  animation: waveHand 2s infinite;
+  color: var(--primary-color);
+}
+
+@keyframes waveHand {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.speechBubble {
+  background: var(--background-primary);
+  color: var(--text-primary);
+  border-radius: 18px;
+  padding: 0.75rem 1.25rem;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 0.5rem;
+  position: relative;
+  max-width: 320px;
+  text-align: center;
+  border: 1px solid var(--accent-border-color);
+}
+.speechBubble:after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 12px 12px 0 12px;
+  border-style: solid;
+  border-color: var(--background-primary) transparent transparent transparent;
+}
+
+.quickActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.findFriendsBtn {
+  background: var(--background-primary);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: 24px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  font-family: inherit;
+  &:hover {
+    background: var(--background-secondary);
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+  }
+}
+
+.no_chat h2 {
+  color: var(--text-primary);
+}
+
+.no_chat p {
+  color: var(--text-primary-70);
+}
+
+.bigChatImage {
+  width: 80%;
+  max-width: 520px;
+  display: block;
+  margin: 0 auto;
+  height: auto;
+  filter: drop-shadow(0 4px 24px rgba(0,0,0,0.08));
+}
+
+.timelineVisual {
+  width: 80%;
+  max-width: 520px;
+  display: block;
+  margin: 0 auto;
+  height: auto;
+  filter: drop-shadow(0 4px 24px rgba(0,0,0,0.08));
+}
+
+.welcomePoster {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-secondary);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.geoTopLeft {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 140px;
+  height: 140px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.geoBottomRight {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.geoBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.geoMuralBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.centerText {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pixrLogo {
+  font-family: 'anurati', 'Nunito', sans-serif;
+  font-size: 4.2rem;
+  letter-spacing: 0.2em;
+  color: var(--primary-color);
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.welcomeTitle {
+  font-size: 2.1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.welcomeSubtext {
+  font-size: 1.3rem;
+  color: var(--text-primary-70);
+  font-weight: 400;
+  margin-bottom: 0.2rem;
+}
 
 @media (min-width: 768px) {
     .lobby {

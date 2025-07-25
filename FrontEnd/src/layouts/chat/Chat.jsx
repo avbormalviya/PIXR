@@ -43,6 +43,7 @@ import chatsvg from "/svg/undraw_social-serenity_x9vq.svg"
 // import chatsvg from "/svg/undraw_connection_ts3f.svg"
 
 import style from "./chat.module.scss";
+import ChatWelcomePoster from "./ChatWelcomePoster";
 
 
 export const Chat = () => {
@@ -704,7 +705,7 @@ export const Chat = () => {
                     </ChatContainer>
                 ) : windowWidth >= 864 && (
                     <div className={style.no_chat}>
-                        <img style={{ width: "80%" }} src={chatsvg} alt="Chat" />
+                        <ChatWelcomePoster />
                     </div>
                 )}
             </MainContainer>
