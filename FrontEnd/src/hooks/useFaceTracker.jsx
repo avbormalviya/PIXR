@@ -3,7 +3,8 @@ import * as faceapi from "face-api.js";
 
 export const useFaceTracker = ({
     onFaceDetected,
-    timeout = 10000, // 10 seconds to detect
+    timeout = 10000,
+    runOnMount = true
 }) => {
     const [status, setStatus] = useState("Initializing");
     const [canRetry, setCanRetry] = useState(false);
@@ -69,6 +70,7 @@ export const useFaceTracker = ({
                 if (detection) {
                     canvas.toBlob((blob) => {
                         const file = new File([blob], "face-frame.png", { type: "image/png" });
+                        const imageUrl = URL.createObjectURL(blob);
 
                         cleanup();
                         setStatus("Face detected");
@@ -76,13 +78,9 @@ export const useFaceTracker = ({
                         const descriptor = Array.from(detection.descriptor);
 
                         // Send both descriptor and file back
-                        onFaceDetected(descriptor, file);
+                        onFaceDetected(descriptor, file, imageUrl);
                     }, "image/png");
-
-                    cleanup();
-                    setStatus("Face detected");
                 }
-
             }, 500);
 
             timeoutRef.current = setTimeout(() => {
@@ -102,7 +100,11 @@ export const useFaceTracker = ({
     };
 
     useEffect(() => {
-        loadModels().then(detectFace);
+        if (runOnMount) {
+            loadModels().then(detectFace());
+        } else {
+            loadModels(); // preload models even if not detecting immediately
+        }
 
         return () => cleanup();
     }, []);

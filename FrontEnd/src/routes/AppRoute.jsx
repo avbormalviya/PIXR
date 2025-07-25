@@ -65,7 +65,7 @@ export const AppRoute = () => {
                     <>
                         <Route path="/" element={<Home />}>
                             <Route index element={<FeedLayout />} />
-                            <Route path="memoir/:username" element={<Memoir />} />
+                            <Route path="memoir/:userName" element={<Memoir />} />
                             <Route path="search" element={<Search />} />
                             <Route path="reels" element={<Reel />} />
                             <Route path="create/:content" element={<Create />} />

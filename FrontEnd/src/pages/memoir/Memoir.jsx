@@ -162,7 +162,7 @@ const MemoirCard = ({ memoirs, isActive, isPrev, isNext, onStoryEnd, handleStory
                             </div>
                         ))}
                     </div>
-                        
+
                     {
                         user._id === memoirs.userInfo._id ? (
                             <DrawerUserCard styles={style.memoir_owner} fullName={memoirs.userInfo.fullName} userName={memoirs.userInfo.userName} profilePic={memoirs.userInfo.profilePic} drawerInfo = {drawer} />
@@ -179,7 +179,7 @@ const MemoirCard = ({ memoirs, isActive, isPrev, isNext, onStoryEnd, handleStory
                 </div>
             </motion.div>
 
-            
+
             {
                 viewer && (
                     <div className={style.memoir_viewers}>
@@ -206,7 +206,7 @@ export const Memoir = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const { username } = useParams();
+    const { userName } = useParams();
 
     const { user } = useSelector((state) => state.user);
 
@@ -226,34 +226,35 @@ export const Memoir = () => {
             //     setMemoirs(data);
             // }
             // else {
-                const { data } = await getStories(username);
+                const { data } = await getStories(userName);
 
                 if (!data) {
                     return;
                 }
+
                 setMemoirs(data);
                 // handleStoryView();
             // }
         })();
-    }, [stack, username]);
+    }, [stack, userName]);
 
     useEffect(() => {
+        console.log(memoirs)
         addView({
             viewTo: memoirs[0]?._id,
-            viewType: "story",
-            viewBy: user._id
+            viewType: "story"
         })
     }, [memoirs]);
 
     useEffect(() => {
         for (let i = 0; i < memoirs?.length; i++) {
-            if (memoirs[i].userInfo.userName === username) {
+            if (memoirs[i].userInfo.userName === userName) {
                 setActiveIndex(i);
                 swiperRef.current.slideTo(i);
                 break;
             }
         }
-    }, [username, memoirs]);
+    }, [userName, memoirs]);
 
     const handleStoryEnd = () => {
         if (activeIndex < memoirs?.length - 1) {
