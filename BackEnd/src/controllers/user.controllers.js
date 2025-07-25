@@ -1037,7 +1037,7 @@ const getStories = asyncHandler(async (req, res) => {
 
     sendNotification({
         token: user.fcmToken,
-        title: `${viewer.userName} viewed your story`,
+        title: `${viewer?.userName} viewed your story`,
         body: `See who else has watched it on Pixr.`,
         data: {
             type: "story_view",
