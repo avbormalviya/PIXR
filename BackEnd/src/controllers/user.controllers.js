@@ -979,10 +979,9 @@ const addStory = asyncHandler( async (req, res) => {
 const getStories = asyncHandler(async (req, res) => {
     const { userName } = req.params;
 
-    console.log(req.params)
-    console.log(userName)
+    const user = await User.findOne({userName});
 
-    const user = await User.findOne(userName);
+    console.log(user);
 
     if (!user) {
         throw new ApiError(400, "User not found");
