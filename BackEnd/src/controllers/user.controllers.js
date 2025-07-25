@@ -979,8 +979,8 @@ const addStory = asyncHandler( async (req, res) => {
 const getStories = asyncHandler(async (req, res) => {
     const { userName } = req.params;
 
-    conole.log(req.params)
-    conole.log(userName)
+    console.log(req.params)
+    console.log(userName)
 
     const user = await User.findOne(userName);
 
