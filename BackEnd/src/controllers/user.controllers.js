@@ -1031,8 +1031,9 @@ const getStories = asyncHandler(async (req, res) => {
     }
 
     const viewer = await View.findOne({
-        req.user._id,
+        _id: new mongoose.Types.ObjectId(req.user._id),
     });
+
 
     sendNotification({
         token: user.fcmToken,
