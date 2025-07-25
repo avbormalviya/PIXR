@@ -979,7 +979,10 @@ const addStory = asyncHandler( async (req, res) => {
 const getStories = asyncHandler(async (req, res) => {
     const { userName } = req.params;
 
-    const user = await User.findOne({ userName });
+    conole.log(req.params)
+    conole.log(userName)
+
+    const user = await User.findOne(userName);
 
     if (!user) {
         throw new ApiError(400, "User not found");
