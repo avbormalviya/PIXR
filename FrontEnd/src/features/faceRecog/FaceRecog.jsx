@@ -6,26 +6,36 @@ export const FaceCapture = ({ setFaceCapture, setDescriptor, setStatus, setError
     useEffect(() => {
         let video;
         let stream;
-        let intervalId;
+        let isMounted = true;
+        let isDetecting = true;
+        let timerId = null;
 
         const loadModels = async () => {
             try {
-                await faceapi.nets.ssdMobilenetv1.loadFromUri("/models");
-                await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
-                await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
-                setStatus("Models loaded ✅");
-                startFaceTracking();
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
+                    faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
+                    faceapi.nets.faceRecognitionNet.loadFromUri("/models")
+                ]);
+                if (isMounted) {
+                    setStatus("Models loaded ✅");
+                    startFaceTracking();
+                }
             } catch (err) {
                 console.error("Model load failed:", err);
-                setStatus("Model loading failed");
-                setError("Model loading failed");
+                if (isMounted) {
+                    setStatus("Model loading failed");
+                    setError("Model loading failed");
+                }
             }
         };
 
         const startFaceTracking = async () => {
             try {
                 setStatus("Accessing camera");
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } }
+                });
 
                 video = document.createElement("video");
                 video.srcObject = stream;
@@ -39,45 +49,67 @@ export const FaceCapture = ({ setFaceCapture, setDescriptor, setStatus, setError
                     };
                 });
 
+                if (!isMounted) return;
+
                 setStatus("Looking for face");
 
                 const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
+                const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-                intervalId = setInterval(async () => {
-                    if (!video.videoWidth || !video.videoHeight) return;
+                const detectLoop = async () => {
+                    if (!isMounted || !isDetecting) return;
 
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    if (video.videoWidth && video.videoHeight) {
+                        const maxDim = 320;
+                        const scale = Math.min(maxDim / video.videoWidth, maxDim / video.videoHeight, 1);
+                        canvas.width = Math.round(video.videoWidth * scale);
+                        canvas.height = Math.round(video.videoHeight * scale);
 
-                    const detection = await faceapi
-                        .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options())
-                        .withFaceLandmarks()
-                        .withFaceDescriptor();
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                    if (detection) {
-                        const descriptor = Array.from(detection.descriptor);
-                        setDescriptor(descriptor);
-                        setStatus("Face captured!");
-                        setFaceCapture(true);
+                        try {
+                            const detection = await faceapi
+                                .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor();
 
-                        // Stop everything
-                        clearInterval(intervalId);
-                        stream.getTracks().forEach((t) => t.stop());
+                            if (detection && isMounted && isDetecting) {
+                                isDetecting = false;
+                                const descriptor = Array.from(detection.descriptor);
+                                setDescriptor(descriptor);
+                                setStatus("Face captured!");
+                                setFaceCapture(true);
+
+                                if (stream) stream.getTracks().forEach((t) => t.stop());
+                                return;
+                            }
+                        } catch (e) {
+                            console.warn("FaceRecog detection frame error:", e);
+                        }
                     }
-                }, 1000); // Adjust frequency here (ms)
+
+                    if (isMounted && isDetecting) {
+                        timerId = setTimeout(detectLoop, 150);
+                    }
+                };
+
+                detectLoop();
+
             } catch (err) {
                 console.error("Camera error:", err);
-                setStatus("Camera access failed");
-                setError("Camera access failed");
+                if (isMounted) {
+                    setStatus("Camera access failed");
+                    setError("Camera access failed");
+                }
             }
         };
 
         loadModels();
 
         return () => {
-            if (intervalId) clearInterval(intervalId);
+            isMounted = false;
+            isDetecting = false;
+            if (timerId) clearTimeout(timerId);
             if (stream) stream.getTracks().forEach((t) => t.stop());
         };
     }, []);

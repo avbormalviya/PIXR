@@ -12,45 +12,53 @@ firebase.initializeApp({
 });
 
 self.addEventListener('push', function(event) {
-    const data = event.data.json();
-    console.log('Push event received:', data);
+    if (!event.data) return;
+
+    let data = {};
+    try {
+        data = event.data.json();
+    } catch (e) {
+        data = { notification: { title: "PIXR Notification", body: event.data.text() } };
+    }
+
+    const payload = data.notification || data.data || data;
+    const title = payload.title || "PIXR Alert";
+    const isCall = payload.type === 'incoming_call' || payload.title?.toLowerCase().includes('call');
+
     const options = {
-        body: data.body,
+        body: payload.body || "You have a new update in PIXR",
         icon: '/icon_400.png',
-        badge: '/icon_100.png', 
-        image: '/icon_1600.png', // Large image below the notification body
-        actions: [            // Custom action buttons
-            {
-                action: 'open_app',
-                title: 'Open App',
-                icon: '/open-icon.png'
-            },
-            {
-                action: 'dismiss',
-                title: 'Dismiss',
-                icon: '/dismiss-icon.png'
-            }
-        ],
+        badge: '/icon_100.png',
         data: {
-            url: data.url || '/' // Custom data (e.g., URL to open on click)
+            url: payload.url || (payload.senderId ? `/chat` : '/')
         },
-        requireInteraction: true, // Keeps the notification until the user interacts
-        vibrate: [200, 100, 200], // Vibration pattern
-        tag: 'message-group-1'    // Groups/updates notifications with the same tag
+        requireInteraction: isCall,
+        vibrate: isCall ? [500, 250, 500, 250, 500] : [200, 100, 200],
+        tag: isCall ? 'incoming-call' : 'pixr-notification'
     };
 
+    event.waitUntil(
+        self.registration.showNotification(title, options)
+    );
+});
 
-      event.waitUntil(
-          self.registration.showNotification(data.notification.title, options)
-      );
-  });
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    const targetUrl = event.notification.data?.url || '/';
 
-  self.addEventListener('notificationclick', function(event) {
-      event.notification.close();
-      const targetUrl = event.notification.data?.url || '/';
-      event.waitUntil(
-          clients.openWindow(targetUrl)
-      );
-  });
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (let client of windowClients) {
+                if (client.url.includes(self.location.origin) && 'focus' in client) {
+                    client.navigate(targetUrl);
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
+});
 
 const messaging = firebase.messaging();

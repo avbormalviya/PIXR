@@ -979,7 +979,10 @@ const addStory = asyncHandler( async (req, res) => {
 const getStories = asyncHandler(async (req, res) => {
     const { userName } = req.params;
 
-    const user = await User.findOne({userName});
+    console.log(req.params)
+    console.log(userName)
+
+    const user = await User.findOne(userName);
 
     if (!user) {
         throw new ApiError(400, "User not found");
@@ -1033,7 +1036,6 @@ const getStories = asyncHandler(async (req, res) => {
     const viewer = await View.findOne({
         _id: new mongoose.Types.ObjectId(req.user._id),
     });
-
 
     sendNotification({
         token: user.fcmToken,
