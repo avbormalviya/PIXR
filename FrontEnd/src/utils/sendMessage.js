@@ -11,7 +11,7 @@ export const sendMessage = async (data) => {
     };
 
     const response = await axios.post(
-        "https://pixr-backend.onrender.com/api/v1/chats/sendMessage",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/chats/sendMessage`,
         data,
         config
     );

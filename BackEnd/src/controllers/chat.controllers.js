@@ -246,16 +246,26 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     if (!fullMessage?.[0]) throw new ApiError(400, "Failed to fetch message");
 
-    // sendNotification({
-    //     token: updatedChat.participants.find(id => id.toString() !== req.user._id.toString()).fcmToken,
-    //     title: "New message from ${fullMessage[0].sender.username}",
-    //     body: `"${message}" - Open Pixr to reply.`,
-    //     data: {
-    //         type: "new_message",
-    //         senderId: fullMessage[0].sender.id,
-    //         messageId: newMessage._id
-    //     }
-    // })
+    try {
+        const targetUserId = participants[0];
+        if (targetUserId) {
+            const recipientUser = await User.findById(targetUserId).select("fcmToken");
+            if (recipientUser?.fcmToken) {
+                await sendNotification({
+                    token: recipientUser.fcmToken,
+                    title: `New message from ${fullMessage[0].sender?.userName || "Someone"}`,
+                    body: message || "Sent an attachment",
+                    data: {
+                        type: "new_message",
+                        senderId: req.user._id.toString(),
+                        url: "/chat"
+                    }
+                });
+            }
+        }
+    } catch (notifErr) {
+        console.error("FCM Notification error:", notifErr);
+    }
 
 
 

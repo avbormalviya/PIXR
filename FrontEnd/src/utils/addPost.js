@@ -10,6 +10,6 @@ export const addPost = async (files) => {
         withCredentials: true,  // Ensure cookies are sent if available
     };
 
-    const response = await axios.post('https://pixr-backend.onrender.com/api/v1/users/uploadPost', files, config);
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/uploadPost`, files, config);
     return response;
 };

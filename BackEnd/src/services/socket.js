@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import { verifyJWTSocket } from "../middlewares/verifyJWTSocket.js";
 import { Chat } from "../models/chat.model.js";
 import { User } from "../models/user.model.js";
+import { sendNotification } from "./firebase.js";
 
 const activeSockets = new Map();
 
@@ -67,7 +68,7 @@ const initSocket = (app) => {
         });
 
         // Call Events
-        socket.on("call-request", ({ to }) => {
+        socket.on("call-request", async ({ to, signalData }) => {
             console.log(`Received call-request from ${socket.user._id} to ${to}`);
 
             const recipientSocketId = activeSockets.get(to);
@@ -75,9 +76,26 @@ const initSocket = (app) => {
 
             if (recipientSocketId) {
                 console.log(`Emitting call-request to ${recipientSocketId}`);
-                socket.to(recipientSocketId).emit("call-request", { from: socket.user });
-            } else {
-                console.warn(`User ${to} is not connected.`);
+                socket.to(recipientSocketId).emit("call-request", { from: socket.user, signalData });
+            }
+
+            // Always attempt FCM push notification in background/offline
+            try {
+                const targetUser = await User.findById(to).select("fcmToken");
+                if (targetUser?.fcmToken) {
+                    await sendNotification({
+                        token: targetUser.fcmToken,
+                        title: `📞 Incoming Call from ${socket.user.userName || socket.user.fullName || "Someone"}`,
+                        body: "Tap to open PIXR and accept the video call.",
+                        data: {
+                            type: "incoming_call",
+                            senderId: socket.user._id.toString(),
+                            url: `/chat/call/${socket.user._id}`
+                        }
+                    });
+                }
+            } catch (fcmErr) {
+                console.error("Call FCM Push Error:", fcmErr);
             }
         });
 

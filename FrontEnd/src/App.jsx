@@ -17,6 +17,9 @@ import { getToken } from "firebase/messaging"
 import { useFirebase } from "./context/FireBaseContext"
 import { onMessage } from "firebase/messaging";
 
+import { IncomingCallModal } from "./components/notifications/IncomingCallModal"
+import { ToastContainer } from "./components/notifications/ToastContainer"
+
 const savedTheme = localStorage.getItem('theme') || 'light-theme';
 document.body.classList.add(savedTheme);
 
@@ -28,24 +31,23 @@ function App() {
 
   useEffect(() => {
     const checkTokenChange = async () => {
-      const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPID_KEY });
-      const oldToken = localStorage.getItem("fcmToken");
-      if (newToken === oldToken) {
-        console.log("Token is the same");
-      }
-      if (newToken && newToken !== oldToken) {
-        await sendFCMToken({ fcmToken: newToken }); // Update on server
-        localStorage.setItem("fcmToken", newToken); // Update locally
+      try {
+        const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPID_KEY });
+        const oldToken = localStorage.getItem("fcmToken");
+        if (newToken && newToken !== oldToken) {
+          await sendFCMToken({ fcmToken: newToken }); // Update on server
+          localStorage.setItem("fcmToken", newToken); // Update locally
+        }
+      } catch (e) {
+        console.warn("FCM token request error:", e);
       }
     };
     checkTokenChange();
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Message received. ", payload);
+      console.log("Foreground FCM message received: ", payload);
     });
     return unsubscribe;
-    // const interval = setInterval(checkTokenChange, 1000 * 60 * 60 * 6); // Check every 6 hours
-    // return () => clearInterval(interval);
-  }, []);
+  }, [messaging]);
 
   return (
     <BrowserRouter
@@ -61,6 +63,9 @@ function App() {
                 {isHandGesture && (
                   <HandMouseControl showDisplay={showDisplay} />
                 )}
+
+                <IncomingCallModal />
+                <ToastContainer />
 
                 <AppRoute />
                 <Error />

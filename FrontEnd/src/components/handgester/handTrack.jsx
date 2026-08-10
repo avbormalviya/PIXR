@@ -5,137 +5,53 @@ import style from "./handTrack.module.scss";
 const HandMouseControl = ({ showDisplay }) => {
   const videoRef = useRef(null);
   const handsRef = useRef(null);
+  const cameraRef = useRef(null);
   const [deviceId, setDeviceId] = useState(null);
 
-  let cursorX = window.innerWidth / 2, cursorY = window.innerHeight / 2;
-  let prevX = cursorX, prevY = cursorY;
-  const lastScrollY = useRef(null);
-  const isClickingAllowed = useRef(true);
+  const posRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const prevPosRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const isClickingAllowedRef = useRef(true);
+  const isPinchingRef = useRef(false);
+  const lastYRef = useRef(null);
+  const lastFrameTimeRef = useRef(0);
+
+  const clickSoundRef = useRef(null);
 
   useEffect(() => {
-    console.log("Enumerating devices...");
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
+    clickSoundRef.current = new Audio("https://res.cloudinary.com/dr6gycjza/video/upload/v1743244799/WhatsApp_Audio_2025-03-29_at_16.05.44_bedba3c6_drhc7w.mp3");
+
+    navigator.mediaDevices?.enumerateDevices().then((devices) => {
       const videoDevices = devices.filter((device) => device.kind === "videoinput");
-      console.log("Video devices found:", videoDevices);
       if (videoDevices.length > 0) {
         setDeviceId(videoDevices[0].deviceId);
-      } else {
-        console.error("❌ No video input devices found.");
       }
-    });
+    }).catch(err => console.error("Device enumeration error:", err));
   }, []);
 
-  useEffect(() => {
-    if (!window.Hands) {
-      console.error("❌ Mediapipe Hands module not loaded!");
-      return;
-    }
-    if (!deviceId) {
-      console.warn("⚠️ Device ID not set yet");
-      return;
-    }
+  const moveCursor = (targetX, targetY) => {
+    const smoothingFactor = 0.35; // Responsive smooth factor
+    const curX = prevPosRef.current.x + (targetX - prevPosRef.current.x) * smoothingFactor;
+    const curY = prevPosRef.current.y + (targetY - prevPosRef.current.y) * smoothingFactor;
 
-    const hands = new window.Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
-    });
-
-    hands.setOptions({
-      maxNumHands: 1,
-      minDetectionConfidence: 0.7,
-      minTrackingConfidence: 0.7,
-      modelComplexity: 1,
-    });
-
-    handsRef.current = hands; // Store hands instance
-
-    hands.onResults((results) => {
-      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-        console.log("❌ No hands detected!");
-        return;
-      };
-
-      const landmarks = results.multiHandLandmarks[0];
-      const indexFingerTip = landmarks[8]; // Index finger tip
-      const thumbTip = landmarks[4]; // Thumb tip
-      const middleTip = landmarks[12]; // Middle finger tip
-      const middleMCP = landmarks[9]; // Middle finger base joint
-
-      // Calculate distance between thumb & index finger
-      const pinchDistance = Math.sqrt(
-        Math.pow(indexFingerTip.x - thumbTip.x, 2) +
-        Math.pow(indexFingerTip.y - thumbTip.y, 2)
-      );
-
-      // Define pinch threshold (adjust if needed)
-      const PINCH_THRESHOLD = 0.02;
-      const isPinching = pinchDistance < PINCH_THRESHOLD;
-
-      let handX = window.innerWidth - indexFingerTip.x * window.innerWidth;
-      let handY = indexFingerTip.y * window.innerHeight;
-      moveCursor(handX, handY);
-
-      // **Pinch Click Detection**
-      if (pinchDistance < 0.05 && isClickingAllowed.current) {
-        console.log("Click detected!");
-        simulateClick();
-      }
-
-      console.log("✅ Hand detected!", landmarks);
-      detectScrollGesture(landmarks);
-    });
-
-
-    let isMounted = true;
-
-    console.log("Requesting camera access...");
-    window.navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
-      .then((stream) => {
-        console.log("Camera stream started:", stream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-
-        const camera = new window.Camera(videoRef.current, {
-          onFrame: async () => {
-            if (isMounted && handsRef.current) {
-              await handsRef.current.send({ image: videoRef.current });
-            }
-          },
-          width: 640,
-          height: 480,
-        });
-
-
-        camera.start();
-      })
-      .catch((error) => console.error("Camera selection error:", error));
-
-    return () => {
-      isMounted = false;
-      handsRef.current?.close();
-    };
-  }, [deviceId]);
-
-  const moveCursor = (x, y) => {
-    const smoothingFactor = 0.2;
-    cursorX = prevX + (x - prevX) * smoothingFactor;
-    cursorY = prevY + (y - prevY) * smoothingFactor;
-    prevX = cursorX;
-    prevY = cursorY;
+    prevPosRef.current = { x: curX, y: curY };
+    posRef.current = { x: curX, y: curY };
 
     let cursor = document.getElementById("customCursor");
     if (!cursor) {
       cursor = document.createElement("div");
       cursor.id = "customCursor";
-      cursor.style.position = "absolute";
+      cursor.style.position = "fixed";
+      cursor.style.top = "0";
+      cursor.style.left = "0";
       cursor.style.pointerEvents = "none";
-      cursor.style.zIndex = "10000";
+      cursor.style.zIndex = "999999";
+      cursor.style.willChange = "transform";
 
       const verticalLine = document.createElement("div");
       verticalLine.style.position = "absolute";
       verticalLine.style.width = "2px";
-      verticalLine.style.height = "20px";
-      verticalLine.style.background = "var(--primary-color)";
+      verticalLine.style.height = "22px";
+      verticalLine.style.background = "var(--primary-color, #0094f6)";
       verticalLine.style.left = "50%";
       verticalLine.style.top = "50%";
       verticalLine.style.transform = "translate(-50%, -50%)";
@@ -143,9 +59,9 @@ const HandMouseControl = ({ showDisplay }) => {
 
       const horizontalLine = document.createElement("div");
       horizontalLine.style.position = "absolute";
-      horizontalLine.style.width = "20px";
+      horizontalLine.style.width = "22px";
       horizontalLine.style.height = "2px";
-      horizontalLine.style.background = "var(--primary-color)";
+      horizontalLine.style.background = "var(--primary-color, #0094f6)";
       horizontalLine.style.left = "50%";
       horizontalLine.style.top = "50%";
       horizontalLine.style.transform = "translate(-50%, -50%)";
@@ -154,135 +70,181 @@ const HandMouseControl = ({ showDisplay }) => {
       document.body.appendChild(cursor);
     }
 
-    cursor.style.left = `${cursorX}px`;
-    cursor.style.top = `${cursorY}px`;
+    cursor.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
   };
 
-  useEffect(() => {
-    const handleMouseMove = (e) => moveCursor(e.clientX, e.clientY);
-    document.addEventListener("mousemove", handleMouseMove);
+  const simulateClick = () => {
+    if (!isClickingAllowedRef.current) return;
 
-    return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-
-        // Cleanup: Remove cursor when component unmounts
-        const cursor = document.getElementById("customCursor");
-        if (cursor) {
-            cursor.remove();
-        }
-    };
-}, []);
-
-const clickSound = new Audio("https://res.cloudinary.com/dr6gycjza/video/upload/v1743244799/WhatsApp_Audio_2025-03-29_at_16.05.44_bedba3c6_drhc7w.mp3"); // Replace with your actual sound URL
-
-const simulateClick = () => {
-    if (!isClickingAllowed.current) return;
-
-    const element = document.elementFromPoint(cursorX, cursorY);
+    const { x, y } = posRef.current;
+    const element = document.elementFromPoint(x, y);
     if (!element) return;
 
-    // Play click sound
-    clickSound.currentTime = 0; // Reset audio if it's already playing
-    clickSound.play().catch(error => console.error("Click sound failed:", error));
+    if (clickSoundRef.current) {
+      clickSoundRef.current.currentTime = 0;
+      clickSoundRef.current.play().catch(() => {});
+    }
 
     const mouseEvent = new MouseEvent("click", {
-      clientX: cursorX,
-      clientY: cursorY,
+      clientX: x,
+      clientY: y,
       bubbles: true,
       cancelable: true,
       view: window,
     });
 
     element.dispatchEvent(mouseEvent);
-    console.log("Mouse click at:", cursorX, cursorY, "on", element);
-
-    isClickingAllowed.current = false;
-    setTimeout(() => (isClickingAllowed.current = true), 500);
-};
-
-  let lastIndexY = null;
-  let isPinching = false;
-  let pinchStableCounter = 0; // Prevents false positives
-
+    isClickingAllowedRef.current = false;
+    setTimeout(() => {
+      isClickingAllowedRef.current = true;
+    }, 450);
+  };
 
   const detectScrollGesture = (landmarks) => {
+    const indexFingerTip = landmarks[8];
+    const thumbTip = landmarks[4];
+
+    const pinchDistance = Math.hypot(
+      indexFingerTip.x - thumbTip.x,
+      indexFingerTip.y - thumbTip.y
+    );
+
+    const TOUCH_THRESHOLD = 0.035;
+    const pinchingNow = pinchDistance < TOUCH_THRESHOLD;
+
+    if (pinchingNow) {
+      if (!isPinchingRef.current) {
+        isPinchingRef.current = true;
+        lastYRef.current = indexFingerTip.y;
+        return;
+      }
+
+      if (lastYRef.current === null) return;
+
+      const verticalMovement = lastYRef.current - indexFingerTip.y;
+      lastYRef.current = indexFingerTip.y;
+
+      if (Math.abs(verticalMovement) > 0.003) {
+        const scrollSpeed = verticalMovement * 12000;
+        simulateScroll(scrollSpeed);
+      }
+    } else {
+      isPinchingRef.current = false;
+      lastYRef.current = null;
+    }
+  };
+
+  const simulateScroll = (scrollAmount) => {
+    const { x, y } = posRef.current;
+    const element = document.elementFromPoint(x, y);
+    const scrollableParent = getScrollableParent(element);
+
+    if (scrollableParent) {
+      scrollableParent.scrollBy({ top: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const getScrollableParent = (element) => {
+    while (element) {
+      const style = window.getComputedStyle(element);
+      if (style.overflowY === "scroll" || style.overflowY === "auto") {
+        return element;
+      }
+      element = element.parentElement;
+    }
+    return document.documentElement;
+  };
+
+  useEffect(() => {
+    if (!window.Hands || !deviceId) return;
+
+    const hands = new window.Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+    });
+
+    hands.setOptions({
+      maxNumHands: 1,
+      minDetectionConfidence: 0.65,
+      minTrackingConfidence: 0.65,
+      modelComplexity: 0, // Lite model for maximum speed and zero lag
+    });
+
+    handsRef.current = hands;
+
+    hands.onResults((results) => {
+      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+        return;
+      }
+
+      const landmarks = results.multiHandLandmarks[0];
       const indexFingerTip = landmarks[8];
       const thumbTip = landmarks[4];
 
       const pinchDistance = Math.hypot(
-          indexFingerTip.x - thumbTip.x,
-          indexFingerTip.y - thumbTip.y
+        indexFingerTip.x - thumbTip.x,
+        indexFingerTip.y - thumbTip.y
       );
 
-      const TOUCH_THRESHOLD = 0.025; // Increase if pinch is not detected
-      const pinchingNow = pinchDistance < TOUCH_THRESHOLD;
+      let targetX = window.innerWidth - indexFingerTip.x * window.innerWidth;
+      let targetY = indexFingerTip.y * window.innerHeight;
+      moveCursor(targetX, targetY);
 
-      if (pinchingNow) {
-          console.log("✅ Pinching!");
-
-          if (!isPinching) {
-              isPinching = true;
-              lastIndexY = indexFingerTip.y; // Save initial position
-              return;
-          }
-
-          if (lastIndexY === null) return;
-
-          const verticalMovement = lastIndexY - indexFingerTip.y;
-          lastIndexY = indexFingerTip.y; // Update last position
-
-          if (Math.abs(verticalMovement) > 0.002) {
-            const baseSpeed = 15000; // Adjust this value
-            let scrollSpeed = verticalMovement * baseSpeed;
-
-            // Ensure a minimum scroll effect
-            // if (Math.abs(scrollSpeed) < 20) {
-            //     scrollSpeed = scrollSpeed > 0 ? 20 : -20;
-            // }
-
-              console.log(`📜 Scrolling: ${scrollSpeed}px`);
-              simulateScroll(scrollSpeed);
-          }
-      } else {
-          isPinching = false;
-          lastIndexY = null;
+      if (pinchDistance < 0.04 && isClickingAllowedRef.current) {
+        simulateClick();
       }
-  };
 
+      detectScrollGesture(landmarks);
+    });
 
+    let isMounted = true;
 
-const simulateScroll = (scrollAmount) => {
-  const element = document.elementFromPoint(cursorX, cursorY);
-  const scrollableParent = getScrollableParent(element);
+    window.navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: deviceId }, width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { max: 30 } }
+    })
+      .then((stream) => {
+        if (!isMounted) return;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
 
-  if (scrollableParent) {
-      console.log(`📜 Scrolling by: ${scrollAmount}px`);
-      scrollableParent.scrollBy({ top: scrollAmount, behavior: "smooth" });
-  } else {
-      console.log("❌ No scrollable parent found");
-  }
-};
+        const camera = new window.Camera(videoRef.current, {
+          onFrame: async () => {
+            const now = performance.now();
+            // Throttle frame processing to ~30 FPS (33ms interval)
+            if (now - lastFrameTimeRef.current < 30) return;
+            lastFrameTimeRef.current = now;
 
-const getScrollableParent = (element) => {
-  while (element) {
-      const style = window.getComputedStyle(element);
-      if (style.overflowY === "scroll" || style.overflowY === "auto") {
-          return element;
-      }
-      element = element.parentElement;
-  }
-  return document.documentElement; // Default to full-page scrolling
-};
+            if (isMounted && handsRef.current && videoRef.current) {
+              await handsRef.current.send({ image: videoRef.current });
+            }
+          },
+          width: 640,
+          height: 480,
+        });
 
+        cameraRef.current = camera;
+        camera.start();
+      })
+      .catch((error) => console.error("Hand tracking camera error:", error));
+
+    return () => {
+      isMounted = false;
+      try {
+        handsRef.current?.close();
+      } catch (e) {}
+      const cursor = document.getElementById("customCursor");
+      if (cursor) cursor.remove();
+    };
+  }, [deviceId]);
 
   return (
     <div>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          style={{ display: showDisplay ? "block" : "none" }}
-          className={style.video}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        style={{ display: showDisplay ? "block" : "none" }}
+        className={style.video}
       />
     </div>
   );

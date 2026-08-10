@@ -1,249 +1,288 @@
-    import { createContext, useContext, useEffect, useRef, useState } from "react";
-    import SimplePeer from "simple-peer/simplepeer.min.js";
-    import { useSocket } from "../context/SocketContext";
-    import { useNavigate } from "react-router-dom";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import SimplePeer from "simple-peer/simplepeer.min.js";
+import { useSocket } from "../context/SocketContext";
+import { useNavigate } from "react-router-dom";
 
-    const PeerContext = createContext();
+const PeerContext = createContext();
 
-    export const PeerProvider = ({ children }) => {
-        const navigate = useNavigate();
-        const { emit, on, off } = useSocket();
-        const outgoingCallRef = useRef(null);
-        const incomingCallRef = useRef(null);
+const ICE_SERVERS = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun2.l.google.com:19302" },
+    { urls: "stun:stun.services.mozilla.com" }
+];
 
-        // State variables
-        const [peer, setPeer] = useState(null);
-        const [localStream, setLocalStream] = useState(null);
-        const [remoteStream, setRemoteStream] = useState(null);
-        const [calling, setCalling] = useState(false);
-        const [incomingCall, setIncomingCall] = useState(false);
-        const [callerId, setCallerId] = useState(null);
-        const [calleeId, setCalleeId] = useState(null);
-        const [isCallAccepted, setIsCallAccepted] = useState(false);
-        const [initiator, setInitiator] = useState(false);
+export const PeerProvider = ({ children }) => {
+    const navigate = useNavigate();
+    const { emit, on, off } = useSocket();
 
-        const [isRemoteCameraOn, setIsRemoteCameraOn] = useState(false);
-        const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
+    const peerRef = useRef(null);
+    const outgoingCallRef = useRef(null);
+    const incomingCallRef = useRef(null);
+    const pendingSignalsRef = useRef([]);
 
-        // Play and stop audio functions for call notifications
-        const playAudio = (ref, url) => {
+    // State variables
+    const [localStream, setLocalStream] = useState(null);
+    const [remoteStream, setRemoteStream] = useState(null);
+    const [calling, setCalling] = useState(false);
+    const [incomingCall, setIncomingCall] = useState(false);
+    const [callerInfo, setCallerInfo] = useState(null);
+    const [callerId, setCallerId] = useState(null);
+    const [calleeId, setCalleeId] = useState(null);
+    const [isCallAccepted, setIsCallAccepted] = useState(false);
+
+    const [isRemoteCameraOn, setIsRemoteCameraOn] = useState(false);
+    const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
+
+    const playAudio = (ref, url) => {
+        try {
+            stopAudio(ref);
             ref.current = new Audio(url);
             ref.current.loop = true;
             ref.current.play().catch(err => console.error("Audio play failed:", err));
-        };
+        } catch (e) {
+            console.error("Audio init error:", e);
+        }
+    };
 
-        const stopAudio = (ref) => {
-            if (ref.current) {
+    const stopAudio = (ref) => {
+        if (ref.current) {
+            try {
                 ref.current.pause();
                 ref.current.currentTime = 0;
+            } catch (e) {}
+            ref.current = null;
+        }
+    };
+
+    const requestMediaStream = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            setLocalStream(stream);
+            return stream;
+        } catch (err) {
+            console.warn("Audio/Video combined media failed, attempting audio-only:", err);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+                setLocalStream(stream);
+                return stream;
+            } catch (err2) {
+                console.error("Failed to get media devices:", err2);
+                alert("Camera or Microphone access is required for video calls.");
+                return null;
+            }
+        }
+    };
+
+    // Caller initiates call
+    const initiateCall = async (targetUserId, currentUserId) => {
+        setCalleeId(targetUserId);
+        setCallerId(currentUserId);
+        setCalling(true);
+        setIsCallAccepted(false);
+        pendingSignalsRef.current = [];
+
+        playAudio(outgoingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374513/duo_ringtone_tehbgk.mp3");
+
+        const stream = await requestMediaStream();
+        if (!stream) {
+            resetCallState();
+            return;
+        }
+
+        console.log("🚀 Creating caller SimplePeer (initiator)");
+        const peer = new SimplePeer({
+            initiator: true,
+            trickle: true,
+            stream,
+            config: { iceServers: ICE_SERVERS }
+        });
+
+        peer.on("signal", (data) => {
+            console.log("📡 Caller generated signal:", data.type || "candidate");
+            emit("signal", { to: targetUserId, data });
+        });
+
+        peer.on("stream", (incomingStream) => {
+            console.log("📡 Received remote stream on caller:", incomingStream);
+            setRemoteStream(incomingStream);
+        });
+
+        peer.on("error", (err) => console.error("❌ Caller Peer error:", err));
+
+        peerRef.current = peer;
+        emit("call-request", { to: targetUserId });
+    };
+
+    // Callee accepts call
+    const acceptCall = async () => {
+        setIncomingCall(false);
+        setIsCallAccepted(true);
+        stopAudio(incomingCallRef);
+
+        const targetId = callerId || callerInfo?._id;
+        const stream = await requestMediaStream();
+        if (!stream) {
+            resetCallState();
+            return;
+        }
+
+        console.log("🚀 Creating callee SimplePeer (receiver)");
+        const peer = new SimplePeer({
+            initiator: false,
+            trickle: true,
+            stream,
+            config: { iceServers: ICE_SERVERS }
+        });
+
+        peer.on("signal", (data) => {
+            console.log("📡 Callee generated signal:", data.type || "candidate");
+            emit("signal", { to: targetId, data });
+        });
+
+        peer.on("stream", (incomingStream) => {
+            console.log("📡 Received remote stream on callee:", incomingStream);
+            setRemoteStream(incomingStream);
+        });
+
+        peer.on("error", (err) => console.error("❌ Callee Peer error:", err));
+
+        peerRef.current = peer;
+
+        // Process any signals received before peer was instantiated
+        if (pendingSignalsRef.current.length > 0) {
+            pendingSignalsRef.current.forEach((sig) => {
+                try {
+                    peer.signal(sig);
+                } catch (e) {
+                    console.error("Error applying buffered signal:", e);
+                }
+            });
+            pendingSignalsRef.current = [];
+        }
+
+        emit("call-accepted", { from: targetId });
+
+        if (callerInfo) {
+            navigate(`/chat/call/${callerInfo._id}`, { state: { user: callerInfo } });
+        }
+    };
+
+    const rejectCall = (userId) => {
+        const targetId = callerId || callerInfo?._id || userId;
+        if (targetId) {
+            emit("call-rejected", { from: targetId });
+        }
+        resetCallState();
+    };
+
+    const resetCallState = () => {
+        console.log("Resetting WebRTC call state...");
+        stopAudio(incomingCallRef);
+        stopAudio(outgoingCallRef);
+
+        if (peerRef.current) {
+            try {
+                peerRef.current.destroy();
+            } catch (e) {}
+            peerRef.current = null;
+        }
+
+        if (localStream) {
+            localStream.getTracks().forEach((track) => track.stop());
+            setLocalStream(null);
+        }
+
+        if (remoteStream) {
+            remoteStream.getTracks().forEach((track) => track.stop());
+            setRemoteStream(null);
+        }
+
+        setIncomingCall(false);
+        setCalling(false);
+        setIsCallAccepted(false);
+        setCallerInfo(null);
+        setCallerId(null);
+        setCalleeId(null);
+        pendingSignalsRef.current = [];
+        setIsRemoteCameraOn(false);
+        setIsRemoteMicOn(false);
+    };
+
+    useEffect(() => {
+        const handleCallRequest = ({ from, signalData }) => {
+            console.log("📞 Received call-request from:", from);
+            setIncomingCall(true);
+            setCallerInfo(from);
+            setCallerId(from._id);
+
+            if (signalData) {
+                pendingSignalsRef.current.push(signalData);
+            }
+
+            playAudio(incomingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374515/google_duo_sj9euw.mp3");
+        };
+
+        const handleSignal = ({ data }) => {
+            console.log("📡 Received WebRTC signal:", data.type || "candidate");
+            if (peerRef.current && !peerRef.current.destroyed) {
+                try {
+                    peerRef.current.signal(data);
+                } catch (e) {
+                    console.error("Error signaling peer:", e);
+                }
+            } else {
+                pendingSignalsRef.current.push(data);
             }
         };
 
-        // Start or end a call
-        const initiateCall = (chatUserId, InitUserId) => {
-            setCalleeId(chatUserId);
-            setCallerId(InitUserId);
-            setCalling(true);
-            setInitiator(true);
-            emit("call-request", { to: chatUserId });
-            playAudio(outgoingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374513/duo_ringtone_tehbgk.mp3");
-        };
-
-        const acceptCall = () => {
-            setIncomingCall(false);
+        const handleCallAccepted = () => {
+            console.log("✅ Call accepted by remote user");
             setIsCallAccepted(true);
-            startPeerConnection(callerId, true);
-            emit("call-accepted", { from: callerId });
+            setCalling(false);
+            stopAudio(outgoingCallRef);
             stopAudio(incomingCallRef);
         };
 
-        const rejectCall = (userId) => {
-            emit("call-rejected", { from: callerId === userId ? calleeId : callerId });
+        const handleCallRejected = () => {
+            console.log("❌ Call rejected by remote user");
             resetCallState();
         };
 
-        const resetCallState = () => {
-            console.log("Resetting call state...");
+        on("call-request", handleCallRequest);
+        on("signal", handleSignal);
+        on("call-accepted", handleCallAccepted);
+        on("call-rejected", handleCallRejected);
+        on("toggleCamera", ({ enabled }) => setIsRemoteCameraOn(enabled));
 
-            // Cleanup peer connection and streams
-            peer?.removeAllListeners();
-            peer?.destroy();
-            setPeer(null);
-
-            localStream?.getTracks().forEach(track => track.stop());
-            setLocalStream(null);
-
-            remoteStream?.getTracks().forEach(track => track.stop());
-            setRemoteStream(null);
-
-            // Reset UI state
-            setIncomingCall(false);
-            setCalling(false);
-            setIsCallAccepted(false);
-            stopAudio(incomingCallRef);
-            stopAudio(outgoingCallRef);
-
-            setIsRemoteCameraOn(false);
-            setIsRemoteMicOn(false);
-
-            navigate("/");
+        return () => {
+            off("call-request", handleCallRequest);
+            off("signal", handleSignal);
+            off("call-accepted", handleCallAccepted);
+            off("call-rejected", handleCallRejected);
         };
+    }, [on, off]);
 
-        const startPeerConnection = async (user, initiator) => {
-            try {
-                const stream = await requestPermissions();
-                if (!stream) return;
+    return (
+        <PeerContext.Provider
+            value={{
+                localStream,
+                remoteStream,
+                calling,
+                incomingCall,
+                callerInfo,
+                isCallAccepted,
+                initiateCall,
+                acceptCall,
+                rejectCall,
+                resetCallState,
+                isRemoteCameraOn,
+                isRemoteMicOn,
+            }}
+        >
+            {children}
+        </PeerContext.Provider>
+    );
+};
 
-                console.log("🎥 Local stream ready:", stream);
-                setLocalStream(stream);
-
-                const newPeer = new SimplePeer({
-                    initiator,
-                    trickle: true, // Enable trickle ICE instead of waiting for full SDP
-                    stream,
-                    config: {
-                    iceServers: [
-                            { urls: "stun:stun.l.google.com:19302" },
-                            {
-                                urls:   "turn:numb.viagenie.ca:3478",
-                                username:"webrtc@live.com",
-                                credential:"muazkh"
-                            }
-                        ]
-                    }
-                });
-
-                newPeer.on("iceStateChange", (state) => {
-                    console.log("🧊 ICE state changed:", state);
-                });
-
-                newPeer.on("iceConnectionStateChange", () => {
-                    console.log("🧊 ICE connection state:", newPeer._pc.iceConnectionState);
-                });
-
-                newPeer.on("connect", () => {
-                    console.log("✅ Peer connected!");
-                });
-
-
-                newPeer.on("signal", (data) => {
-                    console.log("📡 Sending signal:", data);
-                    emit("signal", { to: user, data });
-                });
-
-                newPeer.on("stream", (incomingStream) => {
-                    console.log("📡 Received remote stream:", incomingStream);
-                    setRemoteStream(incomingStream);
-                });
-
-                newPeer.on("error", (err) => console.error("❌ Peer error:", err));
-
-                setPeer(newPeer);
-            } catch (error) {
-                console.error("❌ Error starting peer connection:", error);
-                resetCallState();
-            }
-        };
-
-
-        const requestPermissions = async () => {
-            const constraints = {};
-
-            if (navigator.mediaDevices.enumerateDevices) {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const hasVideo = devices.some(device => device.kind === "videoinput");
-                const hasAudio = devices.some(device => device.kind === "audioinput");
-
-                if (hasVideo) constraints.video = true;
-                if (hasAudio) constraints.audio = true;
-            }
-
-            if (!constraints.video && !constraints.audio) {
-                console.error("No media devices available");
-                alert("No camera or microphone detected. Please connect a device and try again.");
-                return null;
-            }
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                console.log("Media stream acquired:", stream);
-                return stream;
-            } catch (error) {
-                console.error("Error getting user media:", error);
-                return null;
-            }
-
-        };
-
-        useEffect(() => {
-            const handleCallRequest = ({ from }) => {
-                setIncomingCall(true);
-                setCallerId(from._id);
-                navigate(`/chat/call/${from._id}`, { state: { user: from } });
-                playAudio(incomingCallRef, "https://res.cloudinary.com/dr6gycjza/video/upload/v1734374515/google_duo_sj9euw.mp3");
-            };
-
-            const handleSignal = ({ data }) => {
-                console.log("📡 Received signal data:", data);
-                if (!peer || peer.destroyed) {
-                    console.error("❌ Peer is null or destroyed");
-                    return;
-                }
-                try {
-                    peer?.signal(data);
-                } catch (error) {
-                    console.error("❌ Error handling signal:", error);
-                }
-            };
-
-            const handleCallAccepted = ({ data }) => {
-                setInitiator(false);
-                setIsCallAccepted(true);
-                startPeerConnection(calleeId, false);
-                setCalling(false);
-                stopAudio(incomingCallRef);
-                stopAudio(outgoingCallRef);
-                peer?.signal(data);
-            };
-
-            const handleCallRejected = () => {
-                resetCallState();
-            };
-
-            on("call-request", handleCallRequest);
-            on("signal", handleSignal);
-            on("call-accepted", handleCallAccepted);
-            on("call-rejected", handleCallRejected);
-            on("toggleCamera", ({ enabled }) => setIsRemoteCameraOn(enabled));
-
-            return () => {
-                off("call-request", handleCallRequest);
-                off("signal", handleSignal);
-                off("call-accepted", handleCallAccepted);
-                off("call-rejected", handleCallRejected);
-                peer?.destroy();
-                localStream?.getTracks().forEach((track) => track.stop());
-            };
-        }, [peer, on, off, navigate, callerId, calleeId, localStream]);
-
-        return (
-            <PeerContext.Provider
-                value={{
-                    localStream,
-                    remoteStream,
-                    calling,
-                    incomingCall,
-                    isCallAccepted,
-                    initiateCall,
-                    acceptCall,
-                    rejectCall,
-                    isRemoteCameraOn,
-                    isRemoteMicOn,
-                }}
-            >
-                {children}
-            </PeerContext.Provider>
-        );
-    };
-
-    export const usePeerContext = () => useContext(PeerContext);
+export const usePeerContext = () => useContext(PeerContext);

@@ -12,7 +12,7 @@ export const SocketProvider = ({ children }) => {
         if (!socketRef.current) {
             const accessToken = localStorage.getItem("accessToken");
 
-            socketRef.current = io("https://pixr-backend.onrender.com", {
+            socketRef.current = io(import.meta.env.VITE_BACKEND_URL, {
                 withCredentials: true, // To send cookies if available
                 transports: ["websocket"],
                 extraHeaders: accessToken

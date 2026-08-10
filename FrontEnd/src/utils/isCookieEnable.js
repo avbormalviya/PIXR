@@ -1,6 +1,6 @@
 export async function isAuthCookieWorking() {
     try {
-        const res = await fetch("https://pixr-backend.onrender.com/api/v1/users/getUser", {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/getUser`, {
             method: "GET",
             credentials: "include", // Important: sends cookies
         });

@@ -11,7 +11,7 @@ export const sendFCMToken = async (fcmToken) => {
     };
 
     const response = await axios.post(
-        "https://pixr-backend.onrender.com/api/v1/users/saveFCMToken",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/saveFCMToken`,
         fcmToken,
         config
     );
