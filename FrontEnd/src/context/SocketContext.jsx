@@ -1,48 +1,66 @@
-// src/context/SocketContext.js
 import React, { createContext, useContext, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
 
 const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
     const socketRef = useRef(null);
+    // Stores event -> Set of callbacks so listeners persist across socket reconnects
+    const eventListenersRef = useRef(new Map());
+    const { user } = useSelector((state) => state.user || {});
 
     useEffect(() => {
+        const accessToken = localStorage.getItem("accessToken");
 
-        if (!socketRef.current) {
-            const accessToken = localStorage.getItem("accessToken");
-
-            socketRef.current = io(import.meta.env.VITE_BACKEND_URL, {
-                withCredentials: true, // To send cookies if available
-                transports: ["websocket"],
-                extraHeaders: accessToken
-                    ? { Authorization: `Bearer ${accessToken}` } // Fallback to Authorization header if no cookies
-                    : {},
-            });
+        if (socketRef.current) {
+            socketRef.current.disconnect();
+            socketRef.current = null;
         }
 
-
-        socketRef.current.on("connect", () => {
-            console.log("Connected to socket server");
+        const socket = io(import.meta.env.VITE_BACKEND_URL, {
+            withCredentials: true,
+            transports: ["websocket", "polling"],
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            auth: {
+                token: accessToken
+            },
+            extraHeaders: accessToken
+                ? { Authorization: `Bearer ${accessToken}` }
+                : {},
         });
 
-        socketRef.current.on("connect_error", (error) => {
-            console.log("WebSocket connection error:", error);
+        socketRef.current = socket;
+
+        // Re-attach all registered listeners to the new socket instance
+        eventListenersRef.current.forEach((callbacks, event) => {
+            callbacks.forEach((cb) => {
+                socket.on(event, cb);
+            });
         });
 
-        socketRef.current.on("disconnect", (reason) => {
-            console.log("Disconnected from socket server", reason);
+        socket.on("connect", () => {
+            console.log("🟢 Connected to socket server as:", user?.userName || "guest", socket.id);
+        });
+
+        socket.on("connect_error", (error) => {
+            console.log("🔴 WebSocket connection error:", error);
+        });
+
+        socket.on("disconnect", (reason) => {
+            console.log("🟡 Disconnected from socket server:", reason);
         });
 
         return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
+            if (socketRef.current === socket) {
+                socket.disconnect();
                 socketRef.current = null;
-                console.log("Disconnected from socket server");
             }
         };
-
-    }, []);
+    }, [user?._id]);
 
     const emit = (event, data) => {
         if (socketRef.current) {
@@ -51,15 +69,31 @@ export const SocketProvider = ({ children }) => {
     };
 
     const on = (event, callback) => {
+        if (!eventListenersRef.current.has(event)) {
+            eventListenersRef.current.set(event, new Set());
+        }
+        eventListenersRef.current.get(event).add(callback);
+
         if (socketRef.current) {
-            socketRef.current.off(event);
             socketRef.current.on(event, callback);
         }
     };
 
     const off = (event, callback) => {
+        if (eventListenersRef.current.has(event)) {
+            if (callback) {
+                eventListenersRef.current.get(event).delete(callback);
+            } else {
+                eventListenersRef.current.delete(event);
+            }
+        }
+
         if (socketRef.current) {
-            socketRef.current.off(event, callback);
+            if (callback) {
+                socketRef.current.off(event, callback);
+            } else {
+                socketRef.current.off(event);
+            }
         }
     };
 
@@ -77,3 +111,4 @@ export const useSocket = () => {
     }
     return context;
 };
+

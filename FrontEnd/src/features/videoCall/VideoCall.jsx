@@ -24,6 +24,7 @@ export const VideoCall = () => {
         initiateCall,
         acceptCall,
         rejectCall,
+        endCall,
         isRemoteCameraOn,
         isRemoteMicOn
     } = usePeerContext();
@@ -35,8 +36,8 @@ export const VideoCall = () => {
     useEffect(() => {
         if (location.state?.user && !chatUser?._id) {
             setChatUser(location.state.user);
-        } else if (!location.state?.user && chatUser?._id) {
-            navigate("/", { replace: true });
+        } else if (!location.state?.user && !chatUser?._id) {
+            navigate("/chat", { replace: true });
         }
     }, [location.state?.user, chatUser?._id, navigate]);
 
@@ -84,17 +85,8 @@ export const VideoCall = () => {
     };
 
     const onCallEnd = () => {
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-        }
-
-        setIsLocalCameraOn(false);
-        setIsLocalMicOn(true);
-        setChatUser({});
-
-        rejectCall(user._id);
-
-        navigate("/");
+        endCall();
+        navigate("/chat", { replace: true });
     };
 
     return (

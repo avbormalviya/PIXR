@@ -1,19 +1,27 @@
 import admin from 'firebase-admin';
 import fs from 'fs';
 
-// Path to your service account JSON file
-const serviceAccountPath = `/etc/secrets/FIREBASE_SERVICE_ACCOUNT_KEY`;
+let serviceAccount;
 
-// Read the JSON file synchronously
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+const secretFilePath = `/etc/secrets/FIREBASE_SERVICE_ACCOUNT_KEY`;
 
-// Initialize Firebase Admin SDK
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-});
+if (fs.existsSync(secretFilePath)) {
+    serviceAccount = JSON.parse(fs.readFileSync(secretFilePath, 'utf8'));
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+} else {
+    console.warn('[Firebase] No service account found. Push notifications disabled.');
+}
+
+if (serviceAccount) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+    });
+}
 
 
 export const sendNotification = async ({ token, title, body, image, data = {} }) => {
+    if (!serviceAccount) return; // skip silently in local dev
     const message = {
         token,
         notification: {
