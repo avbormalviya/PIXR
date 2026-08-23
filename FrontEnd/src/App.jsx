@@ -19,6 +19,7 @@ import { onMessage } from "firebase/messaging";
 
 import { IncomingCallModal } from "./components/notifications/IncomingCallModal"
 import { ToastContainer } from "./components/notifications/ToastContainer"
+import { PwaInstallPrompt } from "./components/notifications/PwaInstallPrompt"
 
 const savedTheme = localStorage.getItem('theme') || 'light-theme';
 document.body.classList.add(savedTheme);
@@ -30,6 +31,9 @@ function App() {
   const { messaging } = useFirebase();
 
   useEffect(() => {
+    // Send immediate silent warm-up ping to backend (prevents Render cold start delays)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/ping`).catch(() => {});
+
     const checkTokenChange = async () => {
       try {
         const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPID_KEY });
@@ -66,6 +70,7 @@ function App() {
 
                 <IncomingCallModal />
                 <ToastContainer />
+                <PwaInstallPrompt />
 
                 <AppRoute />
                 <Error />

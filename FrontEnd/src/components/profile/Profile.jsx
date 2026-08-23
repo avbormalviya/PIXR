@@ -26,6 +26,7 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import LayersRoundedIcon from '@mui/icons-material/LayersRounded';
 import { FeedDetails } from "../feedDetailes/FeedDetails"
 import { Img } from "../img/Img"
+import { ProfileSkeleton } from "./ProfileSkeleton"
 
 export const Profile = () => {
 
@@ -108,6 +109,10 @@ export const Profile = () => {
         animate: {
             backgroundColor: 'var(--background-ternary)',
         }
+    }
+
+    if (!userProfile?.userName) {
+        return <ProfileSkeleton />;
     }
 
     return (

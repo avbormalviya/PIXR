@@ -9,7 +9,24 @@ const ICE_SERVERS = [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
     { urls: "stun:stun2.l.google.com:19302" },
-    { urls: "stun:stun.services.mozilla.com" }
+    { urls: "stun:stun3.l.google.com:19302" },
+    { urls: "stun:stun4.l.google.com:19302" },
+    { urls: "stun:global.stun.twilio.com:3478" },
+    {
+        urls: "turn:openrelay.metered.ca:80",
+        username: "openrelayproject",
+        credential: "openrelayproject"
+    },
+    {
+        urls: "turn:openrelay.metered.ca:443",
+        username: "openrelayproject",
+        credential: "openrelayproject"
+    },
+    {
+        urls: "turn:openrelay.metered.ca:443?transport=tcp",
+        username: "openrelayproject",
+        credential: "openrelayproject"
+    }
 ];
 
 export const PeerProvider = ({ children }) => {
@@ -74,10 +91,11 @@ export const PeerProvider = ({ children }) => {
         }
     };
 
-    // Caller initiates call
-    const initiateCall = async (targetUserId, currentUserId) => {
+    // Caller initiates call — calleeInfo is the full user object of the person being called
+    const initiateCall = async (targetUserId, currentUserId, calleeInfo = null) => {
         setCalleeId(targetUserId);
         setCallerId(currentUserId);
+        if (calleeInfo) setCallerInfo(calleeInfo); // store callee so caller can navigate
         setCalling(true);
         setIsCallAccepted(false);
         pendingSignalsRef.current = [];
@@ -169,11 +187,27 @@ export const PeerProvider = ({ children }) => {
     };
 
     const rejectCall = (userId) => {
-        const targetId = callerId || callerInfo?._id || userId;
+        const targetId = calleeId || callerId || callerInfo?._id || userId;
         if (targetId) {
+            emit("call-rejected", { from: targetId });
+            emit("end-call", { to: targetId });
+        }
+        resetCallState();
+        if (window.location.pathname.includes('/chat/call')) {
+            navigate('/chat', { replace: true });
+        }
+    };
+
+    const endCall = () => {
+        const targetId = calleeId || callerId || callerInfo?._id;
+        if (targetId) {
+            emit("end-call", { to: targetId });
             emit("call-rejected", { from: targetId });
         }
         resetCallState();
+        if (window.location.pathname.includes('/chat/call')) {
+            navigate('/chat', { replace: true });
+        }
     };
 
     const resetCallState = () => {
@@ -206,7 +240,7 @@ export const PeerProvider = ({ children }) => {
         setCalleeId(null);
         pendingSignalsRef.current = [];
         setIsRemoteCameraOn(false);
-        setIsRemoteMicOn(false);
+        setIsRemoteMicOn(true);
     };
 
     useEffect(() => {
@@ -236,30 +270,51 @@ export const PeerProvider = ({ children }) => {
             }
         };
 
-        const handleCallAccepted = () => {
+        const handleCallAccepted = ({ to }) => {
             console.log("✅ Call accepted by remote user");
             setIsCallAccepted(true);
             setCalling(false);
             stopAudio(outgoingCallRef);
             stopAudio(incomingCallRef);
+            const targetId = to || calleeId;
+            navigate(`/chat/call/${targetId}`, { state: { user: callerInfo } });
         };
 
         const handleCallRejected = () => {
-            console.log("❌ Call rejected by remote user");
+            console.log("❌ Call rejected/cancelled by remote user");
             resetCallState();
+            if (window.location.pathname.includes('/chat/call')) {
+                navigate('/chat', { replace: true });
+            }
         };
+
+        const handleCallEnded = () => {
+            console.log("❌ Call ended by remote user");
+            resetCallState();
+            if (window.location.pathname.includes('/chat/call')) {
+                navigate('/chat', { replace: true });
+            }
+        };
+
+        const handleToggleCamera = ({ enabled }) => setIsRemoteCameraOn(enabled);
+        const handleToggleMicrophone = ({ enabled }) => setIsRemoteMicOn(enabled);
 
         on("call-request", handleCallRequest);
         on("signal", handleSignal);
         on("call-accepted", handleCallAccepted);
         on("call-rejected", handleCallRejected);
-        on("toggleCamera", ({ enabled }) => setIsRemoteCameraOn(enabled));
+        on("call-ended", handleCallEnded);
+        on("toggleCamera", handleToggleCamera);
+        on("toggleMicrophone", handleToggleMicrophone);
 
         return () => {
             off("call-request", handleCallRequest);
             off("signal", handleSignal);
             off("call-accepted", handleCallAccepted);
             off("call-rejected", handleCallRejected);
+            off("call-ended", handleCallEnded);
+            off("toggleCamera", handleToggleCamera);
+            off("toggleMicrophone", handleToggleMicrophone);
         };
     }, [on, off]);
 
@@ -275,6 +330,7 @@ export const PeerProvider = ({ children }) => {
                 initiateCall,
                 acceptCall,
                 rejectCall,
+                endCall,
                 resetCallState,
                 isRemoteCameraOn,
                 isRemoteMicOn,

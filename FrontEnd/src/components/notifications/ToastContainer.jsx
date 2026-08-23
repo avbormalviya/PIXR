@@ -14,11 +14,23 @@ export const ToastContainer = () => {
         const newToast = { id, ...toast };
         setToasts((prev) => [newToast, ...prev].slice(0, 4));
 
-        // Play subtle notification audio
+        // Play subtle message chime (Web Audio API)
         try {
-            const audio = new Audio("https://res.cloudinary.com/dr6gycjza/video/upload/v1734374513/duo_ringtone_tehbgk.mp3");
-            audio.volume = 0.3;
-            audio.play().catch(() => {});
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12); // A5
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            }
         } catch (e) {}
 
         // Auto remove toast after 4.5 seconds

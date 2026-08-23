@@ -11,6 +11,7 @@ import { useSocket } from '../../context/SocketContext';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { FollowButton } from '../button/Button';
 import { Button } from '@mui/material';
+import { NotificationSkeleton } from './NotificationSkeleton';
 
 export const Notification = () => {
 
@@ -149,14 +150,16 @@ export const Notification = () => {
                         }
 
                         {
-                            unreadNotifications.length === 0 && (
+                            isFetching && unreadNotifications.length === 0 && notifications.length === 0 ? (
+                                <NotificationSkeleton />
+                            ) : unreadNotifications.length === 0 && (
                                 <h1 style={{ textAlign: 'center', marginTop: "20px" }} className={style.notification_heading}>No new notifications</h1>
                             )
                         }
 
                         <div ref={lastElementRef} style={{ height: '20px' }} />
 
-                        {isFetching && <MiniLoader />}
+                        {isFetching && notifications.length > 0 && <MiniLoader />}
                     </div>
                 </div>
 
