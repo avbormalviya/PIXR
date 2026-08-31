@@ -243,31 +243,79 @@
     overflow: hidden;
 }
 
+.delete_chat_btn {
+  background: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+
+  &:hover {
+    background: rgba(255, 77, 77, 0.15);
+    transform: scale(1.08);
+  }
+
+  i {
+    font-size: 22px;
+  }
+}
+
 .attachments {
-    position: sticky;
-    bottom: 0;
-    transform: translateX(-12px);
+    position: relative;
     width: fit-content;
-    height: 100%;
-    max-width: 500px;
-    max-height: 500px;
-    padding: 0.5em;
+    max-width: 240px;
+    max-height: 180px;
+    padding: 8px;
     background-color: var(--background-ternary);
-    border-radius: 1em 1em 0 0;
-    box-shadow: 0 -4px 12px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    margin: 8px 12px;
+
+    .remove_attachment_btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      z-index: 10;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.7);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #ff4d4d;
+        transform: scale(1.1);
+      }
+
+      i {
+        font-size: 16px;
+      }
+    }
 
     .attachment_img {
         width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: 1em;
+        max-height: 160px;
+        object-fit: cover;
+        border-radius: 10px;
     }
 
     .attachment_video {
         width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: 1em;
+        max-height: 160px;
+        object-fit: cover;
+        border-radius: 10px;
     }
 }
 
@@ -410,32 +458,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--background-secondary);
+  background: var(--background-secondary, #121622);
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
 }
 
-.geoTopLeft {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 140px;
-  height: 140px;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.geoBottomRight {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 180px;
-  height: 180px;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.geoBackground {
+.glassMeshBg {
   position: absolute;
   top: 0;
   left: 0;
@@ -443,52 +471,114 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
-}
 
-.geoMuralBg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
+  .glowBlob1 {
+    position: absolute;
+    top: 20%;
+    left: 25%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0, 148, 246, 0.25) 0%, rgba(0, 148, 246, 0) 70%);
+    filter: blur(50px);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .glowBlob2 {
+    position: absolute;
+    bottom: 20%;
+    right: 25%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(0, 102, 204, 0.2) 0%, rgba(0, 102, 204, 0) 70%);
+    filter: blur(60px);
+    animation: float 8s ease-in-out infinite reverse;
+  }
 }
 
 .centerText {
   position: relative;
   z-index: 2;
   text-align: center;
-  width: 100%;
-  max-width: 420px;
+  width: 90%;
+  max-width: 440px;
   margin: 0 auto;
+  padding: 36px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.chatIconBadge {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(0, 148, 246, 0.2), rgba(0, 102, 204, 0.4));
+  border: 1px solid rgba(0, 148, 246, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(0, 148, 246, 0.3);
+
+  i {
+    font-size: 32px;
+    color: #0094f6;
+  }
 }
 
 .pixrLogo {
   font-family: 'anurati', 'Nunito', sans-serif;
-  font-size: 4.2rem;
-  letter-spacing: 0.2em;
-  color: var(--primary-color);
+  font-size: 3.5rem;
+  letter-spacing: 0.18em;
+  color: #0094f6;
   font-weight: 900;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  margin-bottom: 0.4rem;
+  text-shadow: 0 0 16px rgba(0, 148, 246, 0.5);
 }
 
 .welcomeTitle {
-  font-size: 2.1rem;
-  color: var(--text-primary);
+  font-size: 1.8rem;
+  color: var(--text-primary, #ffffff);
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .welcomeSubtext {
-  font-size: 1.3rem;
-  color: var(--text-primary-70);
+  font-size: 1.1rem;
+  color: var(--text-primary-70, rgba(255, 255, 255, 0.7));
   font-weight: 400;
-  margin-bottom: 0.2rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.featureBadges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--text-primary, #ffffff);
+
+    i {
+      font-size: 16px;
+      color: #0094f6;
+    }
+  }
 }
 
 @media (min-width: 768px) {

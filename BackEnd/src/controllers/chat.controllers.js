@@ -276,8 +276,28 @@ const sendMessage = asyncHandler(async (req, res) => {
 
 
 
+const deleteChat = asyncHandler(async (req, res) => {
+    const { chatId } = req.params;
+    if (!chatId) throw new ApiError(400, "chatId is required");
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) throw new ApiError(400, "Chat not found");
+
+    if (!chat.participants.includes(req.user._id.toString()) && !chat.participants.some(p => p.toString() === req.user._id.toString())) {
+        throw new ApiError(403, "You are not authorized to delete this chat");
+    }
+
+    await ChatMessage.deleteMany({ chat: chatId });
+    await Chat.findByIdAndDelete(chatId);
+
+    res.status(200).json(
+        new ApiResponse(200, {}, "Chat deleted successfully")
+    );
+});
+
 export {
     createOrGetOneOnOneChat,
     createOrGetAGroupChat,
-    sendMessage
+    sendMessage,
+    deleteChat
 }

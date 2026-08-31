@@ -25,6 +25,7 @@ import { useSocket } from "../../context/SocketContext"
 import { getChatFollowings } from "../../utils/getChatFollowings";
 import { sendMessage } from "../../utils/sendMessage";
 import { createOrGetOneOnOneChat } from "../../utils/createOrGetOneOnOneChat";
+import { deleteChat as deleteChatApi } from "../../utils/deleteChat";
 import { requestCameraAndMicAccess } from "../../utils/getPermission";
 import { Img } from "../../components/img/Img";
 import { usePeerContext } from "../../context/PeerContext";
@@ -46,6 +47,10 @@ import style from "./chat.module.scss";
 import ChatWelcomePoster from "./ChatWelcomePoster";
 import { ChatSkeleton } from "./ChatSkeleton";
 
+const isVideoUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    return /\.(mp4|webm|ogg|mov|avi|mkv)(\?.*)?$/i.test(url) || url.includes('/video/upload/');
+};
 
 export const Chat = () => {
 
@@ -406,6 +411,32 @@ export const Chat = () => {
         }
     };
 
+    const handleRemoveAttachment = () => {
+        setAttachments({ type: null, file: null, url: null });
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const handleDeleteChat = async () => {
+        if (!chatId) return;
+        if (window.confirm("Are you sure you want to delete this conversation?")) {
+            try {
+                const res = await deleteChatApi(chatId);
+                if (res?.data || !res?.error) {
+                    setFollowings(prev => prev.filter(f => f._id !== chatUser?._id));
+                    setChat(null);
+                    setChatId(null);
+                    setMessages([]);
+                    setGroupedMessages({});
+                    setIsChatOpen(false);
+                }
+            } catch (err) {
+                console.error("Error deleting chat:", err);
+            }
+        }
+    };
+
 
 
     const handleAttachClick = () => {
@@ -593,6 +624,14 @@ export const Chat = () => {
                             />
                             <ConversationHeader.Actions>
                                 <VoiceCallButton onClick={handleCallButton} disabled={!isPermissionsGranted} />
+                                <button
+                                    type="button"
+                                    className={style.delete_chat_btn}
+                                    onClick={handleDeleteChat}
+                                    title="Delete Conversation"
+                                >
+                                    <i className="material-symbols-rounded">delete</i>
+                                </button>
                             </ConversationHeader.Actions>
                         </ConversationHeader>
 
@@ -622,58 +661,30 @@ export const Chat = () => {
                                                     { addSuffix: true }
                                                 )}
                                             >
-                                                <Avatar
-                                                    size="sm"
-                                                    src={
-                                                        group.senderId === user._id
-                                                            ? user.profilePic
-                                                            : chatUser.profilePic
-                                                    }
-                                                    name={group.senderName}
-                                                />
-                                                <MessageGroup.Header>
-                                                    {formatDistanceToNow(
-                                                        new Date(group.firstMessageTime),
-                                                        { addSuffix: true }
-                                                    )}
-                                                </MessageGroup.Header>
                                                 <MessageGroup.Messages>
                                                     {group.messages.map((msg) => {
-                                                        const isOutgoing = group.senderId === user._id;
-
-                                                        let attachmentUrl = msg.attachments
-
-                                                        attachmentsDownloaded.map((attachment) => {
-                                                            if (attachment?.id === msg._id) {
-                                                                attachmentUrl = attachment.url;
-                                                                return
-                                                            }
-                                                        })
+                                                        const isOutgoing = msg.sender === user._id;
 
                                                         if (msg.attachments) {
+                                                            const isVideo = isVideoUrl(msg.attachments);
                                                             return (
                                                                 <Message
                                                                     key={msg._id}
-                                                                    type="custom"
                                                                     model={{
-                                                                        direction: isOutgoing ? "outgoing" : "incoming",
-                                                                        payload: <Message.CustomContent>
-                                                                            {msg.type === 'IMAGE' ? (
-                                                                                <img
-                                                                                    src={attachmentUrl}
-                                                                                    alt="attachment"
-                                                                                    className={style.message_image}
-                                                                                    onError={() => {
-                                                                                        setIsAttachmentsDownloading(true);
-                                                                                    }}
-                                                                                />
-                                                                            ) : (
-                                                                                <video src={attachmentUrl} controls />
-                                                                            )}
-                                                                            <p>{msg.content}</p>
-                                                                        </Message.CustomContent>
+                                                                        sentTime: new Date(msg.createdAt).toLocaleTimeString(),
+                                                                        sender: group.senderName,
+                                                                        direction: isOutgoing ? "outgoing" : "incoming"
                                                                     }}
-                                                                />
+                                                                >
+                                                                    <Message.CustomContent>
+                                                                        {isVideo ? (
+                                                                            <video src={msg.attachments} controls className={style.attachment_video} />
+                                                                        ) : (
+                                                                            <img src={msg.attachments} alt="attachment" className={style.attachment_img} />
+                                                                        )}
+                                                                        {msg.content && <p>{msg.content}</p>}
+                                                                    </Message.CustomContent>
+                                                                </Message>
                                                             );
                                                         }
 
@@ -697,6 +708,14 @@ export const Chat = () => {
 
                                 {attachments.url &&
                                     <div className={style.attachments}>
+                                        <button
+                                            type="button"
+                                            className={style.remove_attachment_btn}
+                                            onClick={handleRemoveAttachment}
+                                            title="Remove attachment"
+                                        >
+                                            <i className="material-symbols-rounded">close</i>
+                                        </button>
                                         {attachments.type === "IMAGE" ?
                                             <img src={attachments.url} alt="attachment" className={style.attachment_img} />
                                             :

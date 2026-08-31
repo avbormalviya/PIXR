@@ -36,7 +36,14 @@ function App() {
 
     const checkTokenChange = async () => {
       try {
-        const newToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_VAPID_KEY });
+        let registration;
+        if ('serviceWorker' in navigator) {
+          registration = await navigator.serviceWorker.ready;
+        }
+        const newToken = await getToken(messaging, {
+          vapidKey: import.meta.env.VITE_VAPID_KEY,
+          ...(registration && { serviceWorkerRegistration: registration })
+        });
         const oldToken = localStorage.getItem("fcmToken");
         if (newToken && newToken !== oldToken) {
           await sendFCMToken({ fcmToken: newToken }); // Update on server

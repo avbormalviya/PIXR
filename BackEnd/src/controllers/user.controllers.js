@@ -332,17 +332,19 @@ const refreshAccessToken = asyncHandler( async (req, res) => {
         throw new ApiError(400, "unauthorized access");
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user);
+    const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user._id);
 
-    user.refreshToken = newRefreshToken;
-    user.save({ validateBeforeSave: false });
+    let filteredUser = user.toObject();
+    delete filteredUser.password;
+    delete filteredUser.refreshToken;
+    delete filteredUser.descriptor;
 
     res
         .status(200)
         .cookie("accessToken", accessToken, cookieOptions.accessToken)
         .cookie("refreshToken", newRefreshToken, cookieOptions.refreshToken)
         .json(
-            new ApiResponse(200, user, "Refresh access token successful")
+            new ApiResponse(200, { user: filteredUser, accessToken, refreshToken: newRefreshToken }, "Refresh access token successful")
         )
 })
 

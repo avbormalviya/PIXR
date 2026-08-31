@@ -6,8 +6,8 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
     createOrGetOneOnOneChat,
     createOrGetAGroupChat,
-    sendMessage
-
+    sendMessage,
+    deleteChat
 } from "../controllers/chat.controllers.js";
 
 const router = Router();
@@ -26,6 +26,11 @@ router.route("/sendMessage").post(
     verifyJWT,
     upload.single("messageFile"),
     sendMessage
+);
+
+router.route("/:chatId").delete(
+    verifyJWT,
+    deleteChat
 );
 
 export default router;
