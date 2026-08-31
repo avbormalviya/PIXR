@@ -29,7 +29,7 @@ export const VideoCall = () => {
         isRemoteMicOn
     } = usePeerContext();
 
-    const [isLocalCameraOn, setIsLocalCameraOn] = useState(false);
+    const [isLocalCameraOn, setIsLocalCameraOn] = useState(true);
     const [isLocalMicOn, setIsLocalMicOn] = useState(true);
     const [chatUser, setChatUser] = useState({});
 
@@ -44,6 +44,10 @@ export const VideoCall = () => {
     useEffect(() => {
         if (localStream) {
             console.log("Local stream available:", localStream);
+            const vTrack = localStream.getVideoTracks()[0];
+            if (vTrack) {
+                setIsLocalCameraOn(vTrack.enabled);
+            }
             if (localVideoRef.current) {
                 localVideoRef.current.srcObject = localStream;
             }

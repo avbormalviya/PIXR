@@ -49,8 +49,8 @@ const UserCard = ({
             />
 
             <figcaption>
-                <h1 onClick={handleNavigate}>{userName}</h1>
-                <h1>{fullName}</h1>
+                <h1 onClick={handleNavigate}>{userName ? `@${userName}` : "User"}</h1>
+                <h2>{fullName && fullName.trim() ? fullName : (userName ? `@${userName}` : "PIXR Member")}</h2>
             </figcaption>
 
             {followButton && ( <FollowButton userName={userName} isFollower={isFollowing} setIsFollower={setIsFollowing} /> )}

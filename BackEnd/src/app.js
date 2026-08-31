@@ -13,17 +13,9 @@ app.get("/ping", (req, res) => {
 });
 
 app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [
-            "https://pixr-six.vercel.app",
-            "http://192.168.29.35:5173",
-            "http://localhost:5173"
-        ];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
+    origin: process.env.CORS_ORIGIN === "*" ? "*" : (origin, callback) => {
+        // Allow any origin for now to prevent CORS issues on different Vercel deployments
+        callback(null, true);
     },
     credentials: true,
 }));

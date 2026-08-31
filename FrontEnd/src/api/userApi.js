@@ -5,28 +5,73 @@ import { setLoading } from "../features/statusSlice/loader/loaderSlice";
 const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
     const baseQuery = fetchBaseQuery({
         baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/`,
-        credentials: "include", // This still ensures cookies are sent when available
+        credentials: "include",
     });
 
     api.dispatch(setLoading(true));
 
-    // Check if access token is in localStorage (fallback if cookies are blocked)
-    const accessToken = localStorage.getItem("accessToken");
+    let accessToken = localStorage.getItem("accessToken");
+    const formattedArgs = typeof args === "string" ? { url: args } : { ...args };
 
-    const result = await baseQuery(
+    let result = await baseQuery(
         {
-            ...args,
+            ...formattedArgs,
             headers: accessToken
-                ? { Authorization: `Bearer ${accessToken}` } // Add Authorization header if token exists in localStorage
-                : undefined,
+                ? { Authorization: `Bearer ${accessToken}`, ...(formattedArgs.headers || {}) }
+                : formattedArgs.headers,
         },
         api,
         extraOptions
     );
 
+    // If 401 Unauthorized (access token expired), try to silently refresh token
+    if (result.error && (result.error.status === 401 || result.error.status === 400) && !formattedArgs.url?.includes("refreshToken") && !formattedArgs.url?.includes("login") && !formattedArgs.url?.includes("register")) {
+        const storedRefreshToken = localStorage.getItem("refreshToken");
+
+        if (storedRefreshToken) {
+            const refreshResult = await baseQuery(
+                {
+                    url: "refreshToken",
+                    method: "POST",
+                    body: { refreshToken: storedRefreshToken },
+                    headers: { Authorization: `Bearer ${storedRefreshToken}` }
+                },
+                api,
+                extraOptions
+            );
+
+            if (refreshResult?.data) {
+                const newAccessToken = refreshResult.data.data?.accessToken;
+                const newRefreshToken = refreshResult.data.data?.refreshToken;
+
+                if (newAccessToken) {
+                    localStorage.setItem("accessToken", newAccessToken);
+                }
+                if (newRefreshToken) {
+                    localStorage.setItem("refreshToken", newRefreshToken);
+                }
+
+                // Retry original request with new access token
+                result = await baseQuery(
+                    {
+                        ...formattedArgs,
+                        headers: newAccessToken
+                            ? { Authorization: `Bearer ${newAccessToken}`, ...(formattedArgs.headers || {}) }
+                            : formattedArgs.headers,
+                    },
+                    api,
+                    extraOptions
+                );
+            } else {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+            }
+        }
+    }
+
     api.dispatch(setLoading(false));
 
-    if (result.error) {
+    if (result.error && result.error.status !== 401) {
         api.dispatch(setError(result.error));
     }
 

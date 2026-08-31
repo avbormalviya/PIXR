@@ -48,7 +48,7 @@ export const PeerProvider = ({ children }) => {
     const [calleeId, setCalleeId] = useState(null);
     const [isCallAccepted, setIsCallAccepted] = useState(false);
 
-    const [isRemoteCameraOn, setIsRemoteCameraOn] = useState(false);
+    const [isRemoteCameraOn, setIsRemoteCameraOn] = useState(true);
     const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
 
     const playAudio = (ref, url) => {
@@ -124,6 +124,7 @@ export const PeerProvider = ({ children }) => {
         peer.on("stream", (incomingStream) => {
             console.log("📡 Received remote stream on caller:", incomingStream);
             setRemoteStream(incomingStream);
+            setIsRemoteCameraOn(true);
         });
 
         peer.on("error", (err) => console.error("❌ Caller Peer error:", err));
@@ -161,6 +162,7 @@ export const PeerProvider = ({ children }) => {
         peer.on("stream", (incomingStream) => {
             console.log("📡 Received remote stream on callee:", incomingStream);
             setRemoteStream(incomingStream);
+            setIsRemoteCameraOn(true);
         });
 
         peer.on("error", (err) => console.error("❌ Callee Peer error:", err));
