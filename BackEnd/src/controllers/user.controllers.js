@@ -45,28 +45,30 @@ async function matchUser(user, descriptor) {
 }
 
 
+const isProduction = process.env.PRODUCTION === "true";
+
 const cookieOptions = {
     accessToken: {
         httpOnly: true,
-        sameSite: "none",
-        secure: true,
-        domain: "pixr-backend.onrender.com",
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
+        ...(isProduction && { domain: "pixr-backend.onrender.com" }),
         maxAge: process.env.ACCESS_TOKEN_EXPIRY
     },
 
     refreshToken: {
         httpOnly: true,
-        sameSite: "none",
-        secure: true,
-        domain: "pixr-backend.onrender.com",
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
+        ...(isProduction && { domain: "pixr-backend.onrender.com" }),
         maxAge: process.env.REFRESH_TOKEN_EXPIRY
     },
 
     removeCookieOptions: {
         httpOnly: true,
-        sameSite: "none",
-        secure: true,
-        domain: "pixr-backend.onrender.com",
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
+        ...(isProduction && { domain: "pixr-backend.onrender.com" }),
         path: "/",
     }
 }
@@ -982,7 +984,7 @@ const getStories = asyncHandler(async (req, res) => {
     console.log(req.params)
     console.log(userName)
 
-    const user = await User.findOne(userName);
+    const user = await User.findOne({ userName });
 
     if (!user) {
         throw new ApiError(400, "User not found");
@@ -1034,12 +1036,12 @@ const getStories = asyncHandler(async (req, res) => {
     }
 
     const viewer = await View.findOne({
-        _id: req.user._id,
+        _id: new mongoose.Types.ObjectId(req.user._id),
     });
 
     sendNotification({
         token: user.fcmToken,
-        title: `${viewer.userName} viewed your story`,
+        title: `${viewer?.userName} viewed your story`,
         body: `See who else has watched it on Pixr.`,
         data: {
             type: "story_view",

@@ -8,6 +8,10 @@ const app = express();
 
 initSocket(app);
 
+app.get("/ping", (req, res) => {
+    res.status(200).send("pong");
+});
+
 app.use(cors({
     origin: (origin, callback) => {
         const allowedOrigins = [

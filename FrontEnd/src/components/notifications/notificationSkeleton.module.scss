@@ -1,0 +1,23 @@
+.notification_skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+
+  .card_skeleton {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--background-secondary, rgba(255, 255, 255, 0.03));
+    border-radius: 16px;
+
+    .content_skeleton {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+  }
+}

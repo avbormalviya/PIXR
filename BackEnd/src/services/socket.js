@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import { verifyJWTSocket } from "../middlewares/verifyJWTSocket.js";
 import { Chat } from "../models/chat.model.js";
 import { User } from "../models/user.model.js";
+import { sendNotification } from "./firebase.js";
 
 const activeSockets = new Map();
 
@@ -18,6 +19,9 @@ const updateLastOnline = async (userId) => {
 const initSocket = (app) => {
     const httpServer = createServer(app);
     const io = new Server(httpServer, {
+        pingTimeout: 20000,
+        pingInterval: 10000,
+        transports: ["websocket", "polling"],
         cors: {
             origin: (origin, callback) => {
                 const allowedOrigins = [
@@ -67,37 +71,68 @@ const initSocket = (app) => {
         });
 
         // Call Events
-        socket.on("call-request", ({ to }) => {
+        socket.on("call-request", async ({ to, signalData }) => {
             console.log(`Received call-request from ${socket.user._id} to ${to}`);
 
-            const recipientSocketId = activeSockets.get(to);
-            console.log(`Recipient socket ID:`, recipientSocketId);
+            const targetId = to ? String(to) : null;
+            const recipientSocketId = activeSockets.get(targetId);
+            console.log(`Recipient socket ID for ${targetId}:`, recipientSocketId);
 
             if (recipientSocketId) {
                 console.log(`Emitting call-request to ${recipientSocketId}`);
-                socket.to(recipientSocketId).emit("call-request", { from: socket.user });
-            } else {
-                console.warn(`User ${to} is not connected.`);
+                socket.to(recipientSocketId).emit("call-request", { from: socket.user, signalData });
+            }
+
+            // Always attempt FCM push notification in background/offline
+            try {
+                const targetUser = await User.findById(to).select("fcmToken");
+                if (targetUser?.fcmToken) {
+                    await sendNotification({
+                        token: targetUser.fcmToken,
+                        title: `📞 Incoming Call from ${socket.user.userName || socket.user.fullName || "Someone"}`,
+                        body: "Tap to open PIXR and accept the video call.",
+                        data: {
+                            type: "incoming_call",
+                            senderId: socket.user._id.toString(),
+                            url: `/chat/call/${socket.user._id}`
+                        }
+                    });
+                }
+            } catch (fcmErr) {
+                console.error("Call FCM Push Error:", fcmErr);
             }
         });
 
 
         socket.on("call-accepted", ({ from }) => {
-            const callerSocketId = activeSockets.get(from);
+            const targetId = from ? String(from) : null;
+            const callerSocketId = activeSockets.get(targetId);
             if (callerSocketId) {
                 socket.to(callerSocketId).emit("call-accepted", { to: socket.user._id });
             }
         });
 
         socket.on("call-rejected", ({ from }) => {
-            const callerSocketId = activeSockets.get(from);
+            const targetId = from ? String(from) : null;
+            const callerSocketId = activeSockets.get(targetId);
             if (callerSocketId) {
                 socket.to(callerSocketId).emit("call-rejected", { to: socket.user._id });
+                socket.to(callerSocketId).emit("call-ended", { to: socket.user._id });
+            }
+        });
+
+        socket.on("end-call", ({ to }) => {
+            const targetId = to ? String(to) : null;
+            const recipientSocketId = activeSockets.get(targetId);
+            if (recipientSocketId) {
+                socket.to(recipientSocketId).emit("call-ended", { from: socket.user._id });
+                socket.to(recipientSocketId).emit("call-rejected", { from: socket.user._id });
             }
         });
 
         socket.on("signal", ({ to, data }) => {
-            const recipientSocketId = activeSockets.get(to);
+            const targetId = to ? String(to) : null;
+            const recipientSocketId = activeSockets.get(targetId);
             if (recipientSocketId) {
                 socket.to(recipientSocketId).emit("signal", { data, from: socket.user._id });
             }
@@ -105,21 +140,24 @@ const initSocket = (app) => {
 
         // Toggle Remote Camera
         socket.on("toggleCamera", ({ to, enabled }) => {
-            const recipientSocketId = activeSockets.get(to);
+            const targetId = to ? String(to) : null;
+            const recipientSocketId = activeSockets.get(targetId);
             if (recipientSocketId) {
                 socket.to(recipientSocketId).emit("toggleCamera", { enabled });
             }
         });
 
         socket.on("toggleMicrophone", ({ to, enabled }) => {
-            const recipientSocketId = activeSockets.get(to);
+            const targetId = to ? String(to) : null;
+            const recipientSocketId = activeSockets.get(targetId);
             if (recipientSocketId) {
                 socket.to(recipientSocketId).emit("toggleMicrophone", { enabled });
             }
         });
 
         socket.on("receiveMessage", ({ to, message }) => {
-            const recipientSocketId = activeSockets.get(to);
+            const targetId = to ? String(to) : null;
+            const recipientSocketId = activeSockets.get(targetId);
             if (recipientSocketId) {
                 socket.to(recipientSocketId).emit("receiveMessage", message); // send only message
             }
@@ -142,9 +180,11 @@ const initSocket = (app) => {
         // Disconnect
         socket.on("disconnect", () => {
             console.log("User disconnected:", userId, socket.id);
-            socket.broadcast.emit("userOffline", { userId })
-            activeSockets.delete(userId);
-            ( async () => await updateLastOnline(userId))();
+            if (activeSockets.get(userId) === socket.id) {
+                activeSockets.delete(userId);
+                socket.broadcast.emit("userOffline", { userId });
+                ( async () => await updateLastOnline(userId))();
+            }
         });
     });
 

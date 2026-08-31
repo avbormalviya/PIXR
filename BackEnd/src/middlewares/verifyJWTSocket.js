@@ -13,13 +13,16 @@ export const verifyJWTSocket = async (socket, next) => {
             .find(c => c.startsWith("accessToken="))
             ?.split("=")[1];
 
-        // 2. Try from Authorization header
-        const authHeader = socket.handshake.headers.authorization || "";
+        // 2. Try from Authorization header or handshake auth
+        const authHeader = socket.handshake.headers.authorization || socket.handshake.auth?.Authorization || socket.handshake.auth?.authorization || "";
         const bearerToken = authHeader.startsWith("Bearer ")
             ? authHeader.slice(7)
-            : null;
+            : (authHeader || null);
 
-        const token = cookieToken || bearerToken;
+        // 3. Try direct auth.token
+        const authToken = socket.handshake.auth?.token;
+
+        const token = cookieToken || bearerToken || authToken;
 
         if (!token) throw new ApiError(401, "No token found. Unauthorized access");
 

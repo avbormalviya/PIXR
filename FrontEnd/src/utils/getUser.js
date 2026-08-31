@@ -11,7 +11,7 @@ export const getUser = async () => {
     };
 
     try {
-        const response = await axios.get("https://pixr-backend.onrender.com/api/v1/users/getUser", config);
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/getUser`, config);
         if (response?.status === 200) {
             return response.data;
         }

@@ -44,6 +44,7 @@ import chatsvg from "/svg/undraw_social-serenity_x9vq.svg"
 
 import style from "./chat.module.scss";
 import ChatWelcomePoster from "./ChatWelcomePoster";
+import { ChatSkeleton } from "./ChatSkeleton";
 
 
 export const Chat = () => {
@@ -85,10 +86,18 @@ export const Chat = () => {
     }, []);
 
 
+    const [isFollowingsLoading, setIsFollowingsLoading] = useState(true);
+
     useEffect(() => {
         ( async () => {
-            const result = await getChatFollowings();
-            setFollowings(result.data);
+            try {
+                const result = await getChatFollowings();
+                setFollowings(result?.data || []);
+            } catch (err) {
+                console.error("Error loading chat followings:", err);
+            } finally {
+                setIsFollowingsLoading(false);
+            }
         })();
 
         ( async () => {
@@ -268,7 +277,7 @@ export const Chat = () => {
     };
 
     const handleCallButton = () => {
-        initiateCall(chatUser._id, user._id);
+        initiateCall(chatUser._id, user._id, chatUser);
 
         navigate(`/chat/call/${chat._id}`, { state: { user: chatUser, from: user._id } });
     }
@@ -506,6 +515,10 @@ export const Chat = () => {
         return senderId !== currentSenderId || gap > 60;
     };
 
+
+    if (isFollowingsLoading) {
+        return <ChatSkeleton />;
+    }
 
     return (
         <section className={style.lobby}>
