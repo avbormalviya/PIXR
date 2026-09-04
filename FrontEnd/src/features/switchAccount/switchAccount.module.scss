@@ -1,174 +1,103 @@
-.switch_account_card {
+.switch_account_section {
     width: 100%;
-    max-width: 360px;
-    padding: 1rem 1.2rem;
-    background: var(--background-secondary, #161b26);
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    font-family: inherit;
-    color: var(--text-primary, #ffffff);
+    gap: 1em;
+    padding: 1.2em;
+    background-color: var(--background-secondary);
+    border-radius: 1.2em;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--accent-border-color, rgba(255, 255, 255, 0.08));
 
-    &.modal_layout {
+    &.modal_view {
         position: absolute;
-        top: 55px;
-        right: 15px;
+        top: 50px;
+        right: 0;
         z-index: 999999;
-        width: 340px;
-        animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 360px;
+        max-width: 90vw;
+        animation: slideInDown 0.25s ease-out;
     }
 
-    .header_bar {
+    .header_row {
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 0.2rem;
 
-        .title_area {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
+        .switch_account_heading {
+            font-size: 1.3em;
             font-weight: 700;
-            color: var(--text-primary, #ffffff);
-
-            i {
-                font-size: 22px;
-                color: #0094f6;
-            }
+            color: var(--text-primary);
+            margin: 0;
         }
 
-        .add_account_btn {
+        .add_btn_toggle {
             display: flex;
             align-items: center;
-            gap: 4px;
-            background: linear-gradient(135deg, rgba(0, 148, 246, 0.18), rgba(0, 102, 204, 0.25));
-            color: #0094f6;
-            border: 1px solid rgba(0, 148, 246, 0.4);
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 0.82rem;
+            gap: 0.4em;
+            background-color: var(--background-ternary);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 2em;
+            padding: 0.4em 0.9em;
+            font-size: 0.85em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
 
             i {
-                font-size: 16px;
+                font-size: 1.2em;
             }
 
             &:hover {
-                background: #0094f6;
+                background-color: var(--primary-color);
                 color: #ffffff;
-                transform: translateY(-1px);
             }
         }
     }
 
-    .account_row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px 12px;
-        border-radius: 12px;
-        background: var(--background-ternary, rgba(255, 255, 255, 0.03));
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        transition: all 0.2s ease;
-        cursor: pointer;
+    .active_user_wrapper {
+        position: relative;
+        width: 100%;
+        border-radius: 1em;
+        border: 2px solid var(--primary-color);
+        overflow: hidden;
 
-        &:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(0, 148, 246, 0.3);
-        }
-
-        &.active_row {
-            background: rgba(0, 148, 246, 0.09);
-            border-color: rgba(0, 148, 246, 0.45);
-            cursor: default;
-        }
-
-        .avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
-
-            img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-        }
-
-        .user_info {
-            flex: 1;
-            min-width: 0;
-
-            h4 {
-                font-size: 0.92rem;
-                font-weight: 600;
-                color: var(--text-primary, #ffffff);
-                margin: 0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            p {
-                font-size: 0.78rem;
-                color: var(--text-primary-70, rgba(255, 255, 255, 0.65));
-                margin: 2px 0 0 0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-        }
-
-        .active_badge {
-            font-size: 0.75rem;
+        .active_label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
             font-weight: 700;
-            color: #0094f6;
-            background: rgba(0, 148, 246, 0.18);
-            border: 1px solid rgba(0, 148, 246, 0.3);
-            padding: 3px 10px;
-            border-radius: 12px;
+            color: #ffffff;
+            background-color: var(--primary-color);
+            padding: 0.2em 0.7em;
+            border-radius: 1em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
+    }
 
-        .row_actions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+    .saved_accounts_list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6em;
+        width: 100%;
 
-            .switch_pill {
-                background: #0094f6;
-                color: #ffffff;
-                border: none;
-                border-radius: 16px;
-                padding: 5px 12px;
-                font-size: 0.8rem;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s ease;
+        .saved_card_wrapper {
+            position: relative;
+            width: 100%;
 
-                &:hover {
-                    background: #007bb5;
-                    transform: scale(1.04);
-                }
-
-                &:disabled {
-                    opacity: 0.6;
-                    cursor: not-allowed;
-                }
-            }
-
-            .remove_icon {
+            .remove_acc_btn {
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
                 background: transparent;
                 border: none;
-                color: rgba(255, 255, 255, 0.4);
-                padding: 4px;
+                color: var(--text-primary-50);
+                padding: 6px;
                 border-radius: 50%;
                 cursor: pointer;
                 display: flex;
@@ -177,7 +106,7 @@
                 transition: all 0.2s ease;
 
                 i {
-                    font-size: 16px;
+                    font-size: 1.2em;
                 }
 
                 &:hover {
@@ -188,140 +117,118 @@
         }
     }
 
-    .accounts_list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .empty_container {
+    .no_accounts_prompt {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.6rem;
-        padding: 0.8rem 0;
+        justify-content: center;
+        gap: 0.8em;
+        padding: 1em 0;
         text-align: center;
 
         p {
-            font-size: 0.82rem;
-            color: var(--text-primary-50, rgba(255, 255, 255, 0.6));
+            font-size: 0.85em;
+            color: var(--text-primary-50);
             margin: 0;
         }
 
-        .big_add_btn {
+        .add_account_main_btn {
             display: flex;
             align-items: center;
-            gap: 6px;
-            background: #0094f6;
+            gap: 0.5em;
+            background-color: var(--primary-color);
             color: #ffffff;
             border: none;
-            border-radius: 20px;
-            padding: 8px 18px;
-            font-size: 0.85rem;
+            border-radius: 2em;
+            padding: 0.7em 1.5em;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 148, 246, 0.3);
+
+            i {
+                font-size: 1.2em;
+            }
+
+            &:hover {
+                background-color: var(--secondary-color);
+                transform: translateY(-2px);
+            }
+        }
+    }
+
+    /* Add Account Login Form */
+    .add_account_form {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        width: 100%;
+
+        .form_header {
+            display: flex;
+            align-items: center;
+            gap: 0.8em;
+
+            .back_to_list_btn {
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+                background: transparent;
+                border: none;
+                color: var(--primary-color);
+                font-size: 0.9em;
+                font-weight: 600;
+                cursor: pointer;
+                padding: 0;
+
+                i {
+                    font-size: 1.2em;
+                }
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            .form_heading {
+                font-size: 1.1em;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin: 0;
+            }
+        }
+
+        .error_banner {
+            background-color: rgba(255, 77, 77, 0.15);
+            border: 1px solid rgba(255, 77, 77, 0.4);
+            color: #ff4d4d;
+            font-size: 0.85em;
+            padding: 0.6em 0.9em;
+            border-radius: 0.6em;
+        }
+
+        .inputs_container {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            width: 100%;
+        }
+
+        .login_submit_button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 0.8em;
+            padding: 0.8em;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
 
-            i {
-                font-size: 18px;
-            }
-
             &:hover {
-                background: #007bb5;
-                transform: translateY(-1px);
-            }
-        }
-    }
-
-    /* Inline Add Account Form */
-    .login_form {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-        animation: fadeIn 0.2s ease;
-
-        .back_btn {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: transparent;
-            border: none;
-            color: var(--text-primary-70, rgba(255, 255, 255, 0.7));
-            font-size: 0.85rem;
-            cursor: pointer;
-            padding: 0;
-
-            i {
-                font-size: 18px;
-            }
-
-            &:hover {
-                color: #0094f6;
-            }
-        }
-
-        .form_title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-primary, #ffffff);
-        }
-
-        .error_banner {
-            background: rgba(255, 77, 77, 0.15);
-            border: 1px solid rgba(255, 77, 77, 0.3);
-            color: #ff4d4d;
-            font-size: 0.8rem;
-            padding: 6px 10px;
-            border-radius: 8px;
-        }
-
-        .form_group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-
-            label {
-                font-size: 0.78rem;
-                font-weight: 600;
-                color: var(--text-primary-70, rgba(255, 255, 255, 0.7));
-            }
-
-            input {
-                width: 100%;
-                padding: 8px 12px;
-                border-radius: 8px;
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                background: rgba(0, 0, 0, 0.25);
-                color: #ffffff;
-                font-size: 0.85rem;
-                outline: none;
-                transition: border-color 0.2s ease;
-
-                &:focus {
-                    border-color: #0094f6;
-                    box-shadow: 0 0 0 2px rgba(0, 148, 246, 0.2);
-                }
-
-                &::placeholder {
-                    color: rgba(255, 255, 255, 0.35);
-                }
-            }
-        }
-
-        .submit_login_btn {
-            background: #0094f6;
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            padding: 9px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 0.4rem;
-            transition: background 0.2s ease;
-
-            &:hover {
-                background: #007bb5;
+                background-color: var(--secondary-color);
             }
 
             &:disabled {
@@ -332,18 +239,13 @@
     }
 }
 
-@keyframes fadeInDown {
+@keyframes slideInDown {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-12px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }

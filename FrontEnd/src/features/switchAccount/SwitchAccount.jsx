@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import style from "./switchAccount.module.scss";
-import { Img } from "../../components/img/Img";
+import { SwitchUserCard } from "../../components/userCard/UserCard";
+import { Input } from "../../components/input/Input";
 import { getSavedAccounts, removeSavedAccount, switchAccount, saveAccount } from "../../utils/savedAccounts";
 import { useLoginUserMutation } from "../../api/userApi";
 import { setUserData } from "../../features/user/useSlice";
@@ -16,18 +17,35 @@ export const SwitchAccount = ({ isModal = false, onClose }) => {
     const [savedAccounts, setSavedAccounts] = useState([]);
     const [switchingId, setSwitchingId] = useState(null);
 
-    // Inline Add Account state
-    const [showLoginForm, setShowLoginForm] = useState(false);
-    const [accountInput, setAccountInput] = useState("");
-    const [passwordInput, setPasswordInput] = useState("");
-    const [loginErrorMsg, setLoginErrorMsg] = useState("");
+    // Add Account form state using PIXR native Input controls
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [inputValue, setInputValue] = useState("");
+    const [password, setPassword] = useState("");
+    const [inputType, setInputType] = useState("mail");
+    const [formError, setFormError] = useState("");
 
-    const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
+    const [loginUser, { isLoading }] = useLoginUserMutation();
 
     useEffect(() => {
         const accounts = getSavedAccounts();
         setSavedAccounts(accounts);
     }, [currentUser]);
+
+    const determineInputType = (val) => {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (val && val.trim().length > 0) {
+            if (emailPattern.test(val)) {
+                return "mail";
+            } else {
+                return "id_card";
+            }
+        }
+        return "mail";
+    };
+
+    useEffect(() => {
+        setInputType(determineInputType(inputValue));
+    }, [inputValue]);
 
     const handleSwitch = async (account) => {
         if (account._id === currentUser?._id) return;
@@ -45,25 +63,25 @@ export const SwitchAccount = ({ isModal = false, onClose }) => {
 
     const handleAddAccountSubmit = async (e) => {
         e.preventDefault();
-        setLoginErrorMsg("");
+        setFormError("");
 
-        const inputVal = accountInput.trim();
-        const pwdVal = passwordInput.trim();
+        const val = inputValue.trim();
+        const pwd = password.trim();
 
-        if (!inputVal || !pwdVal) {
-            setLoginErrorMsg("Please fill in both username/email and password.");
+        if (!val || !pwd) {
+            setFormError("Please enter your username/email and password.");
             return;
         }
 
-        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputVal);
-        const loginPayload = {
-            email: isEmail ? inputVal : "",
-            userName: isEmail ? "" : inputVal,
-            password: pwdVal
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+        const payload = {
+            email: isEmail ? val : "",
+            userName: isEmail ? "" : val,
+            password: pwd
         };
 
         try {
-            const res = await loginUser(loginPayload).unwrap();
+            const res = await loginUser(payload).unwrap();
             if (res?.data) {
                 const { user, accessToken, refreshToken } = res.data;
 
@@ -73,11 +91,11 @@ export const SwitchAccount = ({ isModal = false, onClose }) => {
                 saveAccount(user, refreshToken);
                 dispatch(setUserData(user));
 
-                showSuccess(`Account @${user.userName} added and logged in!`);
+                showSuccess(`Account @${user.userName} added successfully!`);
 
-                setAccountInput("");
-                setPasswordInput("");
-                setShowLoginForm(false);
+                setInputValue("");
+                setPassword("");
+                setShowAddForm(false);
 
                 if (onClose) onClose();
 
@@ -87,149 +105,123 @@ export const SwitchAccount = ({ isModal = false, onClose }) => {
             }
         } catch (err) {
             console.error("Add account login error:", err);
-            const errorText = err?.data?.message || err?.error || "Login failed. Check credentials.";
-            setLoginErrorMsg(errorText);
-            showError(errorText);
+            const errText = err?.data?.message || err?.error || "Login failed. Check credentials.";
+            setFormError(errText);
+            showError(errText);
         }
     };
 
     const otherAccounts = savedAccounts.filter((acc) => acc._id !== currentUser?._id);
 
     return (
-        <div className={`${style.switch_account_card} ${isModal ? style.modal_layout : ""}`}>
-            {!showLoginForm ? (
+        <section className={`${style.switch_account_section} ${isModal ? style.modal_view : ""}`}>
+            {!showAddForm ? (
                 <>
-                    <div className={style.header_bar}>
-                        <div className={style.title_area}>
-                            <i className="material-symbols-rounded">switch_account</i>
-                            <span>Switch Account</span>
-                        </div>
+                    <div className={style.header_row}>
+                        <h1 className={style.switch_account_heading}>Switch Account</h1>
                         <button
                             type="button"
-                            className={style.add_account_btn}
-                            onClick={() => setShowLoginForm(true)}
+                            className={style.add_btn_toggle}
+                            onClick={() => setShowAddForm(true)}
                             title="Add existing account"
                         >
-                            <i className="material-symbols-rounded">add</i>
+                            <i className="material-symbols-rounded">person_add</i>
                             <span>Add</span>
                         </button>
                     </div>
 
-                    {/* Active Current User */}
+                    {/* Active Current User Card */}
                     {currentUser && (
-                        <div className={`${style.account_row} ${style.active_row}`}>
-                            <div className={style.avatar}>
-                                <Img url={currentUser.profilePic} alt="" />
-                            </div>
-                            <div className={style.user_info}>
-                                <h4>{currentUser.fullName || `@${currentUser.userName}`}</h4>
-                                <p>@{currentUser.userName}</p>
-                            </div>
-                            <span className={style.active_badge}>Active</span>
+                        <div className={style.active_user_wrapper}>
+                            <SwitchUserCard
+                                name={currentUser.fullName}
+                                userName={currentUser.userName}
+                                profilePic={currentUser.profilePic}
+                                follow={false}
+                            />
+                            <span className={style.active_label}>Active</span>
                         </div>
                     )}
 
                     {/* Other Saved Accounts */}
                     {otherAccounts.length > 0 ? (
-                        <div className={style.accounts_list}>
+                        <div className={style.saved_accounts_list}>
                             {otherAccounts.map((acc) => (
-                                <div
-                                    key={acc._id}
-                                    className={style.account_row}
-                                    onClick={() => handleSwitch(acc)}
-                                >
-                                    <div className={style.avatar}>
-                                        <Img url={acc.profilePic} alt="" />
-                                    </div>
-                                    <div className={style.user_info}>
-                                        <h4>{acc.fullName || `@${acc.userName}`}</h4>
-                                        <p>@{acc.userName}</p>
-                                    </div>
-                                    <div className={style.row_actions}>
-                                        <button
-                                            type="button"
-                                            className={style.switch_pill}
-                                            disabled={switchingId === acc._id}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSwitch(acc);
-                                            }}
-                                        >
-                                            {switchingId === acc._id ? "..." : "Switch"}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={style.remove_icon}
-                                            onClick={(e) => handleRemove(e, acc._id)}
-                                            title="Remove from saved accounts"
-                                        >
-                                            <i className="material-symbols-rounded">close</i>
-                                        </button>
-                                    </div>
+                                <div key={acc._id} className={style.saved_card_wrapper}>
+                                    <SwitchUserCard
+                                        name={acc.fullName}
+                                        userName={acc.userName}
+                                        profilePic={acc.profilePic}
+                                        follow={false}
+                                        event={() => handleSwitch(acc)}
+                                    />
+                                    <button
+                                        type="button"
+                                        className={style.remove_acc_btn}
+                                        onClick={(e) => handleRemove(e, acc._id)}
+                                        title="Remove saved account"
+                                    >
+                                        <i className="material-symbols-rounded">close</i>
+                                    </button>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className={style.empty_container}>
-                            <p>No other accounts on this device.</p>
+                        <div className={style.no_accounts_prompt}>
+                            <p>No other accounts logged in on this device.</p>
                             <button
                                 type="button"
-                                className={style.big_add_btn}
-                                onClick={() => setShowLoginForm(true)}
+                                className={style.add_account_main_btn}
+                                onClick={() => setShowAddForm(true)}
                             >
-                                <i className="material-symbols-rounded">add_circle</i>
-                                <span>Add An Account</span>
+                                <i className="material-symbols-rounded">person_add</i>
+                                <span>Add An Existing Account</span>
                             </button>
                         </div>
                     )}
                 </>
             ) : (
-                /* Inline Add Account Login Form */
-                <form className={style.login_form} onSubmit={handleAddAccountSubmit}>
-                    <div className={style.header_bar}>
+                /* Add Account Login Form using PIXR native Input components */
+                <form className={style.add_account_form} onSubmit={handleAddAccountSubmit}>
+                    <div className={style.form_header}>
                         <button
                             type="button"
-                            className={style.back_btn}
+                            className={style.back_to_list_btn}
                             onClick={() => {
-                                setShowLoginForm(false);
-                                setLoginErrorMsg("");
+                                setShowAddForm(false);
+                                setFormError("");
                             }}
                         >
                             <i className="material-symbols-rounded">arrow_back</i>
                             <span>Back</span>
                         </button>
-                        <span className={style.form_title}>Add Account</span>
+                        <h2 className={style.form_heading}>Log In to Add Account</h2>
                     </div>
 
-                    {loginErrorMsg && <div className={style.error_banner}>{loginErrorMsg}</div>}
+                    {formError && <div className={style.error_banner}>{formError}</div>}
 
-                    <div className={style.form_group}>
-                        <label>Username or Email</label>
-                        <input
+                    <div className={style.inputs_container}>
+                        <Input
+                            state={inputValue}
+                            setState={setInputValue}
+                            placeholder="Username or Email"
                             type="text"
-                            placeholder="Enter username or email"
-                            value={accountInput}
-                            onChange={(e) => setAccountInput(e.target.value)}
-                            required
+                            icon={inputType}
                         />
-                    </div>
-
-                    <div className={style.form_group}>
-                        <label>Password</label>
-                        <input
+                        <Input
+                            state={password}
+                            setState={setPassword}
+                            placeholder="Password"
                             type="password"
-                            placeholder="Enter password"
-                            value={passwordInput}
-                            onChange={(e) => setPasswordInput(e.target.value)}
-                            required
+                            icon="visibility"
                         />
                     </div>
 
-                    <button type="submit" className={style.submit_login_btn} disabled={isLoginLoading}>
-                        {isLoginLoading ? "Logging In..." : "Log In & Add Account"}
+                    <button type="submit" className={style.login_submit_button} disabled={isLoading}>
+                        {isLoading ? "Logging in..." : "Log In & Add Account"}
                     </button>
                 </form>
             )}
-        </div>
+        </section>
     );
 };
