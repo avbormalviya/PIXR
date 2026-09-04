@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux"
 import { setUserData } from "../../features/user/useSlice"
 import { Loader } from "../../features/statusSlice/loader/Loader"
 import { isAuthCookieWorking } from "../../utils/isCookieEnable"
+import { saveAccount } from "../../utils/savedAccounts"
 
 import { requestCameraAndMicAccess } from "../../utils/getPermission"
 
@@ -81,6 +82,7 @@ export const Login = () => {
             localStorage.setItem("refreshToken", refreshToken);
         }
 
+        saveAccount(user, refreshToken);
         dispatch(setUserData(user));
     }
 

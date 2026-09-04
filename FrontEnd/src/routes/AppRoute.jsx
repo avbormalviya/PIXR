@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { getUser } from "../utils/getUser";
 import { InitialLoading } from "../pages/initialLoading/InitialLoading";
 import { setUserData } from "../features/user/useSlice";
+import { saveAccount } from "../utils/savedAccounts";
 import { Music } from "../layouts/music/Music";
 import { MusicHome } from "../features/music/MusicHome";
 import { MusicDetails } from "../features/music/MusicDetails";
@@ -37,6 +38,7 @@ export const AppRoute = () => {
             const data = await getUser();
             if (data?.data) {
                 dispatch(setUserData(data.data));
+                saveAccount(data.data);
             }
             setLoading(false);
         })();
