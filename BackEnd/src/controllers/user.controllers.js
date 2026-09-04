@@ -345,8 +345,52 @@ const refreshAccessToken = asyncHandler( async (req, res) => {
         .cookie("refreshToken", newRefreshToken, cookieOptions.refreshToken)
         .json(
             new ApiResponse(200, { user: filteredUser, accessToken, refreshToken: newRefreshToken }, "Refresh access token successful")
-        )
 })
+
+const switchAccount = asyncHandler( async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        throw new ApiError(400, "Refresh token is required to switch account");
+    }
+
+    let decodedToken;
+    try {
+        decodedToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    } catch (err) {
+        throw new ApiError(401, "Session expired or invalid for target account. Please log in again.");
+    }
+
+    const user = await User.findById(decodedToken?._id);
+
+    if (!user) {
+        throw new ApiError(404, "User account not found");
+    }
+
+    if (user.refreshToken !== refreshToken) {
+        throw new ApiError(401, "Session revoked or expired for target account");
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user._id);
+
+    let filteredUser = user.toObject();
+    delete filteredUser.password;
+    delete filteredUser.refreshToken;
+    delete filteredUser.descriptor;
+
+    res
+        .status(200)
+        .cookie("accessToken", accessToken, cookieOptions.accessToken)
+        .cookie("refreshToken", newRefreshToken, cookieOptions.refreshToken)
+        .json(
+            new ApiResponse(
+                200,
+                { user: filteredUser, accessToken, refreshToken: newRefreshToken },
+                `Switched to account @${user.userName}`
+            )
+        );
+});
+
 
 
 const changePassword = asyncHandler( async (req, res) => {
@@ -2380,6 +2424,7 @@ export {
     loginUser,
     logoutUser,
     refreshAccessToken,
+    switchAccount,
     changePassword,
     saveFCMToken,
     getUser,

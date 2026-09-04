@@ -63,7 +63,7 @@ export const switchAccount = async (targetAccount, dispatch, navigate) => {
 
     try {
         const response = await axios.post(
-            "/api/v1/users/refresh-token",
+            "/api/v1/users/switchAccount",
             { refreshToken: targetAccount.refreshToken },
             { withCredentials: true }
         );

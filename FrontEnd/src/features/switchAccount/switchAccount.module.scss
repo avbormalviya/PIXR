@@ -1,78 +1,94 @@
-.switch_account_section {
+.switch_account_card {
     width: 100%;
+    max-width: 320px;
+    padding: 0.75rem 0.9rem;
+    background: var(--background-secondary, #181d2a);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    padding: 1rem;
-    background: var(--background-secondary, #181d2a);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 0.5rem;
+    font-family: inherit;
+
+    &.modal_layout {
+        position: absolute;
+        top: 50px;
+        right: 15px;
+        z-index: 999999;
+        width: 290px;
+        animation: fadeInDown 0.2s ease-out;
+    }
 
     .header_bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 0.2rem;
 
-        .switch_account_heading {
-            font-size: 1.1rem;
+        .title_area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--text-primary, #ffffff);
-            margin: 0;
+
+            i {
+                font-size: 18px;
+                color: #0094f6;
+            }
         }
 
         .add_account_btn {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             background: rgba(0, 148, 246, 0.12);
             color: #0094f6;
-            border: 1px solid rgba(0, 148, 246, 0.3);
-            border-radius: 20px;
-            padding: 4px 10px;
-            font-size: 0.8rem;
+            border: 1px solid rgba(0, 148, 246, 0.25);
+            border-radius: 16px;
+            padding: 3px 8px;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
 
             i {
-                font-size: 16px;
+                font-size: 14px;
             }
 
             &:hover {
                 background: #0094f6;
                 color: #ffffff;
-                transform: translateY(-1px);
             }
         }
     }
 
-    .account_card {
+    .account_row {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 8px 12px;
-        border-radius: 12px;
-        background: var(--background-ternary, rgba(255, 255, 255, 0.04));
+        gap: 10px;
+        padding: 6px 8px;
+        border-radius: 10px;
+        background: var(--background-ternary, rgba(255, 255, 255, 0.03));
         border: 1px solid transparent;
         transition: all 0.2s ease;
         cursor: pointer;
 
         &:hover {
-            border-color: rgba(0, 148, 246, 0.3);
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 148, 246, 0.25);
         }
 
-        &.active {
-            border-color: rgba(0, 148, 246, 0.5);
+        &.active_row {
             background: rgba(0, 148, 246, 0.08);
+            border-color: rgba(0, 148, 246, 0.4);
             cursor: default;
         }
 
-        .avatar_wrapper {
-            width: 42px;
-            height: 42px;
+        .avatar {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             overflow: hidden;
             flex-shrink: 0;
@@ -84,12 +100,12 @@
             }
         }
 
-        .account_info {
+        .user_info {
             flex: 1;
             min-width: 0;
 
-            h2 {
-                font-size: 0.95rem;
+            h4 {
+                font-size: 0.85rem;
                 font-weight: 600;
                 color: var(--text-primary, #ffffff);
                 margin: 0;
@@ -99,43 +115,44 @@
             }
 
             p {
-                font-size: 0.8rem;
+                font-size: 0.72rem;
                 color: var(--text-primary-70, rgba(255, 255, 255, 0.6));
-                margin: 2px 0 0 0;
+                margin: 1px 0 0 0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
         }
 
-        .active_badge {
-            font-size: 0.75rem;
-            font-weight: 700;
+        .active_dot {
             color: #0094f6;
-            background: rgba(0, 148, 246, 0.15);
-            padding: 3px 8px;
-            border-radius: 12px;
-        }
-
-        .action_group {
             display: flex;
             align-items: center;
-            gap: 6px;
 
-            .switch_btn {
+            i {
+                font-size: 18px;
+            }
+        }
+
+        .row_actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            .switch_pill {
                 background: #0094f6;
                 color: #ffffff;
                 border: none;
-                border-radius: 16px;
-                padding: 5px 12px;
-                font-size: 0.8rem;
+                border-radius: 14px;
+                padding: 4px 10px;
+                font-size: 0.75rem;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s ease;
 
                 &:hover {
                     background: #007bb5;
-                    transform: scale(1.04);
+                    transform: scale(1.03);
                 }
 
                 &:disabled {
@@ -144,11 +161,11 @@
                 }
             }
 
-            .remove_btn {
+            .remove_icon {
                 background: transparent;
                 border: none;
-                color: rgba(255, 255, 255, 0.4);
-                padding: 4px;
+                color: rgba(255, 255, 255, 0.35);
+                padding: 3px;
                 border-radius: 50%;
                 cursor: pointer;
                 display: flex;
@@ -157,7 +174,7 @@
                 transition: all 0.2s ease;
 
                 i {
-                    font-size: 16px;
+                    font-size: 14px;
                 }
 
                 &:hover {
@@ -168,16 +185,27 @@
         }
     }
 
-    .saved_list {
+    .accounts_list {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.35rem;
     }
 
-    .no_other_text {
-        font-size: 0.8rem;
+    .empty_text {
+        font-size: 0.75rem;
         color: var(--text-primary-50, rgba(255, 255, 255, 0.5));
-        margin: 0.2rem 0 0 0;
+        margin: 0.1rem 0;
         text-align: center;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

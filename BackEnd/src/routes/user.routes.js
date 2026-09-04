@@ -10,6 +10,7 @@ import {
     loginUser,
     logoutUser,
     refreshAccessToken,
+    switchAccount,
     changePassword,
     saveFCMToken,
     getUser,
@@ -78,6 +79,10 @@ router.route("/logout").post(
 
 router.route("/refreshToken").post(
     refreshAccessToken
+);
+
+router.route("/switchAccount").post(
+    switchAccount
 );
 
 router.route("/changePassword").post(
