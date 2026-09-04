@@ -8,10 +8,6 @@ const app = express();
 
 initSocket(app);
 
-app.get("/ping", (req, res) => {
-    res.status(200).send("pong");
-});
-
 app.use(cors({
     origin: process.env.CORS_ORIGIN === "*" ? "*" : (origin, callback) => {
         // Allow any origin for now to prevent CORS issues on different Vercel deployments
@@ -19,6 +15,10 @@ app.use(cors({
     },
     credentials: true,
 }));
+
+app.get("/ping", (req, res) => {
+    res.status(200).send("pong");
+});
 
 app.use(express.json({
     limit: "10mb"

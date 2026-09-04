@@ -345,7 +345,8 @@ const refreshAccessToken = asyncHandler( async (req, res) => {
         .cookie("refreshToken", newRefreshToken, cookieOptions.refreshToken)
         .json(
             new ApiResponse(200, { user: filteredUser, accessToken, refreshToken: newRefreshToken }, "Refresh access token successful")
-})
+        );
+});
 
 const switchAccount = asyncHandler( async (req, res) => {
     const { refreshToken } = req.body;
