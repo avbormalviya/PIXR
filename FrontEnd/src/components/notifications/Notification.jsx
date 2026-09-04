@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import style from './notification.module.scss'
 import { Img } from '../img/Img';
 import { getNotifications, markNotificationAsRead } from '../../utils/getNotifications';
@@ -128,7 +128,7 @@ export const Notification = () => {
                     <div className={style.notification_wrapper}>
                         {
                             unreadNotifications.map((notification, index) => (
-                                <div key={index} className={style.notification_card}>
+                                <div key={notification._id || index} className={style.notification_card}>
                                     <Img url={ notification.sender.profilePic } style={{ borderRadius: "50%" }} />
                                     <div className={style.notification_content}>
                                         <h1>
@@ -166,14 +166,14 @@ export const Notification = () => {
                 <div className={style.right_notification}>
                     <div className={style.notification_wrapper} style={{ borderRadius: '0' }}>
                         {
-                            Object.entries(categories).map(([category, notifications]) => (
-                                notifications.length > 0 && (
-                                    <>
+                            Object.entries(categories).map(([category, catNotifications]) => (
+                                catNotifications.length > 0 && (
+                                    <React.Fragment key={category}>
                                         <h1 className={style.notification_heading}>{ category.replaceAll('_', ' ') }</h1>
     
                                         {
-                                            notifications.map((notification, index) => (
-                                                <div key={index} className={style.notification_card}>
+                                            catNotifications.map((notification, index) => (
+                                                <div key={notification._id || index} className={style.notification_card}>
                                                     <Img url={ notification.sender.profilePic } style={{ borderRadius: "50%" }} />
                                                     <div className={style.notification_content}>
                                                         <h1>
@@ -193,7 +193,7 @@ export const Notification = () => {
                                                 </div>
                                             ))
                                         }
-                                    </>
+                                    </React.Fragment>
                                 )
                             ))
                         }

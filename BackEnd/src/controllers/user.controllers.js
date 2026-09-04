@@ -52,7 +52,7 @@ const cookieOptions = {
         httpOnly: true,
         sameSite: isProduction ? "none" : "lax",
         secure: isProduction,
-        ...(isProduction && { domain: "pixr-backend.onrender.com" }),
+        ...(process.env.COOKIE_DOMAIN && { domain: process.env.COOKIE_DOMAIN }),
         maxAge: process.env.ACCESS_TOKEN_EXPIRY
     },
 
@@ -60,7 +60,7 @@ const cookieOptions = {
         httpOnly: true,
         sameSite: isProduction ? "none" : "lax",
         secure: isProduction,
-        ...(isProduction && { domain: "pixr-backend.onrender.com" }),
+        ...(process.env.COOKIE_DOMAIN && { domain: process.env.COOKIE_DOMAIN }),
         maxAge: process.env.REFRESH_TOKEN_EXPIRY
     },
 
@@ -68,7 +68,7 @@ const cookieOptions = {
         httpOnly: true,
         sameSite: isProduction ? "none" : "lax",
         secure: isProduction,
-        ...(isProduction && { domain: "pixr-backend.onrender.com" }),
+        ...(process.env.COOKIE_DOMAIN && { domain: process.env.COOKIE_DOMAIN }),
         path: "/",
     }
 }

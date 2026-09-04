@@ -623,7 +623,8 @@ export const Chat = () => {
                                 userName={chatUser?.userName}
                             />
                             <ConversationHeader.Actions>
-                                <VoiceCallButton onClick={handleCallButton} disabled={!isPermissionsGranted} />
+                                <VideoCallButton onClick={handleCallButton} title="Video Call" />
+                                <VoiceCallButton onClick={handleCallButton} title="Voice Call" />
                                 <button
                                     type="button"
                                     className={style.delete_chat_btn}
@@ -635,12 +636,12 @@ export const Chat = () => {
                             </ConversationHeader.Actions>
                         </ConversationHeader>
 
-                        <MessageList typingIndicator={typing.typing && <TypingIndicator content={`${typing.userName} is typing`} />}>
+                        <MessageList typingIndicator={typing.typing ? <TypingIndicator content={`${typing.userName} is typing`} /> : null}>
                             {Object.entries(groupedMessages)
                                 .sort(([ , a ], [ , b ]) =>
                                     new Date(a.firstMessageTime) - new Date(b.firstMessageTime)
                                 )
-                                .map(([key, group], idx, arr) => {
+                                .flatMap(([key, group], idx, arr) => {
                                     const currentGroupDate = getDateOnly(group.firstMessageTime);
                                     const prevGroup = arr[idx - 1]?.[1];
                                     const prevGroupDate = prevGroup ? getDateOnly(prevGroup.firstMessageTime) : null;
@@ -648,83 +649,86 @@ export const Chat = () => {
                                     const showSeparator = currentGroupDate !== prevGroupDate;
                                     const readableDate = getReadableDate(group.firstMessageTime);
 
-                                    return (
-                                        <React.Fragment key={key}>
-                                            {showSeparator && (
-                                                <MessageSeparator content={readableDate} />
+                                    const items = [];
+                                    if (showSeparator) {
+                                        items.push(
+                                            <MessageSeparator key={`sep_${key}`} content={readableDate} />
+                                        );
+                                    }
+
+                                    items.push(
+                                        <MessageGroup
+                                            key={`grp_${key}`}
+                                            direction={group.senderId === user._id ? "outgoing" : "incoming"}
+                                            sender={group.senderName}
+                                            sentTime={formatDistanceToNow(
+                                                new Date(group.firstMessageTime),
+                                                { addSuffix: true }
                                             )}
-                                            <MessageGroup
-                                                direction={group.senderId === user._id ? "outgoing" : "incoming"}
-                                                sender={group.senderName}
-                                                sentTime={formatDistanceToNow(
-                                                    new Date(group.firstMessageTime),
-                                                    { addSuffix: true }
-                                                )}
-                                            >
-                                                <MessageGroup.Messages>
-                                                    {group.messages.map((msg) => {
-                                                        const isOutgoing = msg.sender === user._id;
+                                        >
+                                            <MessageGroup.Messages>
+                                                {group.messages.map((msg) => {
+                                                    const isOutgoing = msg.sender === user._id;
 
-                                                        if (msg.attachments) {
-                                                            const isVideo = isVideoUrl(msg.attachments);
-                                                            return (
-                                                                <Message
-                                                                    key={msg._id}
-                                                                    model={{
-                                                                        sentTime: new Date(msg.createdAt).toLocaleTimeString(),
-                                                                        sender: group.senderName,
-                                                                        direction: isOutgoing ? "outgoing" : "incoming"
-                                                                    }}
-                                                                >
-                                                                    <Message.CustomContent>
-                                                                        {isVideo ? (
-                                                                            <video src={msg.attachments} controls className={style.attachment_video} />
-                                                                        ) : (
-                                                                            <img src={msg.attachments} alt="attachment" className={style.attachment_img} />
-                                                                        )}
-                                                                        {msg.content && <p>{msg.content}</p>}
-                                                                    </Message.CustomContent>
-                                                                </Message>
-                                                            );
-                                                        }
-
+                                                    if (msg.attachments) {
+                                                        const isVideo = isVideoUrl(msg.attachments);
                                                         return (
                                                             <Message
                                                                 key={msg._id}
                                                                 model={{
-                                                                    message: msg.content,
                                                                     sentTime: new Date(msg.createdAt).toLocaleTimeString(),
                                                                     sender: group.senderName,
                                                                     direction: isOutgoing ? "outgoing" : "incoming"
                                                                 }}
-                                                            />
+                                                            >
+                                                                <Message.CustomContent>
+                                                                    {isVideo ? (
+                                                                        <video src={msg.attachments} controls className={style.attachment_video} />
+                                                                    ) : (
+                                                                        <img src={msg.attachments} alt="attachment" className={style.attachment_img} />
+                                                                    )}
+                                                                    {msg.content && <p>{msg.content}</p>}
+                                                                </Message.CustomContent>
+                                                            </Message>
                                                         );
-                                                    })}
-                                                </MessageGroup.Messages>
-                                            </MessageGroup>
-                                        </React.Fragment>
+                                                    }
+
+                                                    return (
+                                                        <Message
+                                                            key={msg._id}
+                                                            model={{
+                                                                message: msg.content,
+                                                                sentTime: new Date(msg.createdAt).toLocaleTimeString(),
+                                                                sender: group.senderName,
+                                                                direction: isOutgoing ? "outgoing" : "incoming"
+                                                            }}
+                                                        />
+                                                    );
+                                                })}
+                                            </MessageGroup.Messages>
+                                        </MessageGroup>
                                     );
+                                    return items;
                                 })}
-
-                                {attachments.url &&
-                                    <div className={style.attachments}>
-                                        <button
-                                            type="button"
-                                            className={style.remove_attachment_btn}
-                                            onClick={handleRemoveAttachment}
-                                            title="Remove attachment"
-                                        >
-                                            <i className="material-symbols-rounded">close</i>
-                                        </button>
-                                        {attachments.type === "IMAGE" ?
-                                            <img src={attachments.url} alt="attachment" className={style.attachment_img} />
-                                            :
-                                            <video src={attachments.url} controls autoPlay loop className={style.attachment_video} />
-                                        }
-                                    </div>
-                                }
-
                         </MessageList>
+
+                        {attachments.url && (
+                            <div className={style.attachments}>
+                                <button
+                                    type="button"
+                                    className={style.remove_attachment_btn}
+                                    onClick={handleRemoveAttachment}
+                                    title="Remove attachment"
+                                >
+                                    <i className="material-symbols-rounded">close</i>
+                                </button>
+                                {attachments.type === "IMAGE" ? (
+                                    <img src={attachments.url} alt="attachment" className={style.attachment_img} />
+                                ) : (
+                                    <video src={attachments.url} controls autoPlay loop className={style.attachment_video} />
+                                )}
+                            </div>
+                        )}
 
                         <MessageInput
                             placeholder="Type message here"

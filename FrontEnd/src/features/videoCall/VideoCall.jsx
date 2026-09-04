@@ -42,25 +42,25 @@ export const VideoCall = () => {
     }, [location.state?.user, chatUser?._id, navigate]);
 
     useEffect(() => {
-        if (localStream) {
-            console.log("Local stream available:", localStream);
+        if (localStream && localVideoRef.current) {
+            console.log("✅ Setting local video stream to element", localStream);
+            localVideoRef.current.srcObject = localStream;
+            localVideoRef.current.play().catch(err => console.error("❌ Local video play error:", err));
+
             const vTrack = localStream.getVideoTracks()[0];
             if (vTrack) {
                 setIsLocalCameraOn(vTrack.enabled);
             }
-            if (localVideoRef.current) {
-                localVideoRef.current.srcObject = localStream;
-            }
         }
-    }, [localStream]);
+    }, [localStream, localVideoRef.current, isCallAccepted, calling]);
 
     useEffect(() => {
         if (remoteStream && remoteVideoRef.current) {
-            console.log("✅ Setting remote video stream", remoteStream);
+            console.log("✅ Setting remote video stream to element", remoteStream);
             remoteVideoRef.current.srcObject = remoteStream;
             remoteVideoRef.current.play().catch(err => console.error("❌ Remote video play error:", err));
         }
-    }, [remoteStream]);
+    }, [remoteStream, remoteVideoRef.current, isCallAccepted]);
 
     const toggleCamera = () => {
         if (!localStream) return;
@@ -97,21 +97,21 @@ export const VideoCall = () => {
         <section className={style.video_call}>
             <div className={style.remote_video_wrapper}>
                 <video className={style.remote_video} ref={remoteVideoRef} autoPlay playsInline />
-                {!isRemoteCameraOn && (
+                {(!isRemoteCameraOn || !remoteStream) && (
                     <div className={style.remote_video_overlay}>
-                        <Img url={chatUser.profilePic} alt="" />
-                        <h1>{chatUser.userName}</h1>
+                        <Img url={chatUser?.profilePic} alt="" />
+                        <h1>{calling ? `Calling ${chatUser?.fullName || chatUser?.userName || ""}...` : (chatUser?.fullName || chatUser?.userName || "Video Call")}</h1>
                     </div>
                 )}
             </div>
 
-            {!calling && !incomingCall && (
+            {localStream && (
                 <div className={style.local_video_wrapper}>
                     <div className={style.local_video_holder}>
-                        <video className={style.local_video} ref={localVideoRef} autoPlay playsInline />
+                        <video className={style.local_video} ref={localVideoRef} autoPlay playsInline muted />
                         {!isLocalCameraOn && (
                             <div className={style.local_video_overlay}>
-                                <Img url={user.profilePic} alt="" />
+                                <Img url={user?.profilePic} alt="" />
                             </div>
                         )}
                     </div>
