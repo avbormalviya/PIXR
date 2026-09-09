@@ -54,11 +54,18 @@ export const removeSavedAccount = (userId) => {
     }
 };
 
-export const switchAccount = async (targetAccount, dispatch, navigate) => {
+export const switchAccount = async (targetAccount, dispatch, navigate, currentUser) => {
     if (!targetAccount || !targetAccount.refreshToken) {
         showError(`No active session saved for @${targetAccount?.userName || "user"}. Please log in.`);
         if (navigate) navigate("/auth/login");
         return false;
+    }
+
+    // Snapshot the current account's live refreshToken before switching so it
+    // can be restored when the user switches back later.
+    if (currentUser) {
+        const liveRefreshToken = localStorage.getItem("refreshToken");
+        saveAccount(currentUser, liveRefreshToken);
     }
 
     try {

@@ -2,8 +2,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const sass = await import('sass'); // ✅ Use dynamic import in ESM
-
 export default defineConfig({
     plugins: [
         react(),
@@ -50,7 +48,7 @@ export default defineConfig({
     css: {
         preprocessorOptions: {
             scss: {
-                implementation: sass.default, // ✅ Use `.default`
+                api: 'modern', // ✅ Use modern Sass API (silences legacy-js-api warnings)
             },
         },
     },

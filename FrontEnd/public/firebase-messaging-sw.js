@@ -11,6 +11,36 @@ firebase.initializeApp({
     appId: "1:892809315757:web:7db1750233733c6bbacd24",
 });
 
+const messaging = firebase.messaging();
+
+// Handle background push notifications (when app is closed/backgrounded)
+messaging.onBackgroundMessage(function(payload) {
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+
+    const data = (payload && payload.data) || {};
+    const notif = payload.notification || data;
+
+    const title = (notif && notif.title) || "PIXR";
+    const isCall = data.type === 'incoming_call'
+        || (notif?.title || "").toLowerCase().includes("call")
+        || (notif?.body || "").toLowerCase().includes("call");
+
+    const options = {
+        body: (notif && notif.body) || "You have a new update in PIXR",
+        icon: '/icon_400.png',
+        badge: '/icon_100.png',
+        data: {
+            url: data.url || (data.senderId ? `/chat` : '/')
+        },
+        requireInteraction: isCall,
+        vibrate: isCall ? [500, 250, 500, 250, 500] : [200, 100, 200],
+        tag: isCall ? 'incoming-call' : 'pixr-notification',
+        renotify: true
+    };
+
+    return self.registration.showNotification(title, options);
+});
+
 self.addEventListener('push', function(event) {
     if (!event.data) return;
 
@@ -23,7 +53,7 @@ self.addEventListener('push', function(event) {
 
     const payload = data.notification || data.data || data;
     const title = payload.title || "PIXR Alert";
-    const isCall = payload.type === 'incoming_call' || payload.title?.toLowerCase().includes('call');
+    const isCall = payload.type === 'incoming_call' || (payload.title?.toLowerCase().includes('call'));
 
     const options = {
         body: payload.body || "You have a new update in PIXR",
@@ -60,5 +90,3 @@ self.addEventListener('notificationclick', function(event) {
         })
     );
 });
-
-const messaging = firebase.messaging();

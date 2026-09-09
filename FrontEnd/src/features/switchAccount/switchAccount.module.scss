@@ -1,186 +1,175 @@
-.switch_account_section {
+/* Sidebar Switch Card — Fixed dimensions so sidebar never resizes or shifts */
+.sidebar_switch_card {
     width: 100%;
+    box-sizing: border-box;
     display: flex;
-    flex-direction: column;
-    gap: 1em;
-    padding: 1.2em;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6em 0.8em;
     background-color: var(--background-secondary);
     border-radius: 1.2em;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--accent-border-color, rgba(255, 255, 255, 0.08));
+    font-size: 1.6rem;
+    gap: 0.8em;
+    overflow: hidden;
 
-    &.modal_view {
-        position: absolute;
-        top: 50px;
-        right: 0;
-        z-index: 999999;
-        width: 360px;
-        max-width: 90vw;
-        animation: slideInDown 0.25s ease-out;
-    }
-
-    .header_row {
-        width: 100%;
+    .user_info_group {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 0.8em;
+        min-width: 0;
+        flex: 1;
 
-        .switch_account_heading {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0;
+        .avatar {
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            min-height: 40px !important;
+            max-width: 40px !important;
+            max-height: 40px !important;
+            border-radius: 50% !important;
+            overflow: hidden !important;
+            flex-shrink: 0 !important;
+
+            img {
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 40px !important;
+                max-height: 40px !important;
+                object-fit: cover !important;
+                border-radius: 50% !important;
+                display: block !important;
+            }
         }
 
-        .add_btn_toggle {
+        .text_meta {
+            min-width: 0;
             display: flex;
-            align-items: center;
-            gap: 0.4em;
-            background-color: var(--background-ternary);
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-            border-radius: 2em;
-            padding: 0.4em 0.9em;
-            font-size: 0.85em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            flex-direction: column;
 
-            i {
-                font-size: 1.2em;
+            h3 {
+                font-size: 0.95em;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-            &:hover {
-                background-color: var(--primary-color);
-                color: #ffffff;
+            p {
+                font-size: 0.8em;
+                color: var(--text-primary-50);
+                margin: 0.1em 0 0 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         }
     }
 
-    .active_user_wrapper {
-        position: relative;
+    .switch_action_btn {
+        background-color: transparent !important;
+        color: var(--primary-color);
+        border: none;
+        font-size: 0.9em;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 0.4em 0.8em;
+        border-radius: 0.6em;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+        font-family: inherit;
+        /* override the global .__button first-child background-color */
+        &:first-child {
+            background-color: transparent !important;
+        }
+
+        &:hover {
+            background-color: rgba(0, 148, 246, 0.12) !important;
+        }
+    }
+}
+
+/* Modal Overlay for Account Switcher & Add Account Form */
+.modal_backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999999;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em;
+    animation: fadeIn 0.2s ease-out;
+
+    .modal_card {
         width: 100%;
-        border-radius: 1em;
-        border: 2px solid var(--primary-color);
-        overflow: hidden;
-
-        .active_label {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            font-size: 0.7em;
-            font-weight: 700;
-            color: #ffffff;
-            background-color: var(--primary-color);
-            padding: 0.2em 0.7em;
-            border-radius: 1em;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-    }
-
-    .saved_accounts_list {
+        max-width: 400px;
+        background-color: var(--background-secondary);
+        border-radius: 1.5em;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--accent-border-color, rgba(255, 255, 255, 0.1));
+        padding: 1.4em;
         display: flex;
         flex-direction: column;
-        gap: 0.6em;
-        width: 100%;
+        gap: 1.2em;
+        animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        color: var(--text-primary);
 
-        .saved_card_wrapper {
-            position: relative;
-            width: 100%;
+        .modal_header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
 
-            .remove_acc_btn {
-                position: absolute;
-                right: 10px;
-                top: 50%;
-                transform: translateY(-50%);
+            h2 {
+                font-size: 2em;
+                font-weight: 700;
+                text-wrap: nowrap;
+                color: var(--text-primary);
+                margin: 0;
+            }
+
+            .close_btn {
                 background: transparent;
                 border: none;
                 color: var(--text-primary-50);
-                padding: 6px;
+                padding: 4px;
                 border-radius: 50%;
                 cursor: pointer;
+                font-size: 1em;
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                transition: all 0.2s ease;
+                justify-content: end;
+                margin: 0 !important;
+                font-size: 2em;
 
                 i {
-                    font-size: 1.2em;
+                    font-size: 1.3em;
                 }
 
                 &:hover {
-                    color: #ff4d4d;
-                    background: rgba(255, 77, 77, 0.15);
+                    color: var(--text-primary);
+                    background: rgba(255, 255, 255, 0.1);
                 }
             }
-        }
-    }
 
-    .no_accounts_prompt {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.8em;
-        padding: 1em 0;
-        text-align: center;
-
-        p {
-            font-size: 0.85em;
-            color: var(--text-primary-50);
-            margin: 0;
-        }
-
-        .add_account_main_btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-            background-color: var(--primary-color);
-            color: #ffffff;
-            border: none;
-            border-radius: 2em;
-            padding: 0.7em 1.5em;
-            font-size: 0.95em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 148, 246, 0.3);
-
-            i {
-                font-size: 1.2em;
-            }
-
-            &:hover {
-                background-color: var(--secondary-color);
-                transform: translateY(-2px);
-            }
-        }
-    }
-
-    /* Add Account Login Form */
-    .add_account_form {
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-        width: 100%;
-
-        .form_header {
-            display: flex;
-            align-items: center;
-            gap: 0.8em;
-
-            .back_to_list_btn {
+            .back_btn {
                 display: flex;
                 align-items: center;
                 gap: 0.3em;
                 background: transparent;
                 border: none;
                 color: var(--primary-color);
-                font-size: 0.9em;
+                font-size: 1em;
                 font-weight: 600;
                 cursor: pointer;
                 padding: 0;
+                margin: 0 !important;
+                font-size: 2em;
 
                 i {
                     font-size: 1.2em;
@@ -190,62 +179,266 @@
                     text-decoration: underline;
                 }
             }
-
-            .form_heading {
-                font-size: 1.1em;
-                font-weight: 700;
-                color: var(--text-primary);
-                margin: 0;
-            }
         }
 
-        .error_banner {
-            background-color: rgba(255, 77, 77, 0.15);
-            border: 1px solid rgba(255, 77, 77, 0.4);
-            color: #ff4d4d;
-            font-size: 0.85em;
-            padding: 0.6em 0.9em;
-            border-radius: 0.6em;
-        }
-
-        .inputs_container {
+        .modal_body {
             display: flex;
             flex-direction: column;
             gap: 1em;
-            width: 100%;
-        }
+            max-height: 60vh;
+            overflow-y: auto;
 
-        .login_submit_button {
-            width: 100%;
-            background-color: var(--primary-color);
-            color: #ffffff;
-            border: none;
-            border-radius: 0.8em;
-            padding: 0.8em;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            .account_item {
+                display: flex;
+                align-items: center;
+                gap: 0.9em;
+                padding: 0.7em 0.9em;
+                border-radius: 1em;
+                background-color: var(--background-ternary);
+                border: 1px solid transparent;
+                transition: all 0.2s ease;
+                cursor: pointer;
 
-            &:hover {
-                background-color: var(--secondary-color);
+                &:hover {
+                    border-color: var(--primary-color);
+                }
+
+                &.active_item {
+                    border-color: var(--primary-color);
+                    background-color: rgba(0, 148, 246, 0.1);
+                    cursor: default;
+                }
+
+                .avatar {
+                    width: 40px !important;
+                    height: 40px !important;
+                    min-width: 40px !important;
+                    min-height: 40px !important;
+                    max-width: 40px !important;
+                    max-height: 40px !important;
+                    border-radius: 50% !important;
+                    overflow: hidden !important;
+                    flex-shrink: 0 !important;
+
+                    img {
+                        width: 100% !important;
+                        height: 100% !important;
+                        max-width: 40px !important;
+                        max-height: 40px !important;
+                        object-fit: cover !important;
+                        border-radius: 50% !important;
+                        display: block !important;
+                    }
+                }
+
+                .account_meta {
+                    flex: 1;
+                    min-width: 0;
+
+                    h4 {
+                        font-size: 0.95em;
+                        font-weight: 600;
+                        color: var(--text-primary);
+                        margin: 0;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
+                    p {
+                        font-size: 0.8em;
+                        color: var(--text-primary-50);
+                        margin: 0.1em 0 0 0;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+
+                .check_icon {
+                    color: var(--primary-color);
+                    font-size: 1.4em;
+                }
+
+                .item_actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4em;
+
+                    .switch_pill {
+                        background-color: var(--primary-color);
+                        color: #ffffff;
+                        border: none;
+                        border-radius: 1.5em;
+                        padding: 0.4em 1em;
+                        font-size: 0.85em;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+
+                        &:hover {
+                            background-color: var(--secondary-color);
+                        }
+
+                        &:disabled {
+                            opacity: 0.6;
+                            cursor: not-allowed;
+                        }
+                    }
+
+                    .remove_pill {
+                        background: transparent;
+                        border: none;
+                        color: var(--text-primary-50);
+                        padding: 4px;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        i {
+                            font-size: 1.1em;
+                        }
+
+                        &:hover {
+                            color: #ff4d4d;
+                            background: rgba(255, 77, 77, 0.15);
+                        }
+                    }
+                }
             }
 
-            &:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
+            .saved_accounts_group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.6em;
+
+                .section_sublabel {
+                    font-size: 0.8em;
+                    font-weight: 700;
+                    color: var(--text-primary-50);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    margin-top: 0.4em;
+                }
+            }
+
+            .empty_accounts_notice {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5em;
+                padding: 1.5em 0;
+                color: var(--text-primary-50);
+                text-align: center;
+
+                i {
+                    font-size: 2.5em;
+                    opacity: 0.6;
+                }
+
+                p {
+                    font-size: 0.9em;
+                    margin: 0;
+                }
+            }
+        }
+
+        .modal_footer {
+            border-top: 1px solid var(--accent-border-color, rgba(255, 255, 255, 0.08));
+            padding-top: 1em;
+
+            .add_existing_account_btn {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.6em;
+                background-color: var(--primary-color);
+                color: #ffffff;
+                border: none;
+                border-radius: 2em;
+                padding: 0.8em;
+                font-size: 0.95em;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 14px rgba(0, 148, 246, 0.3);
+
+                i {
+                    font-size: 1.2em;
+                }
+
+                &:hover {
+                    background-color: var(--secondary-color);
+                    transform: translateY(-1px);
+                }
+            }
+        }
+
+        /* Add Account Login Form */
+        .add_account_form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2em;
+            width: 100%;
+            padding: 0;
+
+            .form_error {
+                background-color: rgba(255, 77, 77, 0.15);
+                border: 1px solid rgba(255, 77, 77, 0.4);
+                color: #ff4d4d;
+                font-size: 0.85em;
+                padding: 0.6em 0.9em;
+                border-radius: 0.6em;
+            }
+
+            .form_inputs {
+                display: flex;
+                flex-direction: column;
+                gap: 1em;
+            }
+
+            .submit_add_btn {
+                width: 100%;
+                background-color: var(--primary-color);
+                color: #ffffff;
+                border: none;
+                border-radius: 0.8em;
+                padding: 0.85em;
+                font-size: 1em;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin: 0 !important;
+                font-size: 1.5em;
+
+                &:hover {
+                    background-color: var(--secondary-color);
+                }
+
+                &:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
             }
         }
     }
 }
 
-@keyframes slideInDown {
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
     from {
         opacity: 0;
-        transform: translateY(-12px);
+        transform: scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
     }
 }

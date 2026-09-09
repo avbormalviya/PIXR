@@ -6,13 +6,11 @@ dotenv.config({
     path: "./.env"
 })
 
-const PORT = process.env.PORT || 8000;
-
 connectDB()
     .then(() => {
-        // app.listen(PORT, () => {
-            console.log("Server is running on port");
-        // })
+        // HTTP server is started by initSocket() in socket.js via httpServer.listen()
+        // Do NOT call app.listen() here — that would bind a second server on the same port
+        console.log("✅ MongoDB connected. Socket server is running on port 8000");
     })
     .catch((error) => {
         console.log("ERROR: error to connect to db ||", error);

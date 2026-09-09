@@ -23,7 +23,7 @@ const Button = ({ children, text, event, ...props }) => {
     )
 }
 
-const IconButton = ({ isActive, ActiveIcon, InactiveIcon, event }) => {
+const IconButton = ({ isActive, ActiveIcon, InactiveIcon, event, style: extraStyle = {} }) => {
     const Icon = isActive ? ActiveIcon : InactiveIcon;
     const MotionIcon = motion(Icon);
     return <MotionIcon
@@ -32,14 +32,13 @@ const IconButton = ({ isActive, ActiveIcon, InactiveIcon, event }) => {
                 e.stopPropagation();
                 event();
             }}
-            // whileHover={{ scale: 1.2 }}
-            // whileTap={{
-            //     scale: 0.8,
-            //     transition: { duration: 0.2 }
-            // }}
-            // animate={{ scale: 1, color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)" }}
-            // transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            style={{ justifySelf: 'end', outline: 'none', color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)" }}
+            whileTap={{
+                scale: 0.85,
+                transition: { duration: 0.15 }
+            }}
+            animate={{ scale: 1, color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)" }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            style={{ justifySelf: 'end', outline: 'none', color: isActive ? "rgb(237 20 61)" : "var(--text-primary-70)", cursor: 'pointer', ...extraStyle }}
         />
 }
 
@@ -105,18 +104,18 @@ const BookmarkButton = ({ isBookmarked, event, ...props }) => {
 }
 
 const ShareButton = ({ event }) => {
-    return <SendRoundedIcon fontSize="large" onClick={event} />;
+    return <SendRoundedIcon fontSize="large" onClick={event} style={{ color: "var(--text-primary-70)", cursor: 'pointer' }} />;
 }
 
 const CommentButton = ({ event }) => {
     return (
-        <Icon icon={CommentIcon} onClick={event} />
+        <Icon icon={CommentIcon} onClick={event} style={{ color: "var(--text-primary-70)", cursor: 'pointer' }} />
     );
 }
 
 const CloseButton = ({ event }) => {
     return (
-        <Icon icon={CloseRoundedIcon} onClick={event} />
+        <Icon icon={CloseRoundedIcon} onClick={event} style={{ color: "var(--text-primary-70)", cursor: 'pointer' }} />
     );
 }
 

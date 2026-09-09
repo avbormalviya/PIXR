@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getMessaging } from 'firebase/messaging';
+import { getMessaging, isSupported } from 'firebase/messaging';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,11 +15,23 @@ const firebaseConfig = {
 const FirebaseContext = createContext();
 
 export const FirebaseProvider = ({ children }) => {
-    const app = initializeApp(firebaseConfig);
-    const messaging = getMessaging(app);
+    const [messaging, setMessaging] = useState(null);
 
-    // Register the service worker when the app loads
     useEffect(() => {
+        // Initialize Firebase App + messaging if supported
+        (async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const supported = await isSupported().catch(() => false);
+                if (supported) {
+                    setMessaging(getMessaging(app));
+                }
+            } catch (e) {
+                console.error("Firebase init error:", e);
+            }
+        })();
+
+        // Register service worker for background notifications
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/firebase-messaging-sw.js')
                 .then(function(registration) {
@@ -29,7 +41,6 @@ export const FirebaseProvider = ({ children }) => {
                     console.error('Service Worker registration failed:', error);
                 });
         }
-
     }, []);
 
     return (

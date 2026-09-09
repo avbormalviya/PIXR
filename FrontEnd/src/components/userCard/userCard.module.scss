@@ -17,21 +17,23 @@
 
     figcaption {
         flex-grow: 1;
+        min-width: 0;
 
         h1 {
             width: fit-content;
+            max-width: 100%;
             font-size: 1.2em;
             color: var(--text-primary-50);
             font-weight: 500;
-
-            
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        :first-child {
+        h1:first-child {
             font-size: 1.5em;
             color: var(--text-primary);
             font-weight: 700;
-
             cursor: pointer;
         }
     }
@@ -41,12 +43,16 @@
 
         color: whitesmoke;
         background-color: var(--primary-color);
-        
+        /* override global .__button first-child background-color */
+        &:first-child {
+            background-color: var(--primary-color) !important;
+        }
+
         font-size: 1.3em;
         font-weight: 500;
-        
+
         border: none;
         border-radius: 5px;
-        
+
     }
 }

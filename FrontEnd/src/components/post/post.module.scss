@@ -31,7 +31,7 @@
     .post_controller {
         width: 100%;
         display: grid;
-        grid-template-columns: auto 30%;
+        grid-template-columns: 1fr auto;
         grid-template-rows: 20px auto 20px;
         gap: 1em;
         color: var(--text-primary-70);
@@ -42,15 +42,19 @@
             display: flex;
             align-items: center;
             gap: 2em;
+            flex-wrap: wrap;
+            min-width: 0;
 
             .icon_holder {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 0.5em;
+                color: inherit;
 
                 h1 {
                     font-size: 1.2em;
+                    color: var(--text-primary-70);
                 }
             }
         }

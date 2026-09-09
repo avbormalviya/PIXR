@@ -27,6 +27,7 @@ import { getToken } from 'firebase/messaging';
 import { useFirebase } from '../../context/FireBaseContext';
 import { useFileInput } from "../../hooks/useFileInput";
 import { useFaceTracker } from "../../hooks/useFaceTracker";
+import { sendFCMToken } from "../../utils/sendFCMToken";
 
 const themes = [
     "light",
@@ -205,10 +206,24 @@ export const Settings = () => {
 
     useEffect(() => {
         const notification_request = async () => {
-            if (Notification.permission === "granted") {
-                setIsNotificationsEnabled(true);
-            } else {
-                await Notification.requestPermission();
+            try {
+                if (Notification.permission === "granted") {
+                    setIsNotificationsEnabled(true);
+                    // Register FCM token now that we have permission
+                    await registerFCMToken();
+                } else {
+                    const permission = await Notification.requestPermission();
+                    if (permission === "granted") {
+                        setIsNotificationsEnabled(true);
+                        await registerFCMToken();
+                    } else {
+                        setIsNotificationsEnabled(false);
+                        showAlert("error", "Notification permission denied");
+                    }
+                }
+            } catch (err) {
+                console.error("Notification permission error:", err);
+                setIsNotificationsEnabled(false);
             }
         }
 
@@ -216,6 +231,28 @@ export const Settings = () => {
             notification_request();
         }
     }, [isNotificationsEnabled]);
+
+    const registerFCMToken = async () => {
+        try {
+            if (!messaging) return;
+            let registration;
+            if ('serviceWorker' in navigator) {
+                registration = await navigator.serviceWorker.ready;
+            }
+            const newToken = await getToken(messaging, {
+                vapidKey: import.meta.env.VITE_VAPID_KEY,
+                ...(registration && { serviceWorkerRegistration: registration })
+            });
+            if (!newToken) return;
+            const oldToken = localStorage.getItem("fcmToken");
+            if (newToken !== oldToken) {
+                await sendFCMToken({ fcmToken: newToken });
+                localStorage.setItem("fcmToken", newToken);
+            }
+        } catch (e) {
+            console.warn("FCM registration error:", e);
+        }
+    };
 
     const items = ["Account", "Saved", "Theme", "Hand Gesture", "Permissions", "Help", "Private Policy", "Report", "Logout"]
 

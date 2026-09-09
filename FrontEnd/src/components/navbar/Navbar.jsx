@@ -9,6 +9,7 @@ import { setNotification } from "../../features/user/useSlice";
 import { Img } from '../img/Img';
 
 import { Icon } from '../button/Button';
+import { SwitchAccount } from '../../features/switchAccount/SwitchAccount';
 
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -16,6 +17,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import SmartDisplayRoundedIcon from '@mui/icons-material/SmartDisplayRounded';
+import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded';
 import { Badge } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
@@ -30,6 +32,7 @@ export const Navbar = () => {
 
     const [activeIndex, setActiveIndex] = useState(0);
     const [isVertical, setIsVertical] = useState(false);
+    const [showSwitch, setShowSwitch] = useState(false);
 
     const menuRefs = useRef([]);
 
@@ -43,6 +46,14 @@ export const Navbar = () => {
 
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Close switch modal on Escape
+    useEffect(() => {
+        if (!showSwitch) return;
+        const onKey = (e) => { if (e.key === "Escape") setShowSwitch(false); };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, [showSwitch]);
 
     useEffect(() => {
         dispatch(setNotification(localStorage.getItem("notification") === "true"));
@@ -69,7 +80,7 @@ export const Navbar = () => {
             setActiveIndex(newIndex);
         }
         else {
-            currentPath.includes("/create") ? setActiveIndex(4) : currentPath.includes("/settings") ? setActiveIndex(7) : currentPath.includes("/music") ? setActiveIndex(3) : setActiveIndex(0);
+            currentPath.includes("/create") ? setActiveIndex(4) : currentPath.includes("/settings") ? setActiveIndex(6) : currentPath.includes("/music") ? setActiveIndex(3) : setActiveIndex(0);
         }
     }, [location.pathname, isVertical, user]);
 
@@ -87,6 +98,7 @@ export const Navbar = () => {
             { to:"/reels", icon: SmartDisplayRoundedIcon, label: 'Reels' },
             { to: "/music", icon: MusicNoteRoundedIcon, label: 'Music' },
             { to:"/create/post", icon: AddCircleRoundedIcon, label: 'Create' },
+            { type: 'switch', icon: SwapHorizRoundedIcon, label: 'Switch' },
             { to:`/user/${user?.userName}`, icon: user?.profilePic, label: 'Profile', class: 'Profile_Pic' }
         ],
         vertical: [
@@ -118,24 +130,36 @@ export const Navbar = () => {
                         }
                         whileHover={ index === activeIndex ? {} : { scale: 1.1 } }
                     >
-                        <NavLink
-                            to={item.to}
-                            onClick={() => setActiveIndex(index)}
-                            className={`${style.nav_link} ${index === activeIndex ? style.active : ''} ${item.class ? style[item.class] : ''}`}
-                        >
-                            {
-                                item?.class?
-                                    <Img url={item.icon} alt={item.label} />
-                                :
-                                item?.label === 'Notification' ?
-                                    <Badge invisible={ !notification } color="info" variant="dot" style={{ zIndex: 10 }}>
-                                        <FavoriteIcon fontSize="large" />
-                                    </Badge>
+                        {item.type === 'switch' ? (
+                            <button
+                                type="button"
+                                onClick={() => setShowSwitch(true)}
+                                className={style.nav_link}
+                                aria-label="Switch Account"
+                            >
+                                <Icon icon={item.icon} style={{ position: 'relative', zIndex: 10 }} />
+                                <h1>{item.label}</h1>
+                            </button>
+                        ) : (
+                            <NavLink
+                                to={item.to}
+                                onClick={() => setActiveIndex(index)}
+                                className={`${style.nav_link} ${index === activeIndex ? style.active : ''} ${item.class ? style[item.class] : ''}`}
+                            >
+                                {
+                                    item?.class?
+                                        <Img url={item.icon} alt={item.label} />
                                     :
-                                    <Icon icon={item.icon} style={{ position: 'relative', zIndex: 10 }} />
-                            }
-                            <h1>{item.label}</h1>
-                        </NavLink>
+                                    item?.label === 'Notification' ?
+                                        <Badge invisible={ !notification } color="info" variant="dot" style={{ zIndex: 10 }}>
+                                            <FavoriteIcon fontSize="large" />
+                                        </Badge>
+                                        :
+                                        <Icon icon={item.icon} style={{ position: 'relative', zIndex: 10 }} />
+                                }
+                                <h1>{item.label}</h1>
+                            </NavLink>
+                        )}
                     </motion.li>
                 ))}
 
@@ -151,6 +175,10 @@ export const Navbar = () => {
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
             </ul>
+
+            {showSwitch && (
+                <SwitchAccount isModal={true} onClose={() => setShowSwitch(false)} />
+            )}
         </aside>
     );
 };
